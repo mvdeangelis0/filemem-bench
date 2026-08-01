@@ -5,8 +5,8 @@ This repo is a **standalone git project** (`agent_memory_bench`). Do not nest it
 ## 1. Get the code
 
 ```bash
-git clone https://github.com/Marrett-io/agent_memory_bench.git
-cd agent_memory_bench
+git clone https://github.com/mvdeangelis0/filemem-bench.git
+cd filemem-bench
 ```
 
 Or copy the folder once, then:

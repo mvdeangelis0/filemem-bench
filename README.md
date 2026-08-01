@@ -2,7 +2,7 @@
 
 Open evaluation harness for **filesystem-based agent memory** (management + search), with deterministic scorecards and reproducible run ledgers.
 
-**Standalone git repo** — do not attach this tree to an unrelated product remote.
+**Repo:** [mvdeangelis0/filemem-bench](https://github.com/mvdeangelis0/filemem-bench) (public). Local package name remains `agent-memory-bench` / `amb`.
 
 Design docs: [`docs/design/`](docs/design/).  
 Desktop (RTX 3070 + Ollama): [`docs/guides/desktop-rtx3070.md`](docs/guides/desktop-rtx3070.md).  
