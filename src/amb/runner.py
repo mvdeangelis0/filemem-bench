@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import hashlib
 import os
+import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from amb.agents.llm import LLM, OllamaLLM
+from amb.agents.llm import LLM, OllamaLLM, probe_ollama
 from amb.agents.manage import run_manage
 from amb.agents.scripted_smoke import manage_llm_for_smoke, search_llm_for_query
 from amb.agents.search import run_search
@@ -18,6 +20,10 @@ from amb.suite.validate import validate_suite
 from amb.verbatim import build_verbatim
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
+def _log(msg: str) -> None:
+    print(msg, file=sys.stderr, flush=True)
 
 
 def _filter_chunk(chunk: dict[str, Any], whitelist: list[str]) -> dict[str, Any]:
@@ -34,6 +40,7 @@ def run_suite(
     search_model: str = "mock",
     arm_id: str = "baseline",
     ollama_host: str | None = None,
+    verbose: bool = False,
 ) -> Path:
     suite_path = Path(suite_path)
     suite = load_suite(suite_path)
@@ -50,6 +57,15 @@ def run_suite(
     run_id = f"{suite.meta['id']}__{arm_id}__{stamp}__{short}"
     run_dir = Path(out_dir) / run_id
     writer = RunWriter(run_dir)
+
+    # Progress on by default for long ollama runs; -v adds per-call timing.
+    progress = verbose or llm_mode == "ollama"
+    t_run = time.perf_counter()
+    if progress:
+        _log(
+            f"[amb] run_id={run_id} suite={suite.meta.get('id')} "
+            f"chunks={len(suite.chunks)} queries={len(suite.queries)} llm={llm_mode}"
+        )
 
     manage_prompt = (REPO_ROOT / "prompts" / "manage" / "memory_tool.v1.md").read_text(
         encoding="utf-8"
@@ -118,7 +134,10 @@ def run_suite(
 
     if llm_mode == "mock":
         manage_llm: LLM = manage_llm_for_smoke()
-        for chunk in suite.chunks:
+        n_chunks = len(suite.chunks)
+        for i, chunk in enumerate(suite.chunks, 1):
+            if progress:
+                _log(f"[amb] manage {i}/{n_chunks} chunk={chunk['id']}")
             visible = _filter_chunk(chunk, whitelist)
             steps = run_manage(
                 manage_llm,
@@ -129,34 +148,45 @@ def run_suite(
             )
             writer.write_trajectory(f"trajectories/manage/{chunk['id']}.jsonl", steps)
 
-        for query in suite.queries:
+        search_jobs = [
+            (q, shape)
+            for q in suite.queries
+            for shape in (q.get("shapes") or ["organized"])
+        ]
+        for j, (query, shape) in enumerate(search_jobs, 1):
             qid = query["id"]
-            for shape in query.get("shapes") or ["organized"]:
-                store = (
-                    writer.organized_root()
-                    if shape == "organized"
-                    else writer.verbatim_root()
-                )
-                search_llm = search_llm_for_query(qid, shape=shape)
-                payload, steps = run_search(
-                    search_llm, store, query["q"], search_prompt, max_steps=20
-                )
-                payload["query_id"] = qid
-                payload["shape"] = shape
-                writer.write_search_output(shape, qid, payload)
-                writer.write_trajectory(
-                    f"trajectories/search/{shape}/{qid}.jsonl", steps
-                )
+            if progress:
+                _log(f"[amb] search {j}/{len(search_jobs)} query={qid} shape={shape}")
+            store = (
+                writer.organized_root()
+                if shape == "organized"
+                else writer.verbatim_root()
+            )
+            search_llm = search_llm_for_query(qid, shape=shape)
+            payload, steps = run_search(
+                search_llm, store, query["q"], search_prompt, max_steps=20
+            )
+            payload["query_id"] = qid
+            payload["shape"] = shape
+            writer.write_search_output(shape, qid, payload)
+            writer.write_trajectory(f"trajectories/search/{shape}/{qid}.jsonl", steps)
     elif llm_mode == "ollama":
         if manage_model in {"mock", ""} or search_model in {"mock", ""}:
             raise ValueError(
                 "ollama mode requires --manage-model and --search-model "
                 "(e.g. deepseek-r1:7b)"
             )
-        manage_llm = OllamaLLM(manage_model, base_url=host)
-        search_llm_shared = OllamaLLM(search_model, base_url=host)
+        probe_ollama(host, manage_model)
+        if search_model != manage_model:
+            probe_ollama(host, search_model)
 
-        for chunk in suite.chunks:
+        manage_llm = OllamaLLM(manage_model, base_url=host, verbose=verbose)
+        search_llm_shared = OllamaLLM(search_model, base_url=host, verbose=verbose)
+
+        n_chunks = len(suite.chunks)
+        for i, chunk in enumerate(suite.chunks, 1):
+            _log(f"[amb] manage {i}/{n_chunks} chunk={chunk['id']}")
+            t0 = time.perf_counter()
             visible = _filter_chunk(chunk, whitelist)
             steps = run_manage(
                 manage_llm,
@@ -166,34 +196,50 @@ def run_suite(
                 max_steps=30,
             )
             writer.write_trajectory(f"trajectories/manage/{chunk['id']}.jsonl", steps)
+            _log(
+                f"[amb] manage {i}/{n_chunks} done in {time.perf_counter() - t0:.1f}s "
+                f"({len(steps)} steps)"
+            )
 
-        for query in suite.queries:
+        search_jobs = [
+            (q, shape)
+            for q in suite.queries
+            for shape in (q.get("shapes") or ["organized"])
+        ]
+        for j, (query, shape) in enumerate(search_jobs, 1):
             qid = query["id"]
-            for shape in query.get("shapes") or ["organized"]:
-                store = (
-                    writer.organized_root()
-                    if shape == "organized"
-                    else writer.verbatim_root()
-                )
-                payload, steps = run_search(
-                    search_llm_shared,
-                    store,
-                    query["q"],
-                    search_prompt,
-                    max_steps=20,
-                )
-                payload["query_id"] = qid
-                payload["shape"] = shape
-                writer.write_search_output(shape, qid, payload)
-                writer.write_trajectory(
-                    f"trajectories/search/{shape}/{qid}.jsonl", steps
-                )
+            _log(f"[amb] search {j}/{len(search_jobs)} query={qid} shape={shape}")
+            t0 = time.perf_counter()
+            store = (
+                writer.organized_root()
+                if shape == "organized"
+                else writer.verbatim_root()
+            )
+            payload, steps = run_search(
+                search_llm_shared,
+                store,
+                query["q"],
+                search_prompt,
+                max_steps=20,
+            )
+            payload["query_id"] = qid
+            payload["shape"] = shape
+            writer.write_search_output(shape, qid, payload)
+            writer.write_trajectory(f"trajectories/search/{shape}/{qid}.jsonl", steps)
+            _log(
+                f"[amb] search {j}/{len(search_jobs)} done in {time.perf_counter() - t0:.1f}s "
+                f"({len(steps)} steps)"
+            )
     else:
         raise ValueError(f"unknown llm_mode {llm_mode}")
 
+    if progress:
+        _log("[amb] grading …")
     scorecard, diagnostics = grade(run_dir, suite)
     writer.write_scorecard(scorecard)
     writer.write_diagnostics(diagnostics)
     write_report(run_dir)
     writer.write_manifest()
+    if progress:
+        _log(f"[amb] finished in {time.perf_counter() - t_run:.1f}s → {run_dir}")
     return run_dir

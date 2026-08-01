@@ -34,6 +34,12 @@ def main(argv: list[str] | None = None) -> None:
         help="Ollama base URL (default: OLLAMA_HOST or http://127.0.0.1:11434)",
     )
     p_run.add_argument("--arm", default="baseline")
+    p_run.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Log each Ollama chat call with timing (phase progress is always on for --llm ollama)",
+    )
 
     p_re = sub.add_parser("regrade", help="Regrade a run ledger")
     p_re.add_argument("run_dir")
@@ -56,16 +62,21 @@ def main(argv: list[str] | None = None) -> None:
         return
 
     if args.cmd == "run":
-        run_dir = run_suite(
-            args.suite,
-            out_dir=args.out,
-            llm_mode=args.llm,
-            seed=args.seed,
-            manage_model=args.manage_model,
-            search_model=args.search_model,
-            arm_id=args.arm,
-            ollama_host=args.ollama_host,
-        )
+        try:
+            run_dir = run_suite(
+                args.suite,
+                out_dir=args.out,
+                llm_mode=args.llm,
+                seed=args.seed,
+                manage_model=args.manage_model,
+                search_model=args.search_model,
+                arm_id=args.arm,
+                ollama_host=args.ollama_host,
+                verbose=args.verbose,
+            )
+        except (RuntimeError, ValueError) as e:
+            print(f"error: {e}", file=sys.stderr)
+            sys.exit(1)
         scorecard = json.loads((run_dir / "scorecard.json").read_text(encoding="utf-8"))
         summary = scorecard.get("summary", {})
         print(run_dir)

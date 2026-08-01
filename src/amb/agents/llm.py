@@ -3,10 +3,16 @@ from __future__ import annotations
 import json
 import os
 import re
+import sys
+import time
 from dataclasses import dataclass
-from typing import Any, Protocol
+from typing import Any, Callable, Protocol
 
 import httpx
+
+
+def _log(msg: str) -> None:
+    print(msg, file=sys.stderr, flush=True)
 
 
 class LLM(Protocol):
@@ -87,6 +93,31 @@ def normalize_llm_action(obj: Any) -> dict[str, Any]:
     return {"type": "final", "content": obj}
 
 
+def probe_ollama(base_url: str, model: str, *, timeout: float = 30.0) -> None:
+    """Fail fast if Ollama is down or the model name is missing."""
+    base = base_url.rstrip("/")
+    _log(f"[amb] probing Ollama at {base} …")
+    try:
+        with httpx.Client(timeout=timeout) as client:
+            r = client.get(f"{base}/api/tags")
+            r.raise_for_status()
+            names = [m.get("name", "") for m in r.json().get("models") or []]
+    except httpx.HTTPError as e:
+        raise RuntimeError(
+            f"Cannot reach Ollama at {base}: {e}. "
+            "Is `ollama serve` running? Try: ollama list"
+        ) from e
+    if model not in names and not any(
+        n == model or n.startswith(model + ":") for n in names
+    ):
+        preview = ", ".join(names[:12]) or "(none)"
+        raise RuntimeError(
+            f"Model {model!r} not found in Ollama. Installed: {preview}. "
+            "Use the exact name from `ollama list`."
+        )
+    _log(f"[amb] Ollama OK; model {model!r} present ({len(names)} models listed)")
+
+
 class OllamaLLM:
     def __init__(
         self,
@@ -94,6 +125,8 @@ class OllamaLLM:
         base_url: str | None = None,
         temperature: float = 0.0,
         timeout: float = 300.0,
+        verbose: bool = False,
+        on_call: Callable[[str], None] | None = None,
     ) -> None:
         self.model = model
         self.base_url = (base_url or os.environ.get("OLLAMA_HOST") or "http://127.0.0.1:11434").rstrip(
@@ -101,6 +134,9 @@ class OllamaLLM:
         )
         self.temperature = temperature
         self.timeout = timeout
+        self.verbose = verbose
+        self.on_call = on_call
+        self.n_calls = 0
 
     def complete(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> dict[str, Any]:
         # Append a short tool reminder so format=json stays grounded.
@@ -123,9 +159,34 @@ class OllamaLLM:
             "options": {"temperature": self.temperature},
             "format": "json",
         }
-        with httpx.Client(timeout=self.timeout) as client:
-            r = client.post(f"{self.base_url}/api/chat", json=payload)
-            r.raise_for_status()
-            data = r.json()
+        self.n_calls += 1
+        n = self.n_calls
+        if self.verbose or self.on_call:
+            msg = f"[amb] ollama chat #{n} model={self.model!r} …"
+            if self.on_call:
+                self.on_call(msg)
+            else:
+                _log(msg)
+        t0 = time.perf_counter()
+        try:
+            with httpx.Client(timeout=self.timeout) as client:
+                r = client.post(f"{self.base_url}/api/chat", json=payload)
+                r.raise_for_status()
+                data = r.json()
+        except httpx.TimeoutException as e:
+            raise RuntimeError(
+                f"Ollama chat timed out after {self.timeout}s "
+                f"(call #{n}, model={self.model!r}). "
+                "First load can be slow; GPU idle often means CPU/offload or a hung server."
+            ) from e
+        except httpx.HTTPError as e:
+            raise RuntimeError(
+                f"Ollama chat failed (call #{n}, model={self.model!r}): {e}"
+            ) from e
+        dt = time.perf_counter() - t0
+        if self.verbose:
+            _log(f"[amb] ollama chat #{n} done in {dt:.1f}s")
         content = data.get("message", {}).get("content", "")
-        return normalize_llm_action(_parse_json_content(content) if isinstance(content, str) else content)
+        return normalize_llm_action(
+            _parse_json_content(content) if isinstance(content, str) else content
+        )

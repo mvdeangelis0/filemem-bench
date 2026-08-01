@@ -41,8 +41,10 @@ Optional: `export OLLAMA_HOST=http://127.0.0.1:11434`
 amb run --suite suites/smoke --llm ollama \
   --manage-model deepseek-r1:7b \
   --search-model deepseek-r1:7b \
-  --out runs
+  --out runs -v
 ```
+
+You should see `[amb] probing Ollama…`, then `manage 1/N`, `ollama chat #…` lines. If probe hangs or fails, Ollama isn’t reachable. GPU near-idle with no chat lines usually means the request never started (wrong host/model) or the model is loading on CPU.
 
 Expect lower pass rates than mock (mock is scripted oracle). Inspect `runs/<id>/REPORT.md` and failed checks.
 
