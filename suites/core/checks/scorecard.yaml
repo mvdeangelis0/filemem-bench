@@ -1,0 +1,309 @@
+check_set_id: core_scorecard_v1
+checks:
+- id: mgmt.fact_present.morgan_drink_current
+  family: fact_present
+  gate: scorecard
+  args:
+    fact_id: fact_morgan_drink_current
+    store: organized
+- id: mgmt.update_precedence.morgan_drink
+  family: update_precedence
+  gate: scorecard
+  args:
+    current_fact_id: fact_morgan_drink_current
+    historical_fact_id: fact_morgan_drink_tea
+    store: organized
+- id: mgmt.fact_present.editor_current
+  family: fact_present
+  gate: scorecard
+  args:
+    fact_id: fact_editor_current
+    store: organized
+- id: mgmt.update_precedence.editor
+  family: update_precedence
+  gate: scorecard
+  args:
+    current_fact_id: fact_editor_current
+    historical_fact_id: fact_editor_vim
+    store: organized
+- id: mgmt.fact_present.atlas_deadline_current
+  family: fact_present
+  gate: scorecard
+  args:
+    fact_id: fact_atlas_deadline_current
+    store: organized
+- id: mgmt.update_precedence.atlas_deadline
+  family: update_precedence
+  gate: scorecard
+  args:
+    current_fact_id: fact_atlas_deadline_current
+    historical_fact_id: fact_atlas_deadline
+    store: organized
+- id: mgmt.protected_survives.emergency_contact
+  family: protected_survives
+  gate: scorecard
+  args:
+    fact_id: fact_emergency_contact
+    store: organized
+- id: mgmt.fact_present.priya_api_review
+  family: fact_present
+  gate: scorecard
+  args:
+    fact_id: fact_priya_api_review
+    store: organized
+- id: mgmt.fact_present.jordan_park
+  family: fact_present
+  gate: scorecard
+  args:
+    fact_id: fact_jordan_park_finance
+    store: organized
+- id: search.answer_match.q_drink_current
+  family: answer_match
+  gate: scorecard
+  args:
+    query_id: q_drink_current
+- id: search.citations_exist.q_drink_current
+  family: citations_exist
+  gate: scorecard
+  args:
+    query_id: q_drink_current
+- id: search.citations_support.q_drink_current
+  family: citations_support
+  gate: scorecard
+  args:
+    query_id: q_drink_current
+- id: search.answer_match.q_editor_current
+  family: answer_match
+  gate: scorecard
+  args:
+    query_id: q_editor_current
+- id: search.citations_exist.q_editor_current
+  family: citations_exist
+  gate: scorecard
+  args:
+    query_id: q_editor_current
+- id: search.citations_support.q_editor_current
+  family: citations_support
+  gate: scorecard
+  args:
+    query_id: q_editor_current
+- id: search.answer_match.q_atlas_deadline_current
+  family: answer_match
+  gate: scorecard
+  args:
+    query_id: q_atlas_deadline_current
+- id: search.citations_exist.q_atlas_deadline_current
+  family: citations_exist
+  gate: scorecard
+  args:
+    query_id: q_atlas_deadline_current
+- id: search.citations_support.q_atlas_deadline_current
+  family: citations_support
+  gate: scorecard
+  args:
+    query_id: q_atlas_deadline_current
+- id: search.answer_match.q_emergency
+  family: answer_match
+  gate: scorecard
+  args:
+    query_id: q_emergency
+- id: search.citations_exist.q_emergency
+  family: citations_exist
+  gate: scorecard
+  args:
+    query_id: q_emergency
+- id: search.citations_support.q_emergency
+  family: citations_support
+  gate: scorecard
+  args:
+    query_id: q_emergency
+- id: search.answer_match.q_roommate
+  family: answer_match
+  gate: scorecard
+  args:
+    query_id: q_roommate
+- id: search.citations_exist.q_roommate
+  family: citations_exist
+  gate: scorecard
+  args:
+    query_id: q_roommate
+- id: search.citations_support.q_roommate
+  family: citations_support
+  gate: scorecard
+  args:
+    query_id: q_roommate
+- id: search.answer_match.q_jordan_park_role
+  family: answer_match
+  gate: scorecard
+  args:
+    query_id: q_jordan_park_role
+- id: search.citations_exist.q_jordan_park_role
+  family: citations_exist
+  gate: scorecard
+  args:
+    query_id: q_jordan_park_role
+- id: search.citations_support.q_jordan_park_role
+  family: citations_support
+  gate: scorecard
+  args:
+    query_id: q_jordan_park_role
+- id: search.answer_match.q_recycling
+  family: answer_match
+  gate: scorecard
+  args:
+    query_id: q_recycling
+- id: search.citations_exist.q_recycling
+  family: citations_exist
+  gate: scorecard
+  args:
+    query_id: q_recycling
+- id: search.citations_support.q_recycling
+  family: citations_support
+  gate: scorecard
+  args:
+    query_id: q_recycling
+- id: search.answer_match.q_grocery
+  family: answer_match
+  gate: scorecard
+  args:
+    query_id: q_grocery
+- id: search.citations_exist.q_grocery
+  family: citations_exist
+  gate: scorecard
+  args:
+    query_id: q_grocery
+- id: search.citations_support.q_grocery
+  family: citations_support
+  gate: scorecard
+  args:
+    query_id: q_grocery
+- id: search.answer_match.q_priya_action
+  family: answer_match
+  gate: scorecard
+  args:
+    query_id: q_priya_action
+- id: search.citations_exist.q_priya_action
+  family: citations_exist
+  gate: scorecard
+  args:
+    query_id: q_priya_action
+- id: search.citations_support.q_priya_action
+  family: citations_support
+  gate: scorecard
+  args:
+    query_id: q_priya_action
+- id: search.answer_match.q_morgan_customer_email
+  family: answer_match
+  gate: scorecard
+  args:
+    query_id: q_morgan_customer_email
+- id: search.citations_exist.q_morgan_customer_email
+  family: citations_exist
+  gate: scorecard
+  args:
+    query_id: q_morgan_customer_email
+- id: search.citations_support.q_morgan_customer_email
+  family: citations_support
+  gate: scorecard
+  args:
+    query_id: q_morgan_customer_email
+- id: search.answer_match.q_priya_demo
+  family: answer_match
+  gate: scorecard
+  args:
+    query_id: q_priya_demo
+- id: search.citations_exist.q_priya_demo
+  family: citations_exist
+  gate: scorecard
+  args:
+    query_id: q_priya_demo
+- id: search.citations_support.q_priya_demo
+  family: citations_support
+  gate: scorecard
+  args:
+    query_id: q_priya_demo
+- id: search.answer_match.q_multi_hop_priya_city
+  family: answer_match
+  gate: scorecard
+  args:
+    query_id: q_multi_hop_priya_city
+- id: search.citations_exist.q_multi_hop_priya_city
+  family: citations_exist
+  gate: scorecard
+  args:
+    query_id: q_multi_hop_priya_city
+- id: search.citations_support.q_multi_hop_priya_city
+  family: citations_support
+  gate: scorecard
+  args:
+    query_id: q_multi_hop_priya_city
+- id: search.answer_match.q_multi_hop_roommate_vs_finance
+  family: answer_match
+  gate: scorecard
+  args:
+    query_id: q_multi_hop_roommate_vs_finance
+- id: search.citations_exist.q_multi_hop_roommate_vs_finance
+  family: citations_exist
+  gate: scorecard
+  args:
+    query_id: q_multi_hop_roommate_vs_finance
+- id: search.citations_support.q_multi_hop_roommate_vs_finance
+  family: citations_support
+  gate: scorecard
+  args:
+    query_id: q_multi_hop_roommate_vs_finance
+- id: search.answer_match.q_blackout
+  family: answer_match
+  gate: scorecard
+  args:
+    query_id: q_blackout
+- id: search.citations_exist.q_blackout
+  family: citations_exist
+  gate: scorecard
+  args:
+    query_id: q_blackout
+- id: search.citations_support.q_blackout
+  family: citations_support
+  gate: scorecard
+  args:
+    query_id: q_blackout
+- id: search.answer_match.q_dentist
+  family: answer_match
+  gate: scorecard
+  args:
+    query_id: q_dentist
+- id: search.citations_exist.q_dentist
+  family: citations_exist
+  gate: scorecard
+  args:
+    query_id: q_dentist
+- id: search.citations_support.q_dentist
+  family: citations_support
+  gate: scorecard
+  args:
+    query_id: q_dentist
+- id: search.answer_match.q_dry_run_before_ship
+  family: answer_match
+  gate: scorecard
+  args:
+    query_id: q_dry_run_before_ship
+- id: search.citations_exist.q_dry_run_before_ship
+  family: citations_exist
+  gate: scorecard
+  args:
+    query_id: q_dry_run_before_ship
+- id: search.citations_support.q_dry_run_before_ship
+  family: citations_support
+  gate: scorecard
+  args:
+    query_id: q_dry_run_before_ship
+- id: search.answer_match.q_unknown_pet
+  family: answer_match
+  gate: scorecard
+  args:
+    query_id: q_unknown_pet
+- id: search.answer_match.q_unknown_boat
+  family: answer_match
+  gate: scorecard
+  args:
+    query_id: q_unknown_boat

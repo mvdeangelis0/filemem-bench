@@ -1,0 +1,116 @@
+queries:
+  - id: q_drink_current
+    tier: smoke
+    category: update_awareness
+    q: "What does Morgan prefer to drink?"
+    gold:
+      answers_any: ["coffee", "Coffee"]
+      answers_forbidden_any: ["tea", "Tea"]
+    citations:
+      evidence_any:
+        - must_include_any: ["coffee", "prefers coffee"]
+      min_supporting_citations: 1
+    shapes: [organized, verbatim]
+    checks: [answer_match, citations_exist, citations_support]
+
+  - id: q_emergency
+    tier: smoke
+    category: single_hop
+    q: "Who is Morgan's emergency contact?"
+    gold:
+      answers_any: ["Ava Morgan", "ava morgan"]
+    citations:
+      evidence_any:
+        - must_include_any: ["ava morgan", "555-0100"]
+      min_supporting_citations: 1
+    shapes: [organized, verbatim]
+    checks: [answer_match, citations_exist, citations_support]
+
+  - id: q_atlas_deadline
+    tier: smoke
+    category: single_hop
+    q: "When is Atlas v0.2 supposed to ship?"
+    gold:
+      answers_any: ["March 28", "march 28"]
+    citations:
+      evidence_any:
+        - must_include_any: ["march 28"]
+      min_supporting_citations: 1
+    shapes: [organized, verbatim]
+    checks: [answer_match, citations_exist, citations_support]
+
+  - id: q_priya_action
+    tier: smoke
+    category: meeting_action
+    q: "Who owns the Atlas API review?"
+    gold:
+      answers_any: ["Priya Chen", "Priya"]
+    citations:
+      evidence_any:
+        - must_include_any: ["api review", "priya"]
+      min_supporting_citations: 1
+    shapes: [organized, verbatim]
+    checks: [answer_match, citations_exist, citations_support]
+
+  - id: q_multi_hop_priya_city
+    tier: smoke
+    category: multi_hop
+    q: "Where is the Atlas collaborator Priya working from this month?"
+    gold:
+      answers_any: ["Seattle", "seattle"]
+    citations:
+      evidence_any:
+        - must_include_any: ["seattle"]
+      min_supporting_citations: 1
+    shapes: [organized, verbatim]
+    checks: [answer_match, citations_exist, citations_support]
+
+  - id: q_roommate
+    tier: smoke
+    category: single_hop
+    q: "Who is Morgan's roommate?"
+    gold:
+      answers_any: ["Jordan Lee", "Jordan"]
+    citations:
+      evidence_any:
+        - must_include_any: ["jordan lee", "jordan"]
+      min_supporting_citations: 1
+    shapes: [organized, verbatim]
+    checks: [answer_match, citations_exist, citations_support]
+
+  - id: q_blackout
+    tier: smoke
+    category: temporal
+    q: "Which dates is Morgan unavailable for travel blackout?"
+    gold:
+      answers_any: ["March 20–22", "March 20-22", "march 20-22", "March 20 to 22"]
+    citations:
+      evidence_any:
+        - must_include_any: ["march 20"]
+      min_supporting_citations: 1
+    shapes: [organized, verbatim]
+    checks: [answer_match, citations_exist, citations_support]
+
+  - id: q_recycling
+    tier: smoke
+    category: single_hop
+    q: "Who handles recycling on Thursdays?"
+    gold:
+      answers_any: ["Jordan Lee", "Jordan"]
+    citations:
+      evidence_any:
+        - must_include_any: ["recycling"]
+      min_supporting_citations: 1
+    shapes: [organized, verbatim]
+    checks: [answer_match, citations_exist, citations_support]
+
+  - id: q_unknown_pet
+    tier: smoke
+    category: negative
+    q: "What is the name of Morgan's dog?"
+    gold:
+      abstain: true
+    citations:
+      allow_empty: true
+    shapes: [organized, verbatim]
+    checks: [answer_match]

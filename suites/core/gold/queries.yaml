@@ -1,0 +1,234 @@
+queries:
+  - id: q_drink_current
+    tier: core
+    category: update_awareness
+    q: "What does Morgan prefer to drink?"
+    gold:
+      answers_any: ["coffee", "Coffee"]
+      answers_forbidden_any: ["tea", "Tea"]
+    citations:
+      evidence_any:
+        - must_include_any: ["coffee", "prefers coffee"]
+      min_supporting_citations: 1
+    shapes: [organized, verbatim]
+    checks: [answer_match, citations_exist, citations_support]
+
+  - id: q_editor_current
+    tier: core
+    category: update_awareness
+    q: "What code editor does Morgan prefer now?"
+    gold:
+      answers_any: ["helix", "Helix"]
+      answers_forbidden_any: ["vim", "Vim"]
+    citations:
+      evidence_any:
+        - must_include_any: ["helix"]
+      min_supporting_citations: 1
+    shapes: [organized, verbatim]
+    checks: [answer_match, citations_exist, citations_support]
+
+  - id: q_atlas_deadline_current
+    tier: core
+    category: update_awareness
+    q: "What is the current Atlas v0.2 ship date?"
+    gold:
+      answers_any: ["April 4", "april 4"]
+      answers_forbidden_any: ["March 28", "march 28"]
+    citations:
+      evidence_any:
+        - must_include_any: ["april 4"]
+      min_supporting_citations: 1
+    shapes: [organized, verbatim]
+    checks: [answer_match, citations_exist, citations_support]
+
+  - id: q_emergency
+    tier: core
+    category: single_hop
+    q: "Who is Morgan's emergency contact?"
+    gold:
+      answers_any: ["Ava Morgan", "ava morgan"]
+    citations:
+      evidence_any:
+        - must_include_any: ["ava morgan", "555-0100"]
+      min_supporting_citations: 1
+    shapes: [organized, verbatim]
+    checks: [answer_match, citations_exist, citations_support]
+
+  - id: q_roommate
+    tier: core
+    category: single_hop
+    q: "Who is Morgan's roommate?"
+    gold:
+      answers_any: ["Jordan Lee", "Jordan"]
+    citations:
+      evidence_any:
+        - must_include_any: ["jordan lee"]
+      min_supporting_citations: 1
+    shapes: [organized, verbatim]
+    checks: [answer_match, citations_exist, citations_support]
+
+  - id: q_jordan_park_role
+    tier: core
+    category: single_hop
+    q: "What does Jordan Park handle for Atlas?"
+    gold:
+      answers_any: ["invoicing", "finance", "invoicing for Atlas vendors"]
+    citations:
+      evidence_any:
+        - must_include_any: ["jordan park", "invoicing"]
+      min_supporting_citations: 1
+    shapes: [organized, verbatim]
+    checks: [answer_match, citations_exist, citations_support]
+
+  - id: q_recycling
+    tier: core
+    category: single_hop
+    q: "Who handles recycling on Thursdays?"
+    gold:
+      answers_any: ["Jordan Lee", "Jordan"]
+    citations:
+      evidence_any:
+        - must_include_any: ["recycling"]
+      min_supporting_citations: 1
+    shapes: [organized, verbatim]
+    checks: [answer_match, citations_exist, citations_support]
+
+  - id: q_grocery
+    tier: core
+    category: single_hop
+    q: "Where does Morgan usually shop for groceries?"
+    gold:
+      answers_any: ["New Seasons", "New Seasons on Belmont"]
+    citations:
+      evidence_any:
+        - must_include_any: ["new seasons"]
+      min_supporting_citations: 1
+    shapes: [organized, verbatim]
+    checks: [answer_match, citations_exist, citations_support]
+
+  - id: q_priya_action
+    tier: core
+    category: meeting_action
+    q: "Who owns the Atlas API review?"
+    gold:
+      answers_any: ["Priya Chen", "Priya"]
+    citations:
+      evidence_any:
+        - must_include_any: ["api review", "priya"]
+      min_supporting_citations: 1
+    shapes: [organized, verbatim]
+    checks: [answer_match, citations_exist, citations_support]
+
+  - id: q_morgan_customer_email
+    tier: core
+    category: meeting_action
+    q: "Who owns the customer email about the Atlas slip?"
+    gold:
+      answers_any: ["Morgan", "morgan"]
+    citations:
+      evidence_any:
+        - must_include_any: ["customer email"]
+      min_supporting_citations: 1
+    shapes: [organized, verbatim]
+    checks: [answer_match, citations_exist, citations_support]
+
+  - id: q_priya_demo
+    tier: core
+    category: meeting_action
+    q: "Who prepares the API demo script for the dry-run?"
+    gold:
+      answers_any: ["Priya Chen", "Priya"]
+    citations:
+      evidence_any:
+        - must_include_any: ["demo script", "api demo"]
+      min_supporting_citations: 1
+    shapes: [organized, verbatim]
+    checks: [answer_match, citations_exist, citations_support]
+
+  - id: q_multi_hop_priya_city
+    tier: core
+    category: multi_hop
+    q: "Where is the Atlas collaborator Priya working from this month?"
+    gold:
+      answers_any: ["Seattle", "seattle"]
+    citations:
+      evidence_any:
+        - must_include_any: ["seattle"]
+      min_supporting_citations: 1
+    shapes: [organized, verbatim]
+    checks: [answer_match, citations_exist, citations_support]
+
+  - id: q_multi_hop_roommate_vs_finance
+    tier: core
+    category: multi_hop
+    q: "Which Jordan is Morgan's roommate, Lee or Park?"
+    gold:
+      answers_any: ["Jordan Lee", "Lee", "lee"]
+      answers_forbidden_any: ["Jordan Park", "Park"]
+    citations:
+      evidence_any:
+        - must_include_any: ["jordan lee", "roommate"]
+      min_supporting_citations: 1
+    shapes: [organized, verbatim]
+    checks: [answer_match, citations_exist, citations_support]
+
+  - id: q_blackout
+    tier: core
+    category: temporal
+    q: "Which dates is Morgan unavailable for travel blackout?"
+    gold:
+      answers_any: ["March 20–22", "March 20-22", "march 20-22", "March 20 to 22"]
+    citations:
+      evidence_any:
+        - must_include_any: ["march 20"]
+      min_supporting_citations: 1
+    shapes: [organized, verbatim]
+    checks: [answer_match, citations_exist, citations_support]
+
+  - id: q_dentist
+    tier: core
+    category: temporal
+    q: "When is Morgan's dentist appointment?"
+    gold:
+      answers_any: ["April 2", "april 2", "April 2 at 10:00"]
+    citations:
+      evidence_any:
+        - must_include_any: ["april 2", "dentist"]
+      min_supporting_citations: 1
+    shapes: [organized, verbatim]
+    checks: [answer_match, citations_exist, citations_support]
+
+  - id: q_dry_run_before_ship
+    tier: core
+    category: temporal
+    q: "On what date was the Atlas API dry-run?"
+    gold:
+      answers_any: ["April 3", "april 3"]
+    citations:
+      evidence_any:
+        - must_include_any: ["april 3"]
+      min_supporting_citations: 1
+    shapes: [organized, verbatim]
+    checks: [answer_match, citations_exist, citations_support]
+
+  - id: q_unknown_pet
+    tier: core
+    category: negative
+    q: "What is the name of Morgan's dog?"
+    gold:
+      abstain: true
+    citations:
+      allow_empty: true
+    shapes: [organized, verbatim]
+    checks: [answer_match]
+
+  - id: q_unknown_boat
+    tier: core
+    category: negative
+    q: "What marina does Morgan keep a boat at?"
+    gold:
+      abstain: true
+    citations:
+      allow_empty: true
+    shapes: [organized, verbatim]
+    checks: [answer_match]

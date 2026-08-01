@@ -1,0 +1,105 @@
+chunks:
+  - id: chunk_001
+    t: 1
+    timestamp: "2025-03-01T09:00:00Z"
+    channel: note
+    title: "About me"
+    text: |
+      Morgan's profile note.
+      Preferred drink: tea.
+      Lives in Portland with roommate Jordan Lee.
+    introduces:
+      - fact_id: fact_morgan_drink_tea
+      - fact_id: fact_roommate_jordan
+
+  - id: chunk_002
+    t: 2
+    timestamp: "2025-03-02T10:00:00Z"
+    channel: note
+    title: "Emergency contact"
+    text: |
+      Emergency contact is Ava Morgan (sister), phone 555-0100.
+      Never delete this contact.
+    introduces:
+      - fact_id: fact_emergency_contact
+
+  - id: chunk_003
+    t: 3
+    timestamp: "2025-03-05T14:00:00Z"
+    channel: note
+    title: "Project Atlas"
+    text: |
+      Active project: Atlas.
+      Target ship date for Atlas v0.2 is March 28.
+      Collaborator: Priya Chen.
+    introduces:
+      - fact_id: fact_atlas_deadline
+      - fact_id: fact_priya_collaborator
+
+  - id: chunk_004
+    t: 4
+    timestamp: "2025-03-08T11:00:00Z"
+    channel: message
+    title: "Jordan chores"
+    text: |
+      Jordan Lee handles recycling on Thursdays.
+      Morgan handles groceries.
+
+  - id: chunk_005
+    t: 5
+    timestamp: "2025-03-10T16:30:00Z"
+    channel: note
+    title: "Drink reminder"
+    text: |
+      Quick reminder: Morgan still prefers tea in the morning.
+
+  - id: chunk_006
+    t: 6
+    timestamp: "2025-03-12T15:00:00Z"
+    channel: meeting
+    title: "Sync with Priya on Atlas"
+    text: |
+      Meeting notes. Attendees: Morgan, Priya Chen.
+      Decision: ship Atlas v0.2 by March 28.
+      Action: Priya owns API review.
+    introduces:
+      - fact_id: fact_priya_api_review
+
+  - id: chunk_007
+    t: 7
+    timestamp: "2025-03-15T09:00:00Z"
+    channel: email
+    title: "Travel blackout"
+    text: |
+      Morgan unavailable March 20–22 (travel blackout).
+      Do not schedule Atlas reviews those days.
+
+  - id: chunk_008
+    t: 8
+    timestamp: "2025-03-18T08:00:00Z"
+    channel: note
+    title: "Preference update"
+    text: |
+      Update: Morgan now prefers coffee, not tea.
+      Please treat coffee as the current preferred drink.
+    introduces:
+      - fact_id: fact_morgan_drink_current
+    supersedes:
+      - fact_id: fact_morgan_drink_tea
+
+  - id: chunk_009
+    t: 9
+    timestamp: "2025-03-19T12:00:00Z"
+    channel: message
+    title: "Priya location"
+    text: |
+      Priya Chen works remotely from Seattle this month.
+
+  - id: chunk_010
+    t: 10
+    timestamp: "2025-03-21T17:00:00Z"
+    channel: note
+    title: "Atlas status"
+    text: |
+      Atlas API review still owned by Priya.
+      Morgan will prepare demo notes after travel.

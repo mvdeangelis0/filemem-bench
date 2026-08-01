@@ -1,0 +1,13 @@
+diagnostics_set_id: smoke_diagnostics_v1
+checks:
+  - id: diag.file_count.organized
+    family: store_file_count
+    gate: diagnostic
+    args:
+      store: organized
+
+  - id: diag.max_depth.organized
+    family: store_max_depth
+    gate: diagnostic
+    args:
+      store: organized

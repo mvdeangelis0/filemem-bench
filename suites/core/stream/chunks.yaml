@@ -1,0 +1,239 @@
+chunks:
+  - id: chunk_001
+    t: 1
+    timestamp: "2025-03-01T09:00:00Z"
+    channel: note
+    title: "About me"
+    text: |
+      Morgan's profile note.
+      Preferred drink: tea.
+      Lives in Portland with roommate Jordan Lee.
+    introduces:
+      - fact_id: fact_morgan_drink_tea
+      - fact_id: fact_roommate_jordan
+
+  - id: chunk_002
+    t: 2
+    timestamp: "2025-03-02T10:00:00Z"
+    channel: note
+    title: "Emergency contact"
+    text: |
+      Emergency contact is Ava Morgan (sister), phone 555-0100.
+      Never delete this contact.
+    introduces:
+      - fact_id: fact_emergency_contact
+
+  - id: chunk_003
+    t: 3
+    timestamp: "2025-03-05T14:00:00Z"
+    channel: note
+    title: "Project Atlas"
+    text: |
+      Active project: Atlas.
+      Target ship date for Atlas v0.2 is March 28.
+      Collaborator: Priya Chen.
+    introduces:
+      - fact_id: fact_atlas_deadline
+      - fact_id: fact_priya_collaborator
+
+  - id: chunk_004
+    t: 4
+    timestamp: "2025-03-08T11:00:00Z"
+    channel: message
+    title: "Jordan chores"
+    text: |
+      Jordan Lee handles recycling on Thursdays.
+      Morgan handles groceries.
+
+  - id: chunk_005
+    t: 5
+    timestamp: "2025-03-10T16:30:00Z"
+    channel: note
+    title: "Drink reminder"
+    text: |
+      Quick reminder: Morgan still prefers tea in the morning.
+
+  - id: chunk_006
+    t: 6
+    timestamp: "2025-03-12T15:00:00Z"
+    channel: meeting
+    title: "Sync with Priya on Atlas"
+    text: |
+      Meeting notes. Attendees: Morgan, Priya Chen.
+      Decision: ship Atlas v0.2 by March 28.
+      Action: Priya owns API review.
+    introduces:
+      - fact_id: fact_priya_api_review
+
+  - id: chunk_007
+    t: 7
+    timestamp: "2025-03-15T09:00:00Z"
+    channel: email
+    title: "Travel blackout"
+    text: |
+      Morgan unavailable March 20–22 (travel blackout).
+      Do not schedule Atlas reviews those days.
+
+  - id: chunk_008
+    t: 8
+    timestamp: "2025-03-18T08:00:00Z"
+    channel: note
+    title: "Preference update"
+    text: |
+      Update: Morgan now prefers coffee, not tea.
+      Please treat coffee as the current preferred drink.
+    introduces:
+      - fact_id: fact_morgan_drink_current
+    supersedes:
+      - fact_id: fact_morgan_drink_tea
+
+  - id: chunk_009
+    t: 9
+    timestamp: "2025-03-19T12:00:00Z"
+    channel: message
+    title: "Priya location"
+    text: |
+      Priya Chen works remotely from Seattle this month.
+
+  - id: chunk_010
+    t: 10
+    timestamp: "2025-03-21T17:00:00Z"
+    channel: note
+    title: "Atlas status"
+    text: |
+      Atlas API review still owned by Priya.
+      Morgan will prepare demo notes after travel.
+
+  - id: chunk_011
+    t: 11
+    timestamp: "2025-03-23T10:00:00Z"
+    channel: note
+    title: "Editor preference"
+    text: |
+      Morgan's preferred code editor is vim.
+    introduces:
+      - fact_id: fact_editor_vim
+
+  - id: chunk_012
+    t: 12
+    timestamp: "2025-03-24T13:00:00Z"
+    channel: email
+    title: "Jordan Park intro"
+    text: |
+      New finance contact: Jordan Park (not the roommate).
+      Jordan Park handles invoicing for Atlas vendors.
+    introduces:
+      - fact_id: fact_jordan_park_finance
+
+  - id: chunk_013
+    t: 13
+    timestamp: "2025-03-25T09:30:00Z"
+    channel: meeting
+    title: "Atlas slip discussion"
+    text: |
+      Meeting with Priya Chen.
+      Decision: slip Atlas v0.2 ship date from March 28 to April 4.
+      Action: Morgan owns the customer email about the slip.
+    introduces:
+      - fact_id: fact_atlas_deadline_current
+      - fact_id: fact_morgan_customer_email
+    supersedes:
+      - fact_id: fact_atlas_deadline
+
+  - id: chunk_014
+    t: 14
+    timestamp: "2025-03-26T18:00:00Z"
+    channel: note
+    title: "Grocery store"
+    text: |
+      Morgan usually shops at New Seasons on Belmont.
+
+  - id: chunk_015
+    t: 15
+    timestamp: "2025-03-27T08:15:00Z"
+    channel: note
+    title: "Editor update"
+    text: |
+      Update: Morgan switched editors — now prefers helix, not vim.
+      Treat helix as the current preferred editor.
+    introduces:
+      - fact_id: fact_editor_current
+    supersedes:
+      - fact_id: fact_editor_vim
+
+  - id: chunk_016
+    t: 16
+    timestamp: "2025-03-28T11:00:00Z"
+    channel: message
+    title: "Roommate reminder"
+    text: |
+      Roommate Jordan Lee still handles recycling on Thursdays.
+      Do not confuse with Jordan Park.
+
+  - id: chunk_017
+    t: 17
+    timestamp: "2025-03-29T15:00:00Z"
+    channel: note
+    title: "Dentist"
+    text: |
+      Dentist appointment for Morgan on April 2 at 10:00 (before Atlas ship).
+
+  - id: chunk_018
+    t: 18
+    timestamp: "2025-03-30T12:00:00Z"
+    channel: email
+    title: "Customer email draft owner"
+    text: |
+      Confirmed: Morgan owns the customer email about the Atlas slip to April 4.
+
+  - id: chunk_019
+    t: 19
+    timestamp: "2025-03-31T09:00:00Z"
+    channel: note
+    title: "Coffee still current"
+    text: |
+      Quick confirmation: Morgan still prefers coffee (not tea).
+
+  - id: chunk_020
+    t: 20
+    timestamp: "2025-04-01T16:00:00Z"
+    channel: meeting
+    title: "Demo prep"
+    text: |
+      Attendees: Morgan, Priya Chen.
+      Action: Priya prepares API demo script for April 3 dry-run.
+    introduces:
+      - fact_id: fact_priya_demo_script
+
+  - id: chunk_021
+    t: 21
+    timestamp: "2025-04-02T20:00:00Z"
+    channel: note
+    title: "Post-dentist"
+    text: |
+      Dentist done. Morgan available again after April 2 11:00.
+
+  - id: chunk_022
+    t: 22
+    timestamp: "2025-04-03T10:00:00Z"
+    channel: message
+    title: "Dry-run note"
+    text: |
+      April 3 dry-run used Priya's API demo script. Looks good for April 4 ship.
+
+  - id: chunk_023
+    t: 23
+    timestamp: "2025-04-03T19:00:00Z"
+    channel: note
+    title: "Helix confirmation"
+    text: |
+      Morgan is standardized on helix for all Atlas editing.
+
+  - id: chunk_024
+    t: 24
+    timestamp: "2025-04-04T08:00:00Z"
+    channel: note
+    title: "Ship day"
+    text: |
+      Atlas v0.2 ship day is today, April 4.
+      Emergency contact remains Ava Morgan, 555-0100.

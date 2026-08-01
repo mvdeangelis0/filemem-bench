@@ -1,0 +1,121 @@
+check_set_id: smoke_scorecard_v1
+checks:
+  - id: mgmt.fact_present.morgan_drink_current
+    family: fact_present
+    gate: scorecard
+    args:
+      fact_id: fact_morgan_drink_current
+      store: organized
+
+  - id: mgmt.update_precedence.morgan_drink
+    family: update_precedence
+    gate: scorecard
+    args:
+      current_fact_id: fact_morgan_drink_current
+      historical_fact_id: fact_morgan_drink_tea
+      store: organized
+
+  - id: mgmt.protected_survives.emergency_contact
+    family: protected_survives
+    gate: scorecard
+    args:
+      fact_id: fact_emergency_contact
+      store: organized
+
+  - id: mgmt.fact_present.atlas_deadline
+    family: fact_present
+    gate: scorecard
+    args:
+      fact_id: fact_atlas_deadline
+      store: organized
+
+  - id: mgmt.fact_present.priya_api_review
+    family: fact_present
+    gate: scorecard
+    args:
+      fact_id: fact_priya_api_review
+      store: organized
+
+  - id: search.answer_match.q_drink_current
+    family: answer_match
+    gate: scorecard
+    args:
+      query_id: q_drink_current
+
+  - id: search.citations_exist.q_drink_current
+    family: citations_exist
+    gate: scorecard
+    args:
+      query_id: q_drink_current
+
+  - id: search.citations_support.q_drink_current
+    family: citations_support
+    gate: scorecard
+    args:
+      query_id: q_drink_current
+
+  - id: search.answer_match.q_emergency
+    family: answer_match
+    gate: scorecard
+    args:
+      query_id: q_emergency
+
+  - id: search.citations_exist.q_emergency
+    family: citations_exist
+    gate: scorecard
+    args:
+      query_id: q_emergency
+
+  - id: search.citations_support.q_emergency
+    family: citations_support
+    gate: scorecard
+    args:
+      query_id: q_emergency
+
+  - id: search.answer_match.q_atlas_deadline
+    family: answer_match
+    gate: scorecard
+    args:
+      query_id: q_atlas_deadline
+
+  - id: search.citations_exist.q_atlas_deadline
+    family: citations_exist
+    gate: scorecard
+    args:
+      query_id: q_atlas_deadline
+
+  - id: search.answer_match.q_priya_action
+    family: answer_match
+    gate: scorecard
+    args:
+      query_id: q_priya_action
+
+  - id: search.answer_match.q_multi_hop_priya_city
+    family: answer_match
+    gate: scorecard
+    args:
+      query_id: q_multi_hop_priya_city
+
+  - id: search.answer_match.q_roommate
+    family: answer_match
+    gate: scorecard
+    args:
+      query_id: q_roommate
+
+  - id: search.answer_match.q_blackout
+    family: answer_match
+    gate: scorecard
+    args:
+      query_id: q_blackout
+
+  - id: search.answer_match.q_recycling
+    family: answer_match
+    gate: scorecard
+    args:
+      query_id: q_recycling
+
+  - id: search.answer_match.q_unknown_pet
+    family: answer_match
+    gate: scorecard
+    args:
+      query_id: q_unknown_pet

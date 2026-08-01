@@ -1,0 +1,20 @@
+id: smoke
+version: "1.0.0"
+world_id: morgan_personal_v1
+protocol: amb_v1
+shapes: [organized, verbatim]
+harness_default: memory_tool_v1
+ingestion: incremental
+min_chunks: 8
+max_chunks: 12
+min_queries: 8
+check_set_id: smoke_scorecard_v1
+diagnostics_set_id: smoke_diagnostics_v1
+agent_visible_chunk_fields: [id, t, timestamp, channel, title, text]
+categories_required:
+  single_hop: 1
+  multi_hop: 1
+  update_awareness: 1
+verbatim_grouping: per_chunk
+notes: |
+  Morgan personal KB smoke suite; tea→coffee update trap.

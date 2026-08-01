@@ -1,0 +1,89 @@
+facts:
+  - id: fact_morgan_drink_tea
+    kind: preference
+    subject: Morgan
+    predicate: preferred_drink
+    value: tea
+    match:
+      mode: normalized_any
+      forms_any: ["tea"]
+    status: historical
+    introduced_in: chunk_001
+    superseded_by: fact_morgan_drink_current
+    protected: false
+
+  - id: fact_morgan_drink_current
+    kind: preference
+    subject: Morgan
+    predicate: preferred_drink
+    value: coffee
+    match:
+      mode: normalized_any
+      forms_any: ["coffee"]
+    status: current
+    introduced_in: chunk_008
+    supersedes: fact_morgan_drink_tea
+    protected: false
+    evidence_spans:
+      - chunk_id: chunk_008
+        must_include: "prefers coffee"
+
+  - id: fact_emergency_contact
+    kind: contact
+    subject: Morgan
+    predicate: emergency_contact
+    value: Ava Morgan
+    match:
+      mode: normalized_any
+      forms_any: ["ava morgan", "555-0100"]
+    status: current
+    introduced_in: chunk_002
+    protected: true
+
+  - id: fact_roommate_jordan
+    kind: person
+    subject: Jordan Lee
+    predicate: roommate
+    value: Jordan Lee
+    match:
+      mode: normalized_any
+      forms_any: ["jordan lee"]
+    status: current
+    introduced_in: chunk_001
+    protected: false
+
+  - id: fact_atlas_deadline
+    kind: project
+    subject: Atlas
+    predicate: ship_date
+    value: March 28
+    match:
+      mode: normalized_any
+      forms_any: ["march 28", "atlas v0.2"]
+    status: current
+    introduced_in: chunk_003
+    protected: false
+
+  - id: fact_priya_collaborator
+    kind: person
+    subject: Priya Chen
+    predicate: collaborator_on
+    value: Atlas
+    match:
+      mode: normalized_any
+      forms_any: ["priya chen"]
+    status: current
+    introduced_in: chunk_003
+    protected: false
+
+  - id: fact_priya_api_review
+    kind: action
+    subject: Priya Chen
+    predicate: owns
+    value: API review
+    match:
+      mode: normalized_any
+      forms_any: ["api review"]
+    status: current
+    introduced_in: chunk_006
+    protected: false

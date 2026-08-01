@@ -1,0 +1,162 @@
+facts:
+  - id: fact_morgan_drink_tea
+    kind: preference
+    subject: Morgan
+    predicate: preferred_drink
+    value: tea
+    match:
+      mode: normalized_any
+      forms_any: ["tea"]
+    status: historical
+    introduced_in: chunk_001
+    superseded_by: fact_morgan_drink_current
+    protected: false
+
+  - id: fact_morgan_drink_current
+    kind: preference
+    subject: Morgan
+    predicate: preferred_drink
+    value: coffee
+    match:
+      mode: normalized_any
+      forms_any: ["coffee"]
+    status: current
+    introduced_in: chunk_008
+    supersedes: fact_morgan_drink_tea
+    protected: false
+
+  - id: fact_emergency_contact
+    kind: contact
+    subject: Morgan
+    predicate: emergency_contact
+    value: Ava Morgan
+    match:
+      mode: normalized_any
+      forms_any: ["ava morgan", "555-0100"]
+    status: current
+    introduced_in: chunk_002
+    protected: true
+
+  - id: fact_roommate_jordan
+    kind: person
+    subject: Jordan Lee
+    predicate: roommate
+    value: Jordan Lee
+    match:
+      mode: normalized_any
+      forms_any: ["jordan lee"]
+    status: current
+    introduced_in: chunk_001
+    protected: false
+
+  - id: fact_atlas_deadline
+    kind: project
+    subject: Atlas
+    predicate: ship_date
+    value: March 28
+    match:
+      mode: normalized_any
+      forms_any: ["march 28"]
+    status: historical
+    introduced_in: chunk_003
+    superseded_by: fact_atlas_deadline_current
+    protected: false
+
+  - id: fact_atlas_deadline_current
+    kind: project
+    subject: Atlas
+    predicate: ship_date
+    value: April 4
+    match:
+      mode: normalized_any
+      forms_any: ["april 4"]
+    status: current
+    introduced_in: chunk_013
+    supersedes: fact_atlas_deadline
+    protected: false
+
+  - id: fact_priya_collaborator
+    kind: person
+    subject: Priya Chen
+    predicate: collaborator_on
+    value: Atlas
+    match:
+      mode: normalized_any
+      forms_any: ["priya chen"]
+    status: current
+    introduced_in: chunk_003
+    protected: false
+
+  - id: fact_priya_api_review
+    kind: action
+    subject: Priya Chen
+    predicate: owns
+    value: API review
+    match:
+      mode: normalized_any
+      forms_any: ["api review"]
+    status: current
+    introduced_in: chunk_006
+    protected: false
+
+  - id: fact_editor_vim
+    kind: preference
+    subject: Morgan
+    predicate: preferred_editor
+    value: vim
+    match:
+      mode: normalized_any
+      forms_any: ["vim"]
+    status: historical
+    introduced_in: chunk_011
+    superseded_by: fact_editor_current
+    protected: false
+
+  - id: fact_editor_current
+    kind: preference
+    subject: Morgan
+    predicate: preferred_editor
+    value: helix
+    match:
+      mode: normalized_any
+      forms_any: ["helix"]
+    status: current
+    introduced_in: chunk_015
+    supersedes: fact_editor_vim
+    protected: false
+
+  - id: fact_jordan_park_finance
+    kind: person
+    subject: Jordan Park
+    predicate: role
+    value: finance / invoicing
+    match:
+      mode: normalized_any
+      forms_any: ["jordan park"]
+    status: current
+    introduced_in: chunk_012
+    protected: false
+
+  - id: fact_morgan_customer_email
+    kind: action
+    subject: Morgan
+    predicate: owns
+    value: customer email about Atlas slip
+    match:
+      mode: normalized_any
+      forms_any: ["customer email"]
+    status: current
+    introduced_in: chunk_013
+    protected: false
+
+  - id: fact_priya_demo_script
+    kind: action
+    subject: Priya Chen
+    predicate: prepares
+    value: API demo script
+    match:
+      mode: normalized_any
+      forms_any: ["demo script", "api demo"]
+    status: current
+    introduced_in: chunk_020
+    protected: false
