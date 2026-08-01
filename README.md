@@ -4,14 +4,13 @@ Open evaluation harness for **filesystem-based agent memory** (management + sear
 
 **Repo:** [mvdeangelis0/filemem-bench](https://github.com/mvdeangelis0/filemem-bench) (public). Local package name remains `agent-memory-bench` / `amb`.
 
-Design docs: [`docs/design/`](docs/design/).  
-Desktop (RTX 3070 + Ollama): [`docs/guides/desktop-rtx3070.md`](docs/guides/desktop-rtx3070.md).  
-Implementation plan (smoke v1): [`docs/superpowers/plans/2026-08-01-amb-smoke-v1.md`](docs/superpowers/plans/2026-08-01-amb-smoke-v1.md).
+Desktop (RTX 3070 + Ollama): [`docs/guides/desktop-rtx3070.md`](docs/guides/desktop-rtx3070.md).
 
 ## Quick start
 
 ```bash
-cd agent_memory_bench
+git clone https://github.com/mvdeangelis0/filemem-bench.git
+cd filemem-bench
 python3.12 -m venv .venv   # needs Python >=3.11
 source .venv/bin/activate
 pip install -e ".[dev]"
