@@ -76,6 +76,7 @@ def _run_live_manage_search(
             store,
             query["q"],
             search_prompt,
+            shape=shape,
             max_steps=20,
             progress=True,
         )
@@ -228,7 +229,12 @@ def run_suite(
             )
             search_llm = search_llm_for_query(qid, shape=shape)
             payload, steps = run_search(
-                search_llm, store, query["q"], search_prompt, max_steps=20
+                search_llm,
+                store,
+                query["q"],
+                search_prompt,
+                shape=shape,
+                max_steps=20,
             )
             payload["query_id"] = qid
             payload["shape"] = shape

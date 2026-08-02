@@ -43,6 +43,56 @@ class MockLLM:
 
 
 _FENCE = re.compile(r"```(?:json)?\s*([\s\S]*?)```", re.IGNORECASE)
+# Prefer an embedded tool object even when wrapped in prose / fake XML.
+_TOOL_OBJ = re.compile(
+    r"\{\s*\"(?:type\"\s*:\s*\"tool_call\"\s*,\s*\")?tool\"\s*:\s*\"[^\"]+\"[\s\S]*?\}",
+    re.IGNORECASE,
+)
+
+
+def _loads_object(text: str) -> Any:
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        return None
+
+
+def _extract_tool_dict(text: str) -> dict[str, Any] | None:
+    """Find the first JSON object that looks like a tool call."""
+    for m in _TOOL_OBJ.finditer(text):
+        candidate = m.group(0)
+        # Expand to balanced braces from the match start (regex may truncate).
+        start = m.start()
+        depth = 0
+        end = None
+        for i, ch in enumerate(text[start:], start):
+            if ch == "{":
+                depth += 1
+            elif ch == "}":
+                depth -= 1
+                if depth == 0:
+                    end = i + 1
+                    break
+        if end is None:
+            obj = _loads_object(candidate)
+        else:
+            obj = _loads_object(text[start:end])
+        if isinstance(obj, dict) and "tool" in obj:
+            return obj
+        if isinstance(obj, list):
+            for item in obj:
+                if isinstance(item, dict) and "tool" in item:
+                    return item
+    # Arrays of tool calls: [{"tool":...}]
+    start = text.find("[")
+    end = text.rfind("]")
+    if start >= 0 and end > start:
+        arr = _loads_object(text[start : end + 1])
+        if isinstance(arr, list):
+            for item in arr:
+                if isinstance(item, dict) and "tool" in item:
+                    return item
+    return None
 
 
 def _parse_json_content(content: str) -> Any:
@@ -51,29 +101,55 @@ def _parse_json_content(content: str) -> Any:
         return None
     m = _FENCE.search(text)
     if m:
-        text = m.group(1).strip()
-    try:
-        return json.loads(text)
-    except json.JSONDecodeError:
-        # try first {...} blob
-        start = text.find("{")
-        end = text.rfind("}")
-        if start >= 0 and end > start:
-            try:
-                return json.loads(text[start : end + 1])
-            except json.JSONDecodeError:
-                return None
-        return None
+        fenced = m.group(1).strip()
+        obj = _loads_object(fenced)
+        if obj is not None:
+            if isinstance(obj, list):
+                for item in obj:
+                    if isinstance(item, dict) and "tool" in item:
+                        return item
+            return obj
+        tool = _extract_tool_dict(fenced)
+        if tool is not None:
+            return tool
+    obj = _loads_object(text)
+    if obj is not None:
+        if isinstance(obj, list):
+            for item in obj:
+                if isinstance(item, dict) and "tool" in item:
+                    return item
+        return obj
+    tool = _extract_tool_dict(text)
+    if tool is not None:
+        return tool
+    # Last resort: outermost {...} blob
+    start = text.find("{")
+    end = text.rfind("}")
+    if start >= 0 and end > start:
+        return _loads_object(text[start : end + 1])
+    return None
 
 
-def normalize_llm_action(obj: Any) -> dict[str, Any]:
-    """Map model JSON into tool_call or final."""
+def normalize_llm_action(obj: Any, *, raw: str | None = None) -> dict[str, Any]:
+    """Map model JSON into tool_call, final, or protocol_error."""
     if obj is None:
-        return {"type": "final", "content": {"answer": "unknown", "citations": []}}
+        return {
+            "type": "protocol_error",
+            "error": "unparseable_json",
+            "raw": (raw or "")[:500],
+        }
     if isinstance(obj, str):
-        return {"type": "final", "content": obj}
+        return {
+            "type": "protocol_error",
+            "error": "non_json_prose",
+            "raw": obj[:500],
+        }
     if not isinstance(obj, dict):
-        return {"type": "final", "content": str(obj)}
+        return {
+            "type": "protocol_error",
+            "error": "unexpected_json_type",
+            "raw": str(obj)[:500],
+        }
 
     if obj.get("type") == "tool_call" and "tool" in obj:
         return {
@@ -91,7 +167,27 @@ def normalize_llm_action(obj: Any) -> dict[str, Any]:
         return {"type": "final", "content": obj["final"]}
     if "answer" in obj:
         return {"type": "final", "content": obj}
-    return {"type": "final", "content": obj}
+    return {
+        "type": "protocol_error",
+        "error": "missing_tool_or_answer",
+        "raw": json.dumps(obj, ensure_ascii=False)[:500],
+    }
+
+
+def action_from_model_text(content: str) -> dict[str, Any]:
+    """Parse model text into a harness action (shared by Ollama/Bedrock)."""
+    return normalize_llm_action(_parse_json_content(content), raw=content)
+
+
+def protocol_nudge(tools: list[dict[str, Any]], *, error: str | None = None) -> str:
+    tool_names = ", ".join(t["name"] for t in tools)
+    err = f" ({error})" if error else ""
+    return (
+        f"Protocol error{err}: reply with ONE JSON object only — no prose, "
+        f"no XML, no markdown fences. Example: "
+        f'{{"tool":"view","arguments":{{"path":"."}}}} '
+        f"Allowed tools: {tool_names}."
+    )
 
 
 def reinforce_tool_json(
@@ -113,8 +209,11 @@ def reinforce_tool_json(
 
 
 def _log_action(prefix: str, n: int, dt: float, action: dict[str, Any], content: str, verbose: bool) -> None:
-    if action.get("type") == "tool_call":
+    kind = action.get("type")
+    if kind == "tool_call":
         detail = f"tool={action.get('tool')!r}"
+    elif kind == "protocol_error":
+        detail = f"protocol_error={action.get('error')!r}"
     else:
         detail = "final"
     _log(f"[amb] {prefix} #{n} done in {dt:.1f}s → {detail}")
@@ -220,7 +319,7 @@ class OllamaLLM:
         content = data.get("message", {}).get("content", "")
         if not isinstance(content, str):
             content = json.dumps(content)
-        action = normalize_llm_action(_parse_json_content(content))
+        action = action_from_model_text(content)
         _log_action("ollama chat", n, dt, action, content, self.verbose)
         return action
 
@@ -341,6 +440,6 @@ class BedrockLLM:
         dt = time.perf_counter() - t0
         chunks = (((resp.get("output") or {}).get("message") or {}).get("content")) or []
         content = "".join(c.get("text", "") for c in chunks if isinstance(c, dict))
-        action = normalize_llm_action(_parse_json_content(content))
+        action = action_from_model_text(content)
         _log_action("bedrock converse", n, dt, action, content, self.verbose)
         return action

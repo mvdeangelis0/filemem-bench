@@ -40,3 +40,144 @@ def test_search_store_map_lists_children(tmp_path: Path):
     assert sm["root"]["ok"]
     assert "people/" in sm["root"]["listing"]
     assert "morgan.md" in sm["children"]["people/"]
+
+
+def test_later_update_gate_forces_chunk_008(tmp_path: Path):
+    from amb.bookkeeper import later_update_gate
+
+    h = MemoryToolHarness(tmp_path, role="manage")
+    h.execute(
+        "create",
+        {
+            "path": "chunks/chunk_001.md",
+            "file_text": (
+                "---\nid: chunk_001\nt: 1\ntitle: About me\n---\n"
+                "Preferred drink: tea.\n"
+            ),
+        },
+    )
+    h.execute(
+        "create",
+        {
+            "path": "chunks/chunk_008.md",
+            "file_text": (
+                "---\nid: chunk_008\nt: 8\ntitle: Preference update\n---\n"
+                "Update: Morgan now prefers coffee, not tea.\n"
+                "Please treat coffee as the current preferred drink.\n"
+            ),
+        },
+    )
+    h.execute(
+        "create",
+        {
+            "path": "chunks/chunk_010.md",
+            "file_text": (
+                "---\nid: chunk_010\nt: 10\ntitle: Atlas status\n---\n"
+                "Atlas API review still owned by Priya.\n"
+            ),
+        },
+    )
+    bk = Bookkeeper(tmp_path)
+    timeline = bk.chunk_timeline()
+    assert any(r["path"] == "chunks/chunk_008.md" and r["update_flag"] for r in timeline)
+    blocked = later_update_gate(
+        tmp_path,
+        "What does Morgan prefer to drink?",
+        answer="tea",
+        citations=["chunks/chunk_001.md"],
+    )
+    assert blocked["ok"] is False
+    assert "chunks/chunk_008.md" in blocked["hint_paths"]
+    # Citing the update clears the gate.
+    ok = later_update_gate(
+        tmp_path,
+        "What does Morgan prefer to drink?",
+        answer="coffee",
+        citations=["chunks/chunk_008.md"],
+    )
+    assert ok["ok"] is True
+    # Abstain never blocked.
+    unk = later_update_gate(
+        tmp_path,
+        "What does Morgan prefer to drink?",
+        answer="unknown",
+        citations=[],
+    )
+    assert unk["ok"] is True
+
+
+def test_search_retries_after_later_update_gate(tmp_path: Path):
+    from amb.agents.llm import MockLLM, ScriptedTurn
+    from amb.agents.search import run_search
+
+    h = MemoryToolHarness(tmp_path, role="manage")
+    h.execute(
+        "create",
+        {
+            "path": "chunks/chunk_001.md",
+            "file_text": "---\nt: 1\n---\nPreferred drink: tea.\n",
+        },
+    )
+    h.execute(
+        "create",
+        {
+            "path": "chunks/chunk_008.md",
+            "file_text": (
+                "---\nt: 8\n---\nUpdate: Morgan now prefers coffee, not tea.\n"
+                "Please treat coffee as the current preferred drink.\n"
+            ),
+        },
+    )
+    llm = MockLLM(
+        [
+            ScriptedTurn(
+                {
+                    "type": "tool_call",
+                    "tool": "view",
+                    "arguments": {"path": "chunks/chunk_001.md"},
+                }
+            ),
+            ScriptedTurn(
+                {
+                    "type": "tool_call",
+                    "tool": "done",
+                    "arguments": {
+                        "answer": "tea",
+                        "citations": ["chunks/chunk_001.md"],
+                        "confidence": "high",
+                    },
+                }
+            ),
+            ScriptedTurn(
+                {
+                    "type": "tool_call",
+                    "tool": "view",
+                    "arguments": {"path": "chunks/chunk_008.md"},
+                }
+            ),
+            ScriptedTurn(
+                {
+                    "type": "tool_call",
+                    "tool": "done",
+                    "arguments": {
+                        "answer": "coffee",
+                        "citations": ["chunks/chunk_008.md"],
+                        "confidence": "high",
+                    },
+                }
+            ),
+        ]
+    )
+    payload, steps = run_search(
+        llm,
+        tmp_path,
+        "What does Morgan prefer to drink?",
+        "search",
+        shape="verbatim",
+    )
+    assert payload["answer"] == "coffee"
+    assert any(
+        s.get("rejected") and (s.get("observation") or {}).get("error_code")
+        == "later_update_unchecked"
+        for s in steps
+    )

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Any
 
@@ -15,6 +16,72 @@ PLACEHOLDER_CITATIONS = {
     "path_to_roommates.txt",
     "path/to/roommates.txt",
 }
+
+_UPDATE_MARK = re.compile(
+    r"(?i)\b(update:|now prefers|no longer|instead of|treat .+ as the current)\b"
+)
+_FRONT_T = re.compile(r"(?m)^t:\s*(\d+)\s*$")
+_FRONT_TITLE = re.compile(r"(?m)^title:\s*(.+)\s*$")
+_CHUNK_NUM = re.compile(r"chunk_(\d+)", re.IGNORECASE)
+
+# Too common in this suite / English to use alone for update gating.
+_QUERY_STOP = {
+    "morgan",
+    "jordan",
+    "priya",
+    "atlas",
+    "what",
+    "does",
+    "this",
+    "that",
+    "from",
+    "with",
+    "have",
+    "prefer",
+    "prefers",
+    "preferred",
+    "preference",
+    "update",
+    "updated",
+    "current",
+    "please",
+    "treat",
+    "about",
+    "where",
+    "when",
+    "which",
+    "who",
+    "whom",
+    "whose",
+    "month",
+    "working",
+    "works",
+}
+
+
+def _query_tokens(query: str) -> set[str]:
+    raw = {t for t in re.findall(r"[a-z0-9]+", (query or "").casefold()) if len(t) >= 4}
+    content = {t for t in raw if t not in _QUERY_STOP}
+    return content or raw
+
+
+def _looks_like_update(body: str) -> bool:
+    return bool(_UPDATE_MARK.search(body or ""))
+
+
+def _chunk_t(path: str, body: str) -> int:
+    m = _FRONT_T.search(body or "")
+    if m:
+        return int(m.group(1))
+    m = _CHUNK_NUM.search(path.replace("\\", "/"))
+    if m:
+        return int(m.group(1))
+    return 0
+
+
+def _chunk_title(body: str) -> str | None:
+    m = _FRONT_TITLE.search(body or "")
+    return m.group(1).strip() if m else None
 
 
 class Bookkeeper:
@@ -88,6 +155,78 @@ class Bookkeeper:
             "citations": [result["path"]] if result.get("content") is not None else [],
         }
 
+    def chunk_timeline(self) -> list[dict[str, Any]]:
+        """Ordered metadata for chunks/ (no full bodies in the returned brief)."""
+        listed = self.list_dir("chunks")
+        if not listed.get("ok"):
+            return []
+        rows: list[dict[str, Any]] = []
+        for name in listed.get("listing") or []:
+            if not isinstance(name, str) or name.endswith("/"):
+                continue
+            rel = f"chunks/{name}"
+            got = self.read(rel)
+            if not got.get("ok") or got.get("content") is None:
+                continue
+            body = str(got["content"])
+            rows.append(
+                {
+                    "path": got["path"],
+                    "t": _chunk_t(got["path"], body),
+                    "title": _chunk_title(body),
+                    "update_flag": _looks_like_update(body),
+                }
+            )
+        rows.sort(key=lambda r: (r["t"], r["path"]))
+        return rows
+
+    def later_update_candidates(
+        self,
+        query: str,
+        cited_paths: list[str] | None,
+    ) -> list[dict[str, Any]]:
+        """Later chunks that look like updates and overlap the query."""
+        timeline = self.chunk_timeline()
+        if not timeline:
+            return []
+
+        cited_t: list[int] = []
+        cited_set: set[str] = set()
+        for c in cited_paths or []:
+            if not isinstance(c, str):
+                continue
+            canon, err = canonicalize_rel_path(c)
+            if err or canon is None:
+                continue
+            cited_set.add(canon)
+            match = next((r for r in timeline if r["path"] == canon), None)
+            if match is not None:
+                cited_t.append(int(match["t"]))
+            else:
+                cited_t.append(_chunk_t(canon, ""))
+
+        cited_max_t = max(cited_t) if cited_t else 0
+        tokens = _query_tokens(query)
+        out: list[dict[str, Any]] = []
+        for row in timeline:
+            if int(row["t"]) <= cited_max_t:
+                continue
+            if row["path"] in cited_set:
+                continue
+            if not row.get("update_flag"):
+                continue
+            body = str(self.read(row["path"]).get("content") or "").casefold()
+            if tokens and not any(tok in body for tok in tokens):
+                continue
+            out.append(
+                {
+                    "path": row["path"],
+                    "t": row["t"],
+                    "title": row.get("title"),
+                }
+            )
+        return out
+
 
 def validate_citations(
     root: Path,
@@ -140,3 +279,29 @@ def validate_citations(
             "good": good,
         }
     return {"ok": True, "citations": good}
+
+
+def later_update_gate(
+    root: Path,
+    query: str,
+    *,
+    answer: str | None,
+    citations: list[Any] | None,
+) -> dict[str, Any]:
+    """Reject non-abstain answers that ignore later update-like chunks."""
+    ans = (answer or "").strip().casefold()
+    if ans in {"unknown", "n/a", "na", "none", "not found", ""}:
+        return {"ok": True, "candidates": []}
+    cites = [c for c in (citations or []) if isinstance(c, str)]
+    bk = Bookkeeper(root)
+    candidates = bk.later_update_candidates(query, cites)
+    if not candidates:
+        return {"ok": True, "candidates": []}
+    hint_paths = [c["path"] for c in candidates]
+    return {
+        "ok": False,
+        "error_code": "later_update_unchecked",
+        "error": "later chunks may supersede your answer; view them before done",
+        "hint_paths": hint_paths,
+        "candidates": candidates,
+    }

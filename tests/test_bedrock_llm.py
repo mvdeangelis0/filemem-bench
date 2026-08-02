@@ -1,4 +1,15 @@
-from amb.agents.llm import BedrockLLM, normalize_llm_action, _parse_json_content
+import json
+
+from amb.agents.llm import (
+    BedrockLLM,
+    MockLLM,
+    ScriptedTurn,
+    action_from_model_text,
+    normalize_llm_action,
+    _parse_json_content,
+)
+from amb.agents.search import run_search
+from amb.harness.memory_tool import MemoryToolHarness
 
 
 def test_parse_bedrock_fenced_json():
@@ -6,6 +17,25 @@ def test_parse_bedrock_fenced_json():
     action = normalize_llm_action(_parse_json_content(text))
     assert action["type"] == "tool_call"
     assert action["tool"] == "view"
+
+
+def test_extract_tool_from_prose_and_fake_xml():
+    text = (
+        "I'll search the chunks.\n"
+        "<function_calls>\n"
+        '[{"tool": "view", "arguments": {"path": "chunks/chunk_001.md"}}]\n'
+        "</function_calls>"
+    )
+    action = action_from_model_text(text)
+    assert action["type"] == "tool_call"
+    assert action["tool"] == "view"
+    assert action["arguments"]["path"] == "chunks/chunk_001.md"
+
+
+def test_unparseable_is_protocol_error_not_unknown():
+    action = action_from_model_text("Sure, let me think about that.")
+    assert action["type"] == "protocol_error"
+    assert action["error"] == "unparseable_json"
 
 
 def test_bedrock_message_merge_and_system():
@@ -55,3 +85,60 @@ def test_bedrock_complete_mocked():
     )
     assert out["type"] == "tool_call"
     assert out["tool"] == "done"
+
+
+def test_search_retries_protocol_error_and_sets_verbatim_shape(tmp_path):
+    h = MemoryToolHarness(tmp_path, role="manage")
+    h.execute(
+        "create",
+        {"path": "chunks/chunk_001.md", "file_text": "Preferred drink: tea\n"},
+    )
+    h.execute(
+        "create",
+        {
+            "path": "chunks/chunk_008.md",
+            "file_text": "Update: Morgan now prefers coffee, not tea.\n",
+        },
+    )
+    llm = MockLLM(
+        [
+            ScriptedTurn(
+                {
+                    "type": "protocol_error",
+                    "error": "unparseable_json",
+                    "raw": "I'll help <function_calls>",
+                }
+            ),
+            ScriptedTurn(
+                {
+                    "type": "tool_call",
+                    "tool": "view",
+                    "arguments": {"path": "chunks/chunk_008.md"},
+                }
+            ),
+            ScriptedTurn(
+                {
+                    "type": "tool_call",
+                    "tool": "done",
+                    "arguments": {
+                        "answer": "coffee",
+                        "citations": ["chunks/chunk_008.md"],
+                        "confidence": "high",
+                    },
+                }
+            ),
+        ]
+    )
+    payload, steps = run_search(
+        llm,
+        tmp_path,
+        "What does Morgan prefer to drink?",
+        "search",
+        shape="verbatim",
+    )
+    assert payload["answer"] == "coffee"
+    assert any(s.get("event") == "protocol_error" for s in steps)
+    assert steps[0].get("shape") == "verbatim"
+    # First user message after system should carry later-chunk instruction.
+    # (exercised via run_search building messages; assert via store_map event)
+    assert "chunks/" in json.dumps(steps[0].get("store_map"))

@@ -5,12 +5,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from amb.agents.llm import LLM
+from amb.agents.llm import LLM, protocol_nudge
 from amb.harness.memory_tool import MemoryToolHarness
 
 
 def _log(msg: str) -> None:
     print(msg, file=sys.stderr, flush=True)
+
 
 TOOLS = [
     {"name": "view", "args": ["path"]},
@@ -45,6 +46,33 @@ def run_manage(
         if progress:
             _log(f"[amb] manage step {step}/{max_steps} → asking model")
         out = llm.complete(messages, TOOLS)
+        if out.get("type") == "protocol_error":
+            nudge = protocol_nudge(TOOLS, error=str(out.get("error") or "bad_protocol"))
+            if progress:
+                _log(f"[amb] manage step {step}/{max_steps} protocol retry")
+            steps.append(
+                {
+                    "step": step,
+                    "event": "protocol_error",
+                    "error": out.get("error"),
+                    "raw": out.get("raw"),
+                }
+            )
+            messages.append(
+                {
+                    "role": "assistant",
+                    "content": json.dumps(
+                        {
+                            "type": "protocol_error",
+                            "error": out.get("error"),
+                            "raw": out.get("raw"),
+                        },
+                        ensure_ascii=False,
+                    ),
+                }
+            )
+            messages.append({"role": "user", "content": nudge})
+            continue
         if out.get("type") == "tool_call":
             tool = out["tool"]
             args = out.get("arguments") or {}
@@ -67,19 +95,18 @@ def run_manage(
                     _log(f"[amb] manage step {step}/{max_steps} agent done")
                 steps.append({"step": step, "event": "done", "reason": "agent_done"})
                 return steps
-        else:
-            if progress:
-                _log(f"[amb] manage step {step}/{max_steps} final (no tool)")
-            # treat final as done
-            steps.append(
-                {
-                    "step": step,
-                    "event": "done",
-                    "reason": "final_message",
-                    "content": out.get("content"),
-                }
-            )
-            return steps
+            continue
+        if progress:
+            _log(f"[amb] manage step {step}/{max_steps} final (no tool)")
+        steps.append(
+            {
+                "step": step,
+                "event": "done",
+                "reason": "final_message",
+                "content": out.get("content"),
+            }
+        )
+        return steps
     if progress:
         _log(f"[amb] manage hit max_steps={max_steps}")
     steps.append({"step": max_steps, "event": "done", "reason": "max_steps_exceeded"})
