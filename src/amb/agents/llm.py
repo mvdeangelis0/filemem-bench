@@ -94,6 +94,37 @@ def normalize_llm_action(obj: Any) -> dict[str, Any]:
     return {"type": "final", "content": obj}
 
 
+def reinforce_tool_json(
+    messages: list[dict[str, Any]], tools: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    tool_names = ", ".join(t["name"] for t in tools)
+    reinforced = list(messages)
+    reinforced.append(
+        {
+            "role": "user",
+            "content": (
+                "Reply with a single JSON object only. "
+                f"Either {{\"tool\":\"<one of: {tool_names}>\",\"arguments\":{{...}}}} "
+                "or {\"final\":{...}} / {\"answer\":\"...\",\"citations\":[...]}."
+            ),
+        }
+    )
+    return reinforced
+
+
+def _log_action(prefix: str, n: int, dt: float, action: dict[str, Any], content: str, verbose: bool) -> None:
+    if action.get("type") == "tool_call":
+        detail = f"tool={action.get('tool')!r}"
+    else:
+        detail = "final"
+    _log(f"[amb] {prefix} #{n} done in {dt:.1f}s → {detail}")
+    if verbose and content.strip():
+        preview = content.strip().replace("\n", " ")
+        if len(preview) > 160:
+            preview = preview[:160] + "…"
+        _log(f"[amb] {prefix} #{n} preview: {preview}")
+
+
 def probe_ollama(base_url: str, model: str, *, timeout: float = 30.0) -> None:
     """Fail fast if Ollama is down or the model name is missing."""
     base = base_url.rstrip("/")
@@ -140,19 +171,7 @@ class OllamaLLM:
         self.n_calls = 0
 
     def complete(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> dict[str, Any]:
-        # Append a short tool reminder so format=json stays grounded.
-        tool_names = ", ".join(t["name"] for t in tools)
-        reinforced = list(messages)
-        reinforced.append(
-            {
-                "role": "user",
-                "content": (
-                    "Reply with a single JSON object only. "
-                    f"Either {{\"tool\":\"<one of: {tool_names}>\",\"arguments\":{{...}}}} "
-                    "or {\"final\":{...}} / {\"answer\":\"...\",\"citations\":[...]}."
-                ),
-            }
-        )
+        reinforced = reinforce_tool_json(messages, tools)
         payload = {
             "model": self.model,
             "messages": reinforced,
@@ -199,17 +218,129 @@ class OllamaLLM:
             hb.join(timeout=0.2)
         dt = time.perf_counter() - t0
         content = data.get("message", {}).get("content", "")
-        action = normalize_llm_action(
-            _parse_json_content(content) if isinstance(content, str) else content
+        if not isinstance(content, str):
+            content = json.dumps(content)
+        action = normalize_llm_action(_parse_json_content(content))
+        _log_action("ollama chat", n, dt, action, content, self.verbose)
+        return action
+
+
+def probe_bedrock(model: str, *, region: str | None = None) -> None:
+    """Fail fast if boto3/credentials/region cannot reach bedrock-runtime."""
+    try:
+        import boto3
+        from botocore.exceptions import BotoCoreError, ClientError
+    except ImportError as e:
+        raise RuntimeError(
+            "bedrock mode requires boto3. Install with: pip install -e '.[bedrock]'"
+        ) from e
+    region = region or os.environ.get("AWS_REGION") or os.environ.get("AWS_DEFAULT_REGION") or "us-east-1"
+    _log(f"[amb] probing Bedrock runtime region={region} model={model!r} …")
+    client = boto3.client("bedrock-runtime", region_name=region)
+    try:
+        # Cheap no-op auth/region check; model access validated on first converse.
+        client.meta.events
+        sts = boto3.client("sts", region_name=region)
+        ident = sts.get_caller_identity()
+    except (BotoCoreError, ClientError) as e:
+        raise RuntimeError(f"Cannot use AWS/Bedrock in {region}: {e}") from e
+    _log(
+        f"[amb] Bedrock OK; account={ident.get('Account')} "
+        f"model_id={model!r} (use inference profile ids like "
+        f"us.anthropic.claude-haiku-4-5-20251001-v1:0)"
+    )
+
+
+class BedrockLLM:
+    """AWS Bedrock Converse API → same JSON tool protocol as OllamaLLM."""
+
+    def __init__(
+        self,
+        model: str,
+        *,
+        region: str | None = None,
+        temperature: float = 0.0,
+        max_tokens: int = 2048,
+        verbose: bool = False,
+        client: Any | None = None,
+    ) -> None:
+        self.model = model
+        self.region = (
+            region
+            or os.environ.get("AWS_REGION")
+            or os.environ.get("AWS_DEFAULT_REGION")
+            or "us-east-1"
         )
-        if action.get("type") == "tool_call":
-            detail = f"tool={action.get('tool')!r}"
+        self.temperature = temperature
+        self.max_tokens = max_tokens
+        self.verbose = verbose
+        self.n_calls = 0
+        if client is not None:
+            self._client = client
         else:
-            detail = "final"
-        _log(f"[amb] ollama chat #{n} done in {dt:.1f}s → {detail}")
-        if self.verbose and isinstance(content, str) and content.strip():
-            preview = content.strip().replace("\n", " ")
-            if len(preview) > 160:
-                preview = preview[:160] + "…"
-            _log(f"[amb] ollama chat #{n} preview: {preview}")
+            try:
+                import boto3
+            except ImportError as e:
+                raise RuntimeError(
+                    "bedrock mode requires boto3. Install with: pip install -e '.[bedrock]'"
+                ) from e
+            self._client = boto3.client("bedrock-runtime", region_name=self.region)
+
+    @staticmethod
+    def _to_bedrock_messages(
+        messages: list[dict[str, Any]],
+    ) -> tuple[str | None, list[dict[str, Any]]]:
+        system_parts: list[str] = []
+        out: list[dict[str, Any]] = []
+        for m in messages:
+            role = m.get("role") or "user"
+            content = m.get("content")
+            if not isinstance(content, str):
+                content = json.dumps(content, ensure_ascii=False)
+            if role == "system":
+                system_parts.append(content)
+                continue
+            if role not in {"user", "assistant"}:
+                role = "user"
+            # Bedrock requires alternating roles; merge consecutive same-role turns.
+            if out and out[-1]["role"] == role:
+                prev = out[-1]["content"][0]["text"]
+                out[-1]["content"][0]["text"] = prev + "\n\n" + content
+            else:
+                out.append({"role": role, "content": [{"text": content}]})
+        system = "\n\n".join(system_parts) if system_parts else None
+        return system, out
+
+    def complete(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> dict[str, Any]:
+        from botocore.exceptions import BotoCoreError, ClientError
+
+        reinforced = reinforce_tool_json(messages, tools)
+        system, br_messages = self._to_bedrock_messages(reinforced)
+        self.n_calls += 1
+        n = self.n_calls
+        _log(f"[amb] bedrock converse #{n} model={self.model!r} …")
+        t0 = time.perf_counter()
+        kwargs: dict[str, Any] = {
+            "modelId": self.model,
+            "messages": br_messages,
+            "inferenceConfig": {
+                "maxTokens": self.max_tokens,
+                "temperature": self.temperature,
+            },
+        }
+        if system:
+            kwargs["system"] = [{"text": system}]
+        try:
+            resp = self._client.converse(**kwargs)
+        except (BotoCoreError, ClientError) as e:
+            raise RuntimeError(
+                f"Bedrock converse failed (call #{n}, model={self.model!r}): {e}. "
+                "Newer Claude models need an inference profile id "
+                "(e.g. us.anthropic.claude-haiku-4-5-20251001-v1:0)."
+            ) from e
+        dt = time.perf_counter() - t0
+        chunks = (((resp.get("output") or {}).get("message") or {}).get("content")) or []
+        content = "".join(c.get("text", "") for c in chunks if isinstance(c, dict))
+        action = normalize_llm_action(_parse_json_content(content))
+        _log_action("bedrock converse", n, dt, action, content, self.verbose)
         return action

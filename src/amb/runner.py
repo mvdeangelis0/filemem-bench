@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from amb.agents.llm import LLM, OllamaLLM, probe_ollama
+from amb.agents.llm import BedrockLLM, LLM, OllamaLLM, probe_bedrock, probe_ollama
 from amb.agents.manage import run_manage
 from amb.agents.scripted_smoke import manage_llm_for_smoke, search_llm_for_query
 from amb.agents.search import run_search
@@ -30,6 +30,65 @@ def _filter_chunk(chunk: dict[str, Any], whitelist: list[str]) -> dict[str, Any]
     return {k: chunk[k] for k in whitelist if k in chunk}
 
 
+def _run_live_manage_search(
+    *,
+    suite: Any,
+    writer: RunWriter,
+    whitelist: list[str],
+    manage_llm: LLM,
+    search_llm: LLM,
+    manage_prompt: str,
+    search_prompt: str,
+) -> None:
+    n_chunks = len(suite.chunks)
+    for i, chunk in enumerate(suite.chunks, 1):
+        _log(f"[amb] manage {i}/{n_chunks} chunk={chunk['id']}")
+        t0 = time.perf_counter()
+        visible = _filter_chunk(chunk, whitelist)
+        steps = run_manage(
+            manage_llm,
+            writer.organized_root(),
+            visible,
+            manage_prompt,
+            max_steps=30,
+            progress=True,
+        )
+        writer.write_trajectory(f"trajectories/manage/{chunk['id']}.jsonl", steps)
+        _log(
+            f"[amb] manage {i}/{n_chunks} done in {time.perf_counter() - t0:.1f}s "
+            f"({len(steps)} steps)"
+        )
+
+    search_jobs = [
+        (q, shape)
+        for q in suite.queries
+        for shape in (q.get("shapes") or ["organized"])
+    ]
+    for j, (query, shape) in enumerate(search_jobs, 1):
+        qid = query["id"]
+        _log(f"[amb] search {j}/{len(search_jobs)} query={qid} shape={shape}")
+        t0 = time.perf_counter()
+        store = (
+            writer.organized_root() if shape == "organized" else writer.verbatim_root()
+        )
+        payload, steps = run_search(
+            search_llm,
+            store,
+            query["q"],
+            search_prompt,
+            max_steps=20,
+            progress=True,
+        )
+        payload["query_id"] = qid
+        payload["shape"] = shape
+        writer.write_search_output(shape, qid, payload)
+        writer.write_trajectory(f"trajectories/search/{shape}/{qid}.jsonl", steps)
+        _log(
+            f"[amb] search {j}/{len(search_jobs)} done in {time.perf_counter() - t0:.1f}s "
+            f"({len(steps)} steps)"
+        )
+
+
 def run_suite(
     suite_path: Path | str,
     *,
@@ -40,6 +99,7 @@ def run_suite(
     search_model: str = "mock",
     arm_id: str = "baseline",
     ollama_host: str | None = None,
+    aws_region: str | None = None,
     verbose: bool = False,
 ) -> Path:
     suite_path = Path(suite_path)
@@ -58,8 +118,8 @@ def run_suite(
     run_dir = Path(out_dir) / run_id
     writer = RunWriter(run_dir)
 
-    # Progress on by default for long ollama runs; -v adds per-call timing.
-    progress = verbose or llm_mode == "ollama"
+    # Progress on by default for long live runs; -v adds per-call timing.
+    progress = verbose or llm_mode in {"ollama", "bedrock"}
     t_run = time.perf_counter()
     if progress:
         _log(
@@ -75,9 +135,18 @@ def run_suite(
     search_digest = writer.copy_prompt("search.memory_tool.v2", search_prompt_path)
 
     host = ollama_host or os.environ.get("OLLAMA_HOST") or "http://127.0.0.1:11434"
+    region = (
+        aws_region
+        or os.environ.get("AWS_REGION")
+        or os.environ.get("AWS_DEFAULT_REGION")
+        or "us-east-1"
+    )
     if llm_mode == "mock":
         manage_model_id = "mock/scripted_smoke"
         search_model_id = "mock/scripted_smoke"
+    elif llm_mode == "bedrock":
+        manage_model_id = f"bedrock/{manage_model}"
+        search_model_id = f"bedrock/{search_model}"
     else:
         manage_model_id = f"ollama/{manage_model}"
         search_model_id = f"ollama/{search_model}"
@@ -119,6 +188,7 @@ def run_suite(
         "agent_visible_chunk_fields": whitelist,
         "llm_mode": llm_mode,
         "ollama_host": host if llm_mode == "ollama" else None,
+        "aws_region": region if llm_mode == "bedrock" else None,
         "eval_held_out": False,
     }
     writer.write_config(config)
@@ -173,59 +243,37 @@ def run_suite(
         probe_ollama(host, manage_model)
         if search_model != manage_model:
             probe_ollama(host, search_model)
-
-        manage_llm = OllamaLLM(manage_model, base_url=host, verbose=verbose)
-        search_llm_shared = OllamaLLM(search_model, base_url=host, verbose=verbose)
-
-        n_chunks = len(suite.chunks)
-        for i, chunk in enumerate(suite.chunks, 1):
-            _log(f"[amb] manage {i}/{n_chunks} chunk={chunk['id']}")
-            t0 = time.perf_counter()
-            visible = _filter_chunk(chunk, whitelist)
-            steps = run_manage(
-                manage_llm,
-                writer.organized_root(),
-                visible,
-                manage_prompt,
-                max_steps=30,
-                progress=True,
+        _run_live_manage_search(
+            suite=suite,
+            writer=writer,
+            whitelist=whitelist,
+            manage_llm=OllamaLLM(manage_model, base_url=host, verbose=verbose),
+            search_llm=OllamaLLM(search_model, base_url=host, verbose=verbose),
+            manage_prompt=manage_prompt,
+            search_prompt=search_prompt,
+        )
+    elif llm_mode == "bedrock":
+        if manage_model in {"mock", ""} or search_model in {"mock", ""}:
+            raise ValueError(
+                "bedrock mode requires --manage-model and --search-model "
+                "(inference profile ids, e.g. us.anthropic.claude-haiku-4-5-20251001-v1:0)"
             )
-            writer.write_trajectory(f"trajectories/manage/{chunk['id']}.jsonl", steps)
-            _log(
-                f"[amb] manage {i}/{n_chunks} done in {time.perf_counter() - t0:.1f}s "
-                f"({len(steps)} steps)"
-            )
-
-        search_jobs = [
-            (q, shape)
-            for q in suite.queries
-            for shape in (q.get("shapes") or ["organized"])
-        ]
-        for j, (query, shape) in enumerate(search_jobs, 1):
-            qid = query["id"]
-            _log(f"[amb] search {j}/{len(search_jobs)} query={qid} shape={shape}")
-            t0 = time.perf_counter()
-            store = (
-                writer.organized_root()
-                if shape == "organized"
-                else writer.verbatim_root()
-            )
-            payload, steps = run_search(
-                search_llm_shared,
-                store,
-                query["q"],
-                search_prompt,
-                max_steps=20,
-                progress=True,
-            )
-            payload["query_id"] = qid
-            payload["shape"] = shape
-            writer.write_search_output(shape, qid, payload)
-            writer.write_trajectory(f"trajectories/search/{shape}/{qid}.jsonl", steps)
-            _log(
-                f"[amb] search {j}/{len(search_jobs)} done in {time.perf_counter() - t0:.1f}s "
-                f"({len(steps)} steps)"
-            )
+        probe_bedrock(manage_model, region=region)
+        if search_model != manage_model:
+            probe_bedrock(search_model, region=region)
+        _run_live_manage_search(
+            suite=suite,
+            writer=writer,
+            whitelist=whitelist,
+            manage_llm=BedrockLLM(
+                manage_model, region=region, verbose=verbose
+            ),
+            search_llm=BedrockLLM(
+                search_model, region=region, verbose=verbose
+            ),
+            manage_prompt=manage_prompt,
+            search_prompt=search_prompt,
+        )
     else:
         raise ValueError(f"unknown llm_mode {llm_mode}")
 

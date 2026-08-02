@@ -23,11 +23,20 @@ amb regrade runs/<run_id> --suite suites/core
 
 Suites: `smoke` (10 chunks) ⊂ `core` (24 chunks, same `morgan_personal_v1` world).
 
-`--llm mock` = scripted oracle (CI). Live GPU:
+`--llm mock` = scripted oracle (CI). Live GPU (Ollama):
 
 ```bash
 amb run --suite suites/smoke --llm ollama \
   --manage-model deepseek-r1:7b \
   --search-model deepseek-r1:7b \
   --out runs
+```
+
+Optional cloud upper-bound (AWS Bedrock; needs `pip install -e ".[bedrock]"` + inference profile id):
+
+```bash
+amb run --suite suites/smoke --llm bedrock \
+  --manage-model us.anthropic.claude-haiku-4-5-20251001-v1:0 \
+  --search-model us.anthropic.claude-haiku-4-5-20251001-v1:0 \
+  --out runs -v
 ```

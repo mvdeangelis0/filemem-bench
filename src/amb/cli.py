@@ -24,7 +24,9 @@ def main(argv: list[str] | None = None) -> None:
     p_run = sub.add_parser("run", help="Run a suite")
     p_run.add_argument("--suite", required=True)
     p_run.add_argument("--out", default="runs")
-    p_run.add_argument("--llm", default="mock", choices=["mock", "ollama"])
+    p_run.add_argument(
+        "--llm", default="mock", choices=["mock", "ollama", "bedrock"]
+    )
     p_run.add_argument("--seed", type=int, default=0)
     p_run.add_argument("--manage-model", default="mock")
     p_run.add_argument("--search-model", default="mock")
@@ -33,12 +35,17 @@ def main(argv: list[str] | None = None) -> None:
         default=None,
         help="Ollama base URL (default: OLLAMA_HOST or http://127.0.0.1:11434)",
     )
+    p_run.add_argument(
+        "--aws-region",
+        default=None,
+        help="AWS region for --llm bedrock (default: AWS_REGION or us-east-1)",
+    )
     p_run.add_argument("--arm", default="baseline")
     p_run.add_argument(
         "-v",
         "--verbose",
         action="store_true",
-        help="Log each Ollama chat call with timing (phase progress is always on for --llm ollama)",
+        help="Log each model call with timing (live progress always on for ollama/bedrock)",
     )
 
     p_re = sub.add_parser("regrade", help="Regrade a run ledger")
@@ -72,6 +79,7 @@ def main(argv: list[str] | None = None) -> None:
                 search_model=args.search_model,
                 arm_id=args.arm,
                 ollama_host=args.ollama_host,
+                aws_region=args.aws_region,
                 verbose=args.verbose,
             )
         except (RuntimeError, ValueError) as e:

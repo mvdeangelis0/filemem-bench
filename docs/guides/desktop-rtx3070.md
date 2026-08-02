@@ -50,6 +50,20 @@ Expect lower pass rates than mock (mock is scripted oracle). Inspect `runs/<id>/
 
 Then scale to `suites/core` overnight if smoke looks sane.
 
-## 5. Security note
+## 5. Optional Bedrock upper-bound arm
+
+Requires AWS creds + `pip install -e ".[bedrock]"`. Use an **inference profile** id (not the raw foundation model id):
+
+```bash
+amb run --suite suites/smoke --llm bedrock \
+  --manage-model us.anthropic.claude-haiku-4-5-20251001-v1:0 \
+  --search-model us.anthropic.claude-haiku-4-5-20251001-v1:0 \
+  --aws-region us-east-1 \
+  --out runs -v
+```
+
+This is a cloud comparison arm (costs money). Local Ollama remains the primary 24/7 target.
+
+## 6. Security note
 
 Do **not** bind raw Ollama (`0.0.0.0:11434`) to the public internet. Keep it local; tunnel later behind an authenticated API if needed.

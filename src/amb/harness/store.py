@@ -31,7 +31,9 @@ def canonicalize_rel_path(rel: object) -> tuple[str | None, str | None]:
         return None, "absolute paths forbidden; use relative paths like people/morgan.md"
     if norm.startswith("//"):
         return None, "absolute paths forbidden; use relative paths like people/morgan.md"
-    # Unix absolute
+    # Lone "/" means store root (models often emit this); other absolutes forbidden.
+    if norm == "/":
+        return ".", None
     if norm.startswith("/"):
         return None, "absolute paths forbidden; use relative paths like people/morgan.md"
     norm = norm.lstrip("./")
