@@ -42,6 +42,18 @@ def main(argv: list[str] | None = None) -> None:
     )
     p_run.add_argument("--arm", default="baseline")
     p_run.add_argument(
+        "--search-mode",
+        default="tools",
+        choices=["tools", "rag"],
+        help="tools=FS memory tool loop; rag=lexical top-k over chunks (verbatim only)",
+    )
+    p_run.add_argument(
+        "--rag-top-k",
+        type=int,
+        default=3,
+        help="Top-k chunks for --search-mode rag (default: 3)",
+    )
+    p_run.add_argument(
         "-v",
         "--verbose",
         action="store_true",
@@ -81,6 +93,8 @@ def main(argv: list[str] | None = None) -> None:
                 ollama_host=args.ollama_host,
                 aws_region=args.aws_region,
                 verbose=args.verbose,
+                search_mode=args.search_mode,
+                rag_top_k=args.rag_top_k,
             )
         except (RuntimeError, ValueError) as e:
             print(f"error: {e}", file=sys.stderr)

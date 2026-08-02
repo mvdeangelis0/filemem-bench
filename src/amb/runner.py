@@ -10,6 +10,7 @@ from typing import Any
 
 from amb.agents.llm import BedrockLLM, LLM, OllamaLLM, probe_bedrock, probe_ollama
 from amb.agents.manage import run_manage
+from amb.agents.rag_search import run_rag_search
 from amb.agents.scripted_smoke import manage_llm_for_smoke, search_llm_for_query
 from amb.agents.search import run_search
 from amb.graders.engine import grade
@@ -39,6 +40,8 @@ def _run_live_manage_search(
     search_llm: LLM,
     manage_prompt: str,
     search_prompt: str,
+    search_mode: str = "tools",
+    rag_top_k: int = 3,
 ) -> None:
     n_chunks = len(suite.chunks)
     for i, chunk in enumerate(suite.chunks, 1):
@@ -66,22 +69,38 @@ def _run_live_manage_search(
     ]
     for j, (query, shape) in enumerate(search_jobs, 1):
         qid = query["id"]
-        _log(f"[amb] search {j}/{len(search_jobs)} query={qid} shape={shape}")
+        use_rag = search_mode == "rag" and shape == "verbatim"
+        mode = "rag" if use_rag else "tools"
+        _log(
+            f"[amb] search {j}/{len(search_jobs)} query={qid} shape={shape} mode={mode}"
+        )
         t0 = time.perf_counter()
-        store = (
-            writer.organized_root() if shape == "organized" else writer.verbatim_root()
-        )
-        payload, steps = run_search(
-            search_llm,
-            store,
-            query["q"],
-            search_prompt,
-            shape=shape,
-            max_steps=20,
-            progress=True,
-        )
+        if use_rag:
+            payload, steps = run_rag_search(
+                search_llm,
+                writer.verbatim_root(),
+                query["q"],
+                top_k=rag_top_k,
+                progress=True,
+            )
+        else:
+            store = (
+                writer.organized_root()
+                if shape == "organized"
+                else writer.verbatim_root()
+            )
+            payload, steps = run_search(
+                search_llm,
+                store,
+                query["q"],
+                search_prompt,
+                shape=shape,
+                max_steps=20,
+                progress=True,
+            )
         payload["query_id"] = qid
         payload["shape"] = shape
+        payload["search_mode"] = mode
         writer.write_search_output(shape, qid, payload)
         writer.write_trajectory(f"trajectories/search/{shape}/{qid}.jsonl", steps)
         _log(
@@ -102,7 +121,11 @@ def run_suite(
     ollama_host: str | None = None,
     aws_region: str | None = None,
     verbose: bool = False,
+    search_mode: str = "tools",
+    rag_top_k: int = 3,
 ) -> Path:
+    if search_mode not in {"tools", "rag"}:
+        raise ValueError(f"unknown search_mode {search_mode}")
     suite_path = Path(suite_path)
     suite = load_suite(suite_path)
     errors = validate_suite(suite)
@@ -125,7 +148,8 @@ def run_suite(
     if progress:
         _log(
             f"[amb] run_id={run_id} suite={suite.meta.get('id')} "
-            f"chunks={len(suite.chunks)} queries={len(suite.queries)} llm={llm_mode}"
+            f"chunks={len(suite.chunks)} queries={len(suite.queries)} "
+            f"llm={llm_mode} search_mode={search_mode}"
         )
 
     manage_prompt_path = REPO_ROOT / "prompts" / "manage" / "memory_tool.v2.md"
@@ -188,6 +212,8 @@ def run_suite(
         "diagnostics_set_id": suite.diagnostics_set_id,
         "agent_visible_chunk_fields": whitelist,
         "llm_mode": llm_mode,
+        "search_mode": search_mode,
+        "rag_top_k": rag_top_k if search_mode == "rag" else None,
         "ollama_host": host if llm_mode == "ollama" else None,
         "aws_region": region if llm_mode == "bedrock" else None,
         "eval_held_out": False,
@@ -257,6 +283,8 @@ def run_suite(
             search_llm=OllamaLLM(search_model, base_url=host, verbose=verbose),
             manage_prompt=manage_prompt,
             search_prompt=search_prompt,
+            search_mode=search_mode,
+            rag_top_k=rag_top_k,
         )
     elif llm_mode == "bedrock":
         if manage_model in {"mock", ""} or search_model in {"mock", ""}:
@@ -279,6 +307,8 @@ def run_suite(
             ),
             manage_prompt=manage_prompt,
             search_prompt=search_prompt,
+            search_mode=search_mode,
+            rag_top_k=rag_top_k,
         )
     else:
         raise ValueError(f"unknown llm_mode {llm_mode}")
