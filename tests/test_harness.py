@@ -46,3 +46,12 @@ def test_unknown_tool_lists_allowed(tmp_path):
     assert r["ok"] is False
     assert r["error_code"] == "protocol_error"
     assert "view" in r["error"]
+
+
+def test_create_upserts_when_exists(tmp_path):
+    h = MemoryToolHarness(tmp_path, role="manage")
+    r1 = h.execute("create", {"path": "people/morgan.md", "file_text": "v1\n"})
+    assert r1["ok"] and r1["status"] == "created"
+    r2 = h.execute("create", {"path": "people/morgan.md", "file_text": "v2\n"})
+    assert r2["ok"] and r2["status"] == "updated"
+    assert h.execute("view", {"path": "people/morgan.md"})["content"] == "v2\n"

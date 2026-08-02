@@ -111,14 +111,19 @@ class MemoryToolHarness:
         path = self._path(rel)
         if path is None:
             return {"ok": False, "error_code": "path_error", "error": "path escapes store"}
-        if path.exists():
-            return {"ok": False, "error_code": "path_error", "error": "already exists", "path": rel}
-        path.parent.mkdir(parents=True, exist_ok=True)
         text = args.get("file_text", args.get("content", args.get("text", "")))
         if not isinstance(text, str):
             text = str(text)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        # Upsert: agents often re-create the same path on later chunks.
+        existed = path.exists()
         path.write_text(text, encoding="utf-8", newline="\n")
-        return {"ok": True, "tool": "create", "path": rel}
+        return {
+            "ok": True,
+            "tool": "create",
+            "path": rel,
+            "status": "updated" if existed else "created",
+        }
 
     def _str_replace(self, args: dict[str, Any]) -> dict[str, Any]:
         rel, err = self._require_path(args, "path")
