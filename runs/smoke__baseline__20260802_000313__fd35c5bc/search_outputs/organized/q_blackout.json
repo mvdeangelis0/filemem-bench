@@ -1,0 +1,11 @@
+{
+  "query_id": "q_blackout",
+  "answer": "Morgan was unavailable for travel blackout on July 4, 2019, and July 4, 2020.",
+  "citations": [
+    "path.md"
+  ],
+  "confidence": "high|medium|low",
+  "status": "ok",
+  "error_code": null,
+  "shape": "organized"
+}

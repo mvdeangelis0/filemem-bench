@@ -1,0 +1,11 @@
+{
+  "query_id": "q_roommate",
+  "answer": "I'm sorry, but I cannot access external data or files. Please check if the information is available in your local directory.",
+  "citations": [
+    "path_to_roommates.txt"
+  ],
+  "confidence": "low",
+  "status": "ok",
+  "error_code": null,
+  "shape": "organized"
+}

@@ -1,0 +1,11 @@
+{
+  "query_id": "q_drink_current",
+  "answer": "Morgan's drink preferences are unknown based on the current data available.",
+  "citations": [
+    "path.md"
+  ],
+  "confidence": "low",
+  "status": "ok",
+  "error_code": null,
+  "shape": "verbatim"
+}

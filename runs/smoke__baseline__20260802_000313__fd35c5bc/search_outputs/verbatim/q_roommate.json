@@ -1,0 +1,11 @@
+{
+  "query_id": "q_roommate",
+  "answer": "Morgan's roommate is unknown based on current information.",
+  "citations": [
+    "path/to/roommates.txt"
+  ],
+  "confidence": "low",
+  "status": "ok",
+  "error_code": null,
+  "shape": "verbatim"
+}

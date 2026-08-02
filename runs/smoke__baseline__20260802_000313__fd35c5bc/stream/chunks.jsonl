@@ -1,0 +1,10 @@
+{"id": "chunk_001", "t": 1, "timestamp": "2025-03-01T09:00:00Z", "channel": "note", "title": "About me", "text": "Morgan's profile note.\nPreferred drink: tea.\nLives in Portland with roommate Jordan Lee.\n"}
+{"id": "chunk_002", "t": 2, "timestamp": "2025-03-02T10:00:00Z", "channel": "note", "title": "Emergency contact", "text": "Emergency contact is Ava Morgan (sister), phone 555-0100.\nNever delete this contact.\n"}
+{"id": "chunk_003", "t": 3, "timestamp": "2025-03-05T14:00:00Z", "channel": "note", "title": "Project Atlas", "text": "Active project: Atlas.\nTarget ship date for Atlas v0.2 is March 28.\nCollaborator: Priya Chen.\n"}
+{"id": "chunk_004", "t": 4, "timestamp": "2025-03-08T11:00:00Z", "channel": "message", "title": "Jordan chores", "text": "Jordan Lee handles recycling on Thursdays.\nMorgan handles groceries.\n"}
+{"id": "chunk_005", "t": 5, "timestamp": "2025-03-10T16:30:00Z", "channel": "note", "title": "Drink reminder", "text": "Quick reminder: Morgan still prefers tea in the morning.\n"}
+{"id": "chunk_006", "t": 6, "timestamp": "2025-03-12T15:00:00Z", "channel": "meeting", "title": "Sync with Priya on Atlas", "text": "Meeting notes. Attendees: Morgan, Priya Chen.\nDecision: ship Atlas v0.2 by March 28.\nAction: Priya owns API review.\n"}
+{"id": "chunk_007", "t": 7, "timestamp": "2025-03-15T09:00:00Z", "channel": "email", "title": "Travel blackout", "text": "Morgan unavailable March 20–22 (travel blackout).\nDo not schedule Atlas reviews those days.\n"}
+{"id": "chunk_008", "t": 8, "timestamp": "2025-03-18T08:00:00Z", "channel": "note", "title": "Preference update", "text": "Update: Morgan now prefers coffee, not tea.\nPlease treat coffee as the current preferred drink.\n"}
+{"id": "chunk_009", "t": 9, "timestamp": "2025-03-19T12:00:00Z", "channel": "message", "title": "Priya location", "text": "Priya Chen works remotely from Seattle this month.\n"}
+{"id": "chunk_010", "t": 10, "timestamp": "2025-03-21T17:00:00Z", "channel": "note", "title": "Atlas status", "text": "Atlas API review still owned by Priya.\nMorgan will prepare demo notes after travel.\n"}

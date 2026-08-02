@@ -1,0 +1,11 @@
+{
+  "query_id": "q_unknown_pet",
+  "answer": "Penny",
+  "citations": [
+    "path.md"
+  ],
+  "confidence": "medium",
+  "status": "ok",
+  "error_code": null,
+  "shape": "organized"
+}

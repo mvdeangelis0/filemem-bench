@@ -1,0 +1,11 @@
+{
+  "query_id": "q_unknown_pet",
+  "answer": "There is insufficient information to determine the name of Morgan's dog.",
+  "citations": [
+    "path.md"
+  ],
+  "confidence": "low",
+  "status": "ok",
+  "error_code": null,
+  "shape": "verbatim"
+}

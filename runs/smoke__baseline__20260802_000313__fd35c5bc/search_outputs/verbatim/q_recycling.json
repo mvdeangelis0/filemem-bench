@@ -1,0 +1,11 @@
+{
+  "answer": "Local government agencies, such as the Solid Waste Management Division, typically handle recycling on Thursdays. This includes regular trash collection and any designated special recycling events that may occur on this day.",
+  "citations": [
+    "path.md"
+  ],
+  "confidence": "medium",
+  "status": "ok",
+  "error_code": null,
+  "query_id": "q_recycling",
+  "shape": "verbatim"
+}

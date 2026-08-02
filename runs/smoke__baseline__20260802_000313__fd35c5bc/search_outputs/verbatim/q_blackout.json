@@ -1,0 +1,11 @@
+{
+  "query_id": "q_blackout",
+  "answer": "Morgan was unavailable for travel blackout on [specific dates].",
+  "citations": [
+    "path.md"
+  ],
+  "confidence": "medium",
+  "status": "ok",
+  "error_code": null,
+  "shape": "verbatim"
+}

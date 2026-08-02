@@ -1,0 +1,49 @@
+{
+  "schema_version": "amb_ledger_v1",
+  "run_id": "smoke__baseline__20260801_234904__fd35c5bc",
+  "created_at": "2026-08-01T23:49:04.840936+00:00",
+  "suite": {
+    "id": "smoke",
+    "version": "1.0.0",
+    "path": "C:\\Users\\user\\Documents\\ResearchProjects\\filemem-bench\\suites\\smoke"
+  },
+  "arm_id": "baseline",
+  "protocol": "static",
+  "harness_id": "memory_tool_v1",
+  "shapes": [
+    "organized",
+    "verbatim"
+  ],
+  "seed": 0,
+  "roles": {
+    "manage": {
+      "model_id": "ollama/deepseek-r1:7b-qwen-distill-q4_K_M",
+      "prompt_id": "manage.memory_tool.v1",
+      "prompt_digest": "3ff42f36d8d43f6abddb33b72ccd6b3df40835740586adb35d9a3328db0db5a1",
+      "adapter_id": null,
+      "temperature": 0.0,
+      "max_steps": 30
+    },
+    "search": {
+      "model_id": "ollama/deepseek-r1:7b-qwen-distill-q4_KM",
+      "prompt_id": "search.memory_tool.v1",
+      "prompt_digest": "69470d1725811e551bee9919072724284d159f1bf70be4b2eeee1fa3ffa3e194",
+      "adapter_id": null,
+      "temperature": 0.0,
+      "max_steps": 20
+    }
+  },
+  "check_set_id": "smoke_scorecard_v1",
+  "diagnostics_set_id": "smoke_diagnostics_v1",
+  "agent_visible_chunk_fields": [
+    "id",
+    "t",
+    "timestamp",
+    "channel",
+    "title",
+    "text"
+  ],
+  "llm_mode": "ollama",
+  "ollama_host": "http://127.0.0.1:11434",
+  "eval_held_out": false
+}

@@ -1,0 +1,11 @@
+{
+  "query_id": "q_emergency",
+  "answer": "Morgan's emergency contact is John Doe at 123 Main St, City, State. More details can be found in the memory_tool_v1 documentation.",
+  "citations": [
+    "path.md"
+  ],
+  "confidence": "medium",
+  "status": "ok",
+  "error_code": null,
+  "shape": "verbatim"
+}

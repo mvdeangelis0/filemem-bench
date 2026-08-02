@@ -1,0 +1,3 @@
+{"step": 1, "event": "tool_call", "tool": "create", "arguments": {"id": "chunk_006", "t": 6, "timestamp": "2025-03-12T15:00:00Z", "channel": "meeting", "title": "Sync with Priya on Atlas", "text": "Meeting notes. Attendees: Morgan, Priya Chen.\nDecision: ship Atlas v0.2 by March 28.\nAction: Priya owns API review."}, "observation": {"ok": false, "error_code": "path_error", "error": "already exists"}}
+{"step": 2, "event": "tool_call", "tool": "done", "arguments": {}, "observation": {"ok": true, "tool": "done", "final": {}}}
+{"step": 2, "event": "done", "reason": "agent_done"}

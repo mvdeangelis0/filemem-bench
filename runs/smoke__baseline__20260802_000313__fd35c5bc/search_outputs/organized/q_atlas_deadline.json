@@ -1,0 +1,11 @@
+{
+  "query_id": "q_atlas_deadline",
+  "answer": "Atlas v0.2 has not yet been released and does not have a known scheduled release date as of now.",
+  "citations": [
+    "path.md"
+  ],
+  "confidence": "medium",
+  "status": "ok",
+  "error_code": null,
+  "shape": "organized"
+}

@@ -1,0 +1,449 @@
+{
+  "schema_version": "amb_scorecard_v1",
+  "normalization_id": "norm_v1",
+  "check_set_id": "smoke_scorecard_v1",
+  "suite": {
+    "id": "smoke",
+    "version": "1.0.0"
+  },
+  "run_id": "smoke__baseline__20260802_000313__fd35c5bc",
+  "graded_at": "2026-08-02T00:12:34.160769+00:00",
+  "results": [
+    {
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "matched_form": null,
+        "path_hint": null
+      },
+      "check_id": "mgmt.fact_present.morgan_drink_current",
+      "family": "fact_present",
+      "gate": "scorecard"
+    },
+    {
+      "check_id": "mgmt.update_precedence.morgan_drink",
+      "family": "update_precedence",
+      "gate": "scorecard",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "current_ok": false,
+        "historical_absent": true,
+        "historical_hit": null
+      }
+    },
+    {
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "matched_form": null,
+        "path_hint": null
+      },
+      "check_id": "mgmt.protected_survives.emergency_contact",
+      "family": "protected_survives",
+      "gate": "scorecard"
+    },
+    {
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "matched_form": null,
+        "path_hint": null
+      },
+      "check_id": "mgmt.fact_present.atlas_deadline",
+      "family": "fact_present",
+      "gate": "scorecard"
+    },
+    {
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "matched_form": null,
+        "path_hint": null
+      },
+      "check_id": "mgmt.fact_present.priya_api_review",
+      "family": "fact_present",
+      "gate": "scorecard"
+    },
+    {
+      "check_id": "search.answer_match.q_drink_current.organized",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "organized",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "morgan's drink preferences are not available in the current store information"
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_drink_current.verbatim",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "verbatim",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "morgan's drink preferences are unknown based on the current data available"
+      }
+    },
+    {
+      "check_id": "search.citations_exist.q_drink_current.organized",
+      "family": "citations_exist",
+      "gate": "scorecard",
+      "shape": "organized",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "reason": "missing_file",
+        "path": "path.md"
+      }
+    },
+    {
+      "check_id": "search.citations_exist.q_drink_current.verbatim",
+      "family": "citations_exist",
+      "gate": "scorecard",
+      "shape": "verbatim",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "reason": "missing_file",
+        "path": "path.md"
+      }
+    },
+    {
+      "check_id": "search.citations_support.q_drink_current.organized",
+      "family": "citations_support",
+      "gate": "scorecard",
+      "shape": "organized",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "reason": "deps_failed",
+        "exist": {
+          "reason": "missing_file",
+          "path": "path.md"
+        }
+      }
+    },
+    {
+      "check_id": "search.citations_support.q_drink_current.verbatim",
+      "family": "citations_support",
+      "gate": "scorecard",
+      "shape": "verbatim",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "reason": "deps_failed",
+        "exist": {
+          "reason": "missing_file",
+          "path": "path.md"
+        }
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_emergency.organized",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "organized",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "morgan's emergency contact is john doe at 123 main street, city, state. please refer to the attached document for more details"
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_emergency.verbatim",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "verbatim",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "morgan's emergency contact is john doe at 123 main st, city, state. more details can be found in the memory_tool_v1 documentation"
+      }
+    },
+    {
+      "check_id": "search.citations_exist.q_emergency.organized",
+      "family": "citations_exist",
+      "gate": "scorecard",
+      "shape": "organized",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "reason": "missing_file",
+        "path": "path/to document"
+      }
+    },
+    {
+      "check_id": "search.citations_exist.q_emergency.verbatim",
+      "family": "citations_exist",
+      "gate": "scorecard",
+      "shape": "verbatim",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "reason": "missing_file",
+        "path": "path.md"
+      }
+    },
+    {
+      "check_id": "search.citations_support.q_emergency.organized",
+      "family": "citations_support",
+      "gate": "scorecard",
+      "shape": "organized",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "reason": "deps_failed",
+        "exist": {
+          "reason": "missing_file",
+          "path": "path/to document"
+        }
+      }
+    },
+    {
+      "check_id": "search.citations_support.q_emergency.verbatim",
+      "family": "citations_support",
+      "gate": "scorecard",
+      "shape": "verbatim",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "reason": "deps_failed",
+        "exist": {
+          "reason": "missing_file",
+          "path": "path.md"
+        }
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_atlas_deadline.organized",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "organized",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "atlas v0.2 has not yet been released and does not have a known scheduled release date as of now"
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_atlas_deadline.verbatim",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "verbatim",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "unknown"
+      }
+    },
+    {
+      "check_id": "search.citations_exist.q_atlas_deadline.organized",
+      "family": "citations_exist",
+      "gate": "scorecard",
+      "shape": "organized",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "reason": "missing_file",
+        "path": "path.md"
+      }
+    },
+    {
+      "check_id": "search.citations_exist.q_atlas_deadline.verbatim",
+      "family": "citations_exist",
+      "gate": "scorecard",
+      "shape": "verbatim",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "reason": "empty_citations"
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_priya_action.organized",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "organized",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "the atlas api is developed and owned by deepseek, a chinese company specializing in ai technology. for more details on the atlas api review process or ownership, please refer to official documentation or announcements from deepseek"
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_priya_action.verbatim",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "verbatim",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "unknown"
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_multi_hop_priya_city.organized",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "organized",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "unknown"
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_multi_hop_priya_city.verbatim",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "verbatim",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "unknown"
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_roommate.organized",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "organized",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "i'm sorry, but i cannot access external data or files. please check if the information is available in your local directory"
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_roommate.verbatim",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "verbatim",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "morgan's roommate is unknown based on current information"
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_blackout.organized",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "organized",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "morgan was unavailable for travel blackout on july 4, 2019, and july 4, 2020"
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_blackout.verbatim",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "verbatim",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "morgan was unavailable for travel blackout on [specific dates]"
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_recycling.organized",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "organized",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "local government agencies typically handle recycling on thursdays, often through designated programs or schedules organized by city halls or environmental departments"
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_recycling.verbatim",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "verbatim",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "local government agencies, such as the solid waste management division, typically handle recycling on thursdays. this includes regular trash collection and any designated special recycling events that may occur on this day"
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_unknown_pet.organized",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "organized",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "penny"
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_unknown_pet.verbatim",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "verbatim",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "there is insufficient information to determine the name of morgan's dog"
+      }
+    }
+  ],
+  "summary": {
+    "n_scorecard": 33,
+    "n_passed": 0,
+    "pass_rate": 0.0,
+    "by_family": {
+      "fact_present": {
+        "n": 3,
+        "passed": 0
+      },
+      "update_precedence": {
+        "n": 1,
+        "passed": 0
+      },
+      "protected_survives": {
+        "n": 1,
+        "passed": 0
+      },
+      "answer_match": {
+        "n": 18,
+        "passed": 0
+      },
+      "citations_exist": {
+        "n": 6,
+        "passed": 0
+      },
+      "citations_support": {
+        "n": 4,
+        "passed": 0
+      }
+    },
+    "by_role_proxy": {
+      "management": {
+        "n": 5,
+        "passed": 0
+      },
+      "search": {
+        "n": 28,
+        "passed": 0
+      }
+    },
+    "by_shape": {
+      "organized": {
+        "n": 14,
+        "passed": 0
+      },
+      "verbatim": {
+        "n": 14,
+        "passed": 0
+      }
+    }
+  }
+}

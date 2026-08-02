@@ -1,0 +1,11 @@
+{
+  "query_id": "q_priya_action",
+  "answer": "Unknown",
+  "citations": [
+    "path.md"
+  ],
+  "confidence": "low",
+  "status": "ok",
+  "error_code": null,
+  "shape": "verbatim"
+}

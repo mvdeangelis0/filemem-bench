@@ -1,0 +1,11 @@
+{
+  "query_id": "q_multi_hop_priya_city",
+  "answer": "Unknown",
+  "citations": [
+    "path.md"
+  ],
+  "confidence": "low",
+  "status": "ok",
+  "error_code": null,
+  "shape": "organized"
+}

@@ -1,0 +1,11 @@
+{
+  "query_id": "q_recycling",
+  "answer": "Local government agencies typically handle recycling on Thursdays, often through designated programs or schedules organized by city halls or environmental departments.",
+  "citations": [
+    "path.md"
+  ],
+  "confidence": "high|medium|low",
+  "status": "ok",
+  "error_code": null,
+  "shape": "organized"
+}

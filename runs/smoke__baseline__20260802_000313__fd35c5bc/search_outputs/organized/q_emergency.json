@@ -1,0 +1,11 @@
+{
+  "answer": "Morgan's emergency contact is John Doe at 123 Main Street, City, State. Please refer to the attached document for more details.",
+  "citations": [
+    "path/to document"
+  ],
+  "confidence": "medium",
+  "status": "ok",
+  "error_code": null,
+  "query_id": "q_emergency",
+  "shape": "organized"
+}

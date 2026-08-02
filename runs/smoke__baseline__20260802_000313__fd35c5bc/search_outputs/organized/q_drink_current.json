@@ -1,0 +1,11 @@
+{
+  "query_id": "q_drink_current",
+  "answer": "Morgan's drink preferences are not available in the current store information.",
+  "citations": [
+    "path.md"
+  ],
+  "confidence": "low",
+  "status": "ok",
+  "error_code": null,
+  "shape": "organized"
+}
