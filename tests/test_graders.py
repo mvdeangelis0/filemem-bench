@@ -66,3 +66,61 @@ def test_positive_store_passes_update(tmp_path):
     assert upd["passed"] is True
     prot = next(r for r in scorecard["results"] if r["family"] == "protected_survives")
     assert prot["passed"] is True
+
+
+def test_answer_match_accepts_gold_substring(tmp_path):
+    suite = load_suite(ROOT / "suites" / "smoke")
+    run = _mini_run(tmp_path, ROOT / "suites/smoke/fixtures_positive/good_store")
+    for shape in ("organized", "verbatim"):
+        (run / "search_outputs" / shape / "q_drink_current.json").write_text(
+            json.dumps(
+                {
+                    "query_id": "q_drink_current",
+                    "shape": shape,
+                    "answer": "Morgan prefers to drink coffee.",
+                    "citations": ["people/morgan.md"],
+                    "status": "ok",
+                }
+            ),
+            encoding="utf-8",
+        )
+        (run / "search_outputs" / shape / "q_roommate.json").write_text(
+            json.dumps(
+                {
+                    "query_id": "q_roommate",
+                    "shape": shape,
+                    "answer": "Jordan Lee",
+                    "citations": ["people/morgan.md"],
+                    "status": "ok",
+                }
+            ),
+            encoding="utf-8",
+        )
+    scorecard, _ = grade(run, suite)
+    drink = [
+        r
+        for r in scorecard["results"]
+        if r["family"] == "answer_match" and "drink" in r["check_id"]
+    ]
+    assert drink and all(r["passed"] for r in drink)
+    # Forbidden stale form still fails even inside a sentence.
+    for shape in ("organized", "verbatim"):
+        (run / "search_outputs" / shape / "q_drink_current.json").write_text(
+            json.dumps(
+                {
+                    "query_id": "q_drink_current",
+                    "shape": shape,
+                    "answer": "Morgan prefers to drink tea.",
+                    "citations": ["people/morgan.md"],
+                    "status": "ok",
+                }
+            ),
+            encoding="utf-8",
+        )
+    scorecard, _ = grade(run, suite)
+    drink_bad = [
+        r
+        for r in scorecard["results"]
+        if r["family"] == "answer_match" and "drink" in r["check_id"]
+    ]
+    assert drink_bad and all(not r["passed"] for r in drink_bad)

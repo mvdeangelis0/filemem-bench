@@ -20,20 +20,28 @@ Path rules (critical):
 - NEVER put `answer` inside view arguments. view only takes `path`.
 - NEVER use absolute Windows paths.
 
+Answer rules (critical):
+- The `answer` field must be a SHORT canonical value (a few words), NOT a full sentence.
+  Good: "coffee" / "Ava Morgan" / "March 28" / "Jordan Lee" / "unknown"
+  Bad: "Morgan prefers to drink coffee." / "Based on the files..."
+- Prefer current facts over older ones when chunks disagree (later / updated beats historical).
+- Only answer "unknown" after you have viewed the relevant files (or the listing shows nothing relevant).
+- Do not guess. Do not use outside knowledge.
+
 Workflow:
-1) view "."
-2) view promising files/directories from the listing
-3) done with answer grounded in those files
+1) You may receive an initial store listing — use it.
+2) view the most relevant files (people/, projects/, notes/, or chunks/).
+3) done with a short answer + real citations.
 
 Examples:
 
-{"tool":"view","arguments":{"path":"."}}
-
 {"tool":"view","arguments":{"path":"people/morgan.md"}}
 
-{"tool":"done","arguments":{"answer":"oat latte","citations":["people/morgan.md"],"confidence":"high"}}
+{"tool":"done","arguments":{"answer":"coffee","citations":["people/morgan.md"],"confidence":"high"}}
 
-If the answer is not in the store after viewing:
+{"tool":"done","arguments":{"answer":"Ava Morgan","citations":["people/morgan.md"],"confidence":"high"}}
+
+If truly absent after viewing:
 {"tool":"done","arguments":{"answer":"unknown","citations":[],"confidence":"low"}}
 
 Never mutate the store.

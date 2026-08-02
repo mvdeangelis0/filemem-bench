@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from amb.agents.llm import LLM
-from amb.bookkeeper import validate_citations
+from amb.bookkeeper import Bookkeeper, validate_citations
 from amb.harness.memory_tool import MemoryToolHarness
 
 
@@ -20,6 +20,20 @@ TOOLS = [
 ]
 
 
+def _store_map(store_root: Path) -> dict[str, Any]:
+    """Deterministic listing so search starts with a map of the universe."""
+    bk = Bookkeeper(store_root)
+    top = bk.list_dir(".")
+    children: dict[str, Any] = {}
+    if top.get("ok"):
+        for name in top.get("listing") or []:
+            if isinstance(name, str) and name.endswith("/"):
+                sub = bk.list_dir(name.rstrip("/"))
+                if sub.get("ok"):
+                    children[name] = sub.get("listing") or []
+    return {"root": top, "children": children}
+
+
 def run_search(
     llm: LLM,
     store_root: Path,
@@ -31,11 +45,28 @@ def run_search(
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     store_root = Path(store_root)
     harness = MemoryToolHarness(store_root, role="search")
+    store_map = _store_map(store_root)
     messages = [
         {"role": "system", "content": prompt},
-        {"role": "user", "content": json.dumps({"type": "query", "q": query})},
+        {
+            "role": "user",
+            "content": json.dumps(
+                {
+                    "type": "query",
+                    "q": query,
+                    "store_map": store_map,
+                    "instruction": (
+                        "Use store_map to pick paths, view files, then done with a "
+                        "SHORT canonical answer and real citations."
+                    ),
+                },
+                ensure_ascii=False,
+            ),
+        },
     ]
-    steps: list[dict[str, Any]] = []
+    steps: list[dict[str, Any]] = [
+        {"step": 0, "event": "store_map", "store_map": store_map}
+    ]
     for step in range(1, max_steps + 1):
         if progress:
             _log(f"[amb] search step {step}/{max_steps} → asking model")

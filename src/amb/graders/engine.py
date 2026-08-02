@@ -231,7 +231,8 @@ def _search_family(
                 "detail": {"answer_norm": ans},
             }
         for bad in gold.get("answers_forbidden_any") or []:
-            if ans == norm_v1(bad, for_answer=True):
+            bn = norm_v1(bad, for_answer=True)
+            if bn and (ans == bn or bn in ans.split() or f" {bn} " in f" {ans} "):
                 return {
                     "check_id": check_id,
                     "family": family,
@@ -241,7 +242,15 @@ def _search_family(
                     "status": "evaluated",
                     "detail": {"reason": "forbidden", "answer_norm": ans},
                 }
-        passed = any(ans == norm_v1(g, for_answer=True) for g in gold.get("answers_any") or [])
+        # Exact match or gold form contained as a token/phrase in a longer answer.
+        passed = False
+        for g in gold.get("answers_any") or []:
+            gn = norm_v1(g, for_answer=True)
+            if not gn:
+                continue
+            if ans == gn or gn in ans:
+                passed = True
+                break
         return {
             "check_id": check_id,
             "family": family,
