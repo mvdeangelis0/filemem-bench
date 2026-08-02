@@ -1,0 +1,3 @@
+{"step": 1, "event": "tool_call", "tool": "create", "arguments": {"path": "people/morgan.md", "file_text": "# Morgan\n\n- Preferred drink: tea.\nLives in Portland with roommate Jordan Lee."}, "observation": {"ok": true, "tool": "create", "path": "people/morgan.md", "status": "created"}}
+{"step": 2, "event": "tool_call", "tool": "done", "arguments": {}, "observation": {"ok": true, "tool": "done", "final": {}}}
+{"step": 2, "event": "done", "reason": "agent_done"}

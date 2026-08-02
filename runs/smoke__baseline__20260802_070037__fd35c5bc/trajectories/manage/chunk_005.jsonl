@@ -1,0 +1,4 @@
+{"step": 1, "event": "tool_call", "tool": "str_replace", "arguments": {"path": "people/morgan.md", "old_str": "- Preferred drink: oat latte", "new_str": "- Preferred drink: tea"}, "observation": {"ok": false, "error_code": "path_error", "error": "old_str not found", "path": "people/morgan.md"}}
+{"step": 2, "event": "tool_call", "tool": "insert", "arguments": {"path": "people/morgan.md", "insert_line": 1, "new_str": "Preferred drink: tea\n"}, "observation": {"ok": true, "tool": "insert", "path": "people/morgan.md"}}
+{"step": 3, "event": "tool_call", "tool": "done", "arguments": {}, "observation": {"ok": true, "tool": "done", "final": {}}}
+{"step": 3, "event": "done", "reason": "agent_done"}

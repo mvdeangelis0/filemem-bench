@@ -1,0 +1,11 @@
+{
+  "query_id": "q_blackout",
+  "answer": "Morgan is unavailable during blackout dates from 2023-10-15 to 2023-10-20.",
+  "citations": [
+    "people/morgan.md"
+  ],
+  "confidence": "high",
+  "status": "ok",
+  "error_code": null,
+  "shape": "organized"
+}

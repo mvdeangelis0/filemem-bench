@@ -1,0 +1,350 @@
+{
+  "schema_version": "amb_manifest_v1",
+  "files": [
+    {
+      "path": "config.json",
+      "sha256": "7a01d41414ba271a188a0bb71e356153e9471ee051aa98bf9fef89f0021d85b6",
+      "bytes": 1420
+    },
+    {
+      "path": "diagnostics.json",
+      "sha256": "9be0307677aaedf2692535ad2590935c38e41ea15798feca39068cb3e83c04fb",
+      "bytes": 831
+    },
+    {
+      "path": "prompts/manage.memory_tool.v2.md",
+      "sha256": "eb44bb2498653b3eec9b091c4985c723179ee4dbcef89fb86ffe170b85ace766",
+      "bytes": 2224
+    },
+    {
+      "path": "prompts/search.memory_tool.v2.md",
+      "sha256": "dda41d7706b2300945b4d7bd8f9a44e822e4810b4080a637a94e7e77b71f6f7a",
+      "bytes": 1266
+    },
+    {
+      "path": "REPORT.md",
+      "sha256": "4e597b4853a95f1bac9d14cbb4348be8930325e3edfa4d568a0151a39ebff06d",
+      "bytes": 3120
+    },
+    {
+      "path": "scorecard.json",
+      "sha256": "52606dc704f3b3c33a64af8548f17cd97f5bbd10bc323a86b346a96b48f4263b",
+      "bytes": 11528
+    },
+    {
+      "path": "search_outputs/organized/q_atlas_deadline.json",
+      "sha256": "b3ed92019fcb047a43070157daadd60e3901d2878cf8e83a7ec10fa8c68c4308",
+      "bytes": 262
+    },
+    {
+      "path": "search_outputs/organized/q_blackout.json",
+      "sha256": "c84dcbd77db6a22f54a876abc898a70b4ed87b5a53a9de32b601ec86c40115c1",
+      "bytes": 265
+    },
+    {
+      "path": "search_outputs/organized/q_drink_current.json",
+      "sha256": "f58edc413c8b1074182919f2aa0d5279e2f2a74cb150de3a139859790e265622",
+      "bytes": 205
+    },
+    {
+      "path": "search_outputs/organized/q_emergency.json",
+      "sha256": "63859933b656c1a71ae18c4fbec7927e500cdd4503546b72c25bda725c2c74be",
+      "bytes": 277
+    },
+    {
+      "path": "search_outputs/organized/q_multi_hop_priya_city.json",
+      "sha256": "ec8a63fdb89495455f28a77c17fa4c314c565cd8cf99ceecd0bc6adb4d44c486",
+      "bytes": 181
+    },
+    {
+      "path": "search_outputs/organized/q_priya_action.json",
+      "sha256": "db5f10f416fe5e27ea35d8f18b38d89c72ec588de43c55f8a2189256e5d53886",
+      "bytes": 176
+    },
+    {
+      "path": "search_outputs/organized/q_recycling.json",
+      "sha256": "4680993bc0976fc220675cc723a4c7678505b907a7e6e896449172d1faae0360",
+      "bytes": 168
+    },
+    {
+      "path": "search_outputs/organized/q_roommate.json",
+      "sha256": "a76e0ff2a19523008eaf0daef1905c0056a40005a07a5d7e8fff39f9d3eb1cb3",
+      "bytes": 201
+    },
+    {
+      "path": "search_outputs/organized/q_unknown_pet.json",
+      "sha256": "b8db2dc9be9f8c95643c2056b8bddd3a9cc8ba40eb4f2ab1c746b7fdf2e65025",
+      "bytes": 175
+    },
+    {
+      "path": "search_outputs/verbatim/q_atlas_deadline.json",
+      "sha256": "cfe75f2fe6fa499a249f5068d8b0e4f3e54998a497d3a87e701989ce65384095",
+      "bytes": 174
+    },
+    {
+      "path": "search_outputs/verbatim/q_blackout.json",
+      "sha256": "be61ca912129bf93ad963968d81bcf8def4aa5a7b6fc652aa72ccc77e6936e7d",
+      "bytes": 166
+    },
+    {
+      "path": "search_outputs/verbatim/q_drink_current.json",
+      "sha256": "653c142b5dac6a1724a6f8566b76d0ef322125cf8ecc40e334376a2fed8d0ec5",
+      "bytes": 176
+    },
+    {
+      "path": "search_outputs/verbatim/q_emergency.json",
+      "sha256": "447d933943f1240066d32b9a760ec9b5bd2d499d496cd672353a3f0f3f7f6ec9",
+      "bytes": 169
+    },
+    {
+      "path": "search_outputs/verbatim/q_multi_hop_priya_city.json",
+      "sha256": "83f45f1cdfc5ec0a2c509153257bb6e6ee624d1bd1162ebeb8733d8fb6e0bb4c",
+      "bytes": 180
+    },
+    {
+      "path": "search_outputs/verbatim/q_priya_action.json",
+      "sha256": "f17fa987ac9e612ac202ea0859baf6c8e3e04e6810921d7ee5d4673008eff7d6",
+      "bytes": 165
+    },
+    {
+      "path": "search_outputs/verbatim/q_recycling.json",
+      "sha256": "3d4e4c263766c3f8dabcac77980ff25b6115b54c9253039d2050ada8b91031fd",
+      "bytes": 169
+    },
+    {
+      "path": "search_outputs/verbatim/q_roommate.json",
+      "sha256": "fd9249ce5f90656eeecc076dff788b619ba1e157df21b06d089eeaf8c7e928f7",
+      "bytes": 168
+    },
+    {
+      "path": "search_outputs/verbatim/q_unknown_pet.json",
+      "sha256": "d81622ebc3f41eabd292393a596c104fe8a4b02cc2068aa302d97ef3775e4b7b",
+      "bytes": 171
+    },
+    {
+      "path": "stores/organized/notes/emergency_contact.md",
+      "sha256": "613664477828c7a2b547d6d3132fc547c2e53f8ba7842e718da9f8e9f69ccff8",
+      "bytes": 84
+    },
+    {
+      "path": "stores/organized/notes/meetings.md",
+      "sha256": "946f82911bae6bdb777893df2df4a04fa68ab9efc4f1a0e00fa5045b5d5e5655",
+      "bytes": 154
+    },
+    {
+      "path": "stores/organized/people/jordan.md",
+      "sha256": "9cbb8955687b57e352dcc8bf8ff587248322e8674392f47143321d63e00c259e",
+      "bytes": 68
+    },
+    {
+      "path": "stores/organized/people/morgan.md",
+      "sha256": "ecf33e6876d48577a89c9ec69682ff2399b58041cf6191b778d880849b644775",
+      "bytes": 35
+    },
+    {
+      "path": "stores/organized/people/priya.chen.md",
+      "sha256": "b357b73d8ae6ccdf72f07036e32c37505a471f324d7afcb68f31ea48a76e81da",
+      "bytes": 50
+    },
+    {
+      "path": "stores/organized/projects/atlas.md",
+      "sha256": "f5ca1ab48d0b0ae69d0021356972eadc3adebfeda9dd4e0e11eaa0df83a9bbe2",
+      "bytes": 167
+    },
+    {
+      "path": "stores/verbatim/chunks/chunk_001.md",
+      "sha256": "33b11f0749792cb9e8b021806e8bff6f4a3339f01cf6591fa889e7be156eb8cb",
+      "bytes": 188
+    },
+    {
+      "path": "stores/verbatim/chunks/chunk_002.md",
+      "sha256": "479a53cf38e94552bf0b081a610d833a17b0e47f3d69213b9ed412e3401eeb15",
+      "bytes": 192
+    },
+    {
+      "path": "stores/verbatim/chunks/chunk_003.md",
+      "sha256": "69a4027a87233c58a2fffed39204425ea12d66b4b8327cb40d51960fe22eb7db",
+      "bytes": 198
+    },
+    {
+      "path": "stores/verbatim/chunks/chunk_004.md",
+      "sha256": "a93bae33c33f62c7b58c6bf52be200f25315bc615786c575fa5fbbf2effcb71b",
+      "bytes": 175
+    },
+    {
+      "path": "stores/verbatim/chunks/chunk_005.md",
+      "sha256": "84cd2819b73e2181e804850ea31a591fb0e512bca187fa2d9fda4b2dc9a435a8",
+      "bytes": 160
+    },
+    {
+      "path": "stores/verbatim/chunks/chunk_006.md",
+      "sha256": "6b7f9e3ad45bec33babc0c6fd7dd29c6746eef3dfa156bd6a85d6a6ef39dda91",
+      "bytes": 234
+    },
+    {
+      "path": "stores/verbatim/chunks/chunk_007.md",
+      "sha256": "c3cfedfc87d3cbba85f6759ebb375c57e408a6598f19ac575a999ca784f095b6",
+      "bytes": 200
+    },
+    {
+      "path": "stores/verbatim/chunks/chunk_008.md",
+      "sha256": "2801047bbc2084baa4601a15bdb05918f1dd8ba1bcb90f9700104f783f0949f0",
+      "bytes": 203
+    },
+    {
+      "path": "stores/verbatim/chunks/chunk_009.md",
+      "sha256": "65d3df565f719f17dd6a6e0b4401161a455190b5c5953666bcff9d6cc765dc33",
+      "bytes": 157
+    },
+    {
+      "path": "stores/verbatim/chunks/chunk_010.md",
+      "sha256": "09f1c9ab02d93815fe24ca0e544791394124d52a216408e1e2a663b33bbd6a0f",
+      "bytes": 187
+    },
+    {
+      "path": "stream/chunks.jsonl",
+      "sha256": "f5531188cc1b789fe774b6d26ede9349f30a57ccd18fad6351abde08d1d636ca",
+      "bytes": 2114
+    },
+    {
+      "path": "trajectories/manage/chunk_001.jsonl",
+      "sha256": "3c2758466645ebc6f734046ef42670dad424888bab8352527c7ccc5d900ff4b7",
+      "bytes": 738
+    },
+    {
+      "path": "trajectories/manage/chunk_002.jsonl",
+      "sha256": "c91e2ed5e0f89f4c98dffa4a43bf673896f2ae030a8dca53211d887d9ff2250e",
+      "bytes": 494
+    },
+    {
+      "path": "trajectories/manage/chunk_003.jsonl",
+      "sha256": "25ade8e3973179ceecf6480e00bbec4787f2f787924b03d767824b6f381430d1",
+      "bytes": 918
+    },
+    {
+      "path": "trajectories/manage/chunk_004.jsonl",
+      "sha256": "74fed74ac6b514e42009696a1327addf6bc164c1c30048a855788f6bf6116919",
+      "bytes": 1079
+    },
+    {
+      "path": "trajectories/manage/chunk_005.jsonl",
+      "sha256": "f2a7215b5b19631140dc955c90c963b3b4c3e6752175cf017621195443ccd011",
+      "bytes": 734
+    },
+    {
+      "path": "trajectories/manage/chunk_006.jsonl",
+      "sha256": "eba25e397e1cec42fdda78c1d053e8136d0ea599d8f77f3da1a6b7b4f1b71c39",
+      "bytes": 1330
+    },
+    {
+      "path": "trajectories/manage/chunk_007.jsonl",
+      "sha256": "1b53e6e71219ca107ab24ff920d45e3e39f80e8bd03fa5a6c422df1b01723de3",
+      "bytes": 884
+    },
+    {
+      "path": "trajectories/manage/chunk_008.jsonl",
+      "sha256": "377953be82e5ff301b73cd03a418b6d7b077046d0dfbe98f44adf19def44c66d",
+      "bytes": 1401
+    },
+    {
+      "path": "trajectories/manage/chunk_009.jsonl",
+      "sha256": "8a849b96213d54d026f5b7989fa7688ead694fb9c894be52b9fb59013003688a",
+      "bytes": 447
+    },
+    {
+      "path": "trajectories/manage/chunk_010.jsonl",
+      "sha256": "3b040ed312a65f7a549e2439d170bcd7d7703c4c68eb62017c63f81495b34b65",
+      "bytes": 765
+    },
+    {
+      "path": "trajectories/search/organized/q_atlas_deadline.jsonl",
+      "sha256": "7d6cc49c4e9161063759bc6d02b62bf50b2eab29dfb4e55ec220fcdf42401f1f",
+      "bytes": 2532
+    },
+    {
+      "path": "trajectories/search/organized/q_blackout.jsonl",
+      "sha256": "ce8a426bdbb2e132958f788afa644d57cc7d39d8b519caa3962fd088d32b9671",
+      "bytes": 596
+    },
+    {
+      "path": "trajectories/search/organized/q_drink_current.jsonl",
+      "sha256": "752af766cb12627686d3cccdb81f34f5748032d2828a52e4e740d64b67a9e059",
+      "bytes": 308
+    },
+    {
+      "path": "trajectories/search/organized/q_emergency.jsonl",
+      "sha256": "3b5ab565b29118dbedc7e52b35d37a9231cdff0a0ec3acdcd7fac0f4ad40e4b3",
+      "bytes": 641
+    },
+    {
+      "path": "trajectories/search/organized/q_multi_hop_priya_city.jsonl",
+      "sha256": "194fab33d2399009c9cb3fb46ec57466ae6f8f85b23da5f112361a874b0c71fb",
+      "bytes": 121
+    },
+    {
+      "path": "trajectories/search/organized/q_priya_action.jsonl",
+      "sha256": "113527cd045a353d701f659f6db5fea0cd5b652d6700c6a10bee39f578821a20",
+      "bytes": 450
+    },
+    {
+      "path": "trajectories/search/organized/q_recycling.jsonl",
+      "sha256": "e87a1ffd73911cdece0c515a2f4299d8085709174036c90a4d99fdb646861a5b",
+      "bytes": 3924
+    },
+    {
+      "path": "trajectories/search/organized/q_roommate.jsonl",
+      "sha256": "da2b7f6e10c0a8279b4313f973264c4130eda2025565aedc748a4afc8bb2c3f5",
+      "bytes": 532
+    },
+    {
+      "path": "trajectories/search/organized/q_unknown_pet.jsonl",
+      "sha256": "7029c2f1fb9e7a68f25251dde0568fc4f08dbee38456646df56471d4f86c8ed9",
+      "bytes": 3041
+    },
+    {
+      "path": "trajectories/search/verbatim/q_atlas_deadline.jsonl",
+      "sha256": "194fab33d2399009c9cb3fb46ec57466ae6f8f85b23da5f112361a874b0c71fb",
+      "bytes": 121
+    },
+    {
+      "path": "trajectories/search/verbatim/q_blackout.jsonl",
+      "sha256": "81299527e295c0634f47f0ce1656e76d4666fa798247bc2f6da6d15962b4ed3a",
+      "bytes": 4087
+    },
+    {
+      "path": "trajectories/search/verbatim/q_drink_current.jsonl",
+      "sha256": "4e5dde50d846e47b36ce1d4d78bba1dff6023d4d55e4664b94196c56b332f064",
+      "bytes": 243
+    },
+    {
+      "path": "trajectories/search/verbatim/q_emergency.jsonl",
+      "sha256": "b1ded639d1d9dd9e35837dbd81f553cdee4d5e8f055dcd9e1a3700c998ec894d",
+      "bytes": 282
+    },
+    {
+      "path": "trajectories/search/verbatim/q_multi_hop_priya_city.jsonl",
+      "sha256": "194fab33d2399009c9cb3fb46ec57466ae6f8f85b23da5f112361a874b0c71fb",
+      "bytes": 121
+    },
+    {
+      "path": "trajectories/search/verbatim/q_priya_action.jsonl",
+      "sha256": "ad49ab68c425215dbaa52bdfc8f6e35bdfaf3fd0fe8d5f149d805fca49812c72",
+      "bytes": 1897
+    },
+    {
+      "path": "trajectories/search/verbatim/q_recycling.jsonl",
+      "sha256": "194fab33d2399009c9cb3fb46ec57466ae6f8f85b23da5f112361a874b0c71fb",
+      "bytes": 121
+    },
+    {
+      "path": "trajectories/search/verbatim/q_roommate.jsonl",
+      "sha256": "194fab33d2399009c9cb3fb46ec57466ae6f8f85b23da5f112361a874b0c71fb",
+      "bytes": 121
+    },
+    {
+      "path": "trajectories/search/verbatim/q_unknown_pet.jsonl",
+      "sha256": "194fab33d2399009c9cb3fb46ec57466ae6f8f85b23da5f112361a874b0c71fb",
+      "bytes": 121
+    }
+  ]
+}

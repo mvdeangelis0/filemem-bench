@@ -1,0 +1,11 @@
+{
+  "answer": "oat latte",
+  "citations": [
+    "people/morgan.md"
+  ],
+  "confidence": "high",
+  "status": "ok",
+  "error_code": null,
+  "query_id": "q_drink_current",
+  "shape": "organized"
+}

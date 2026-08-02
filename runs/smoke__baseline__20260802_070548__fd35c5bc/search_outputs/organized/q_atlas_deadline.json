@@ -1,0 +1,11 @@
+{
+  "query_id": "q_atlas_deadline",
+  "answer": "Atlas v0.2's release date is unknown based on current information.",
+  "citations": [
+    "people/morgan.md"
+  ],
+  "confidence": "low",
+  "status": "ok",
+  "error_code": null,
+  "shape": "organized"
+}

@@ -1,0 +1,3 @@
+{"step": 1, "event": "tool_call", "tool": "create", "arguments": {"path": "notes/emergency_contact.md", "file_text": "Emergency contact is Ava Morgan (sister), phone 555-0100.\nNever delete this contact."}, "observation": {"ok": true, "tool": "create", "path": "notes/emergency_contact.md", "status": "created"}}
+{"step": 2, "event": "tool_call", "tool": "done", "arguments": {}, "observation": {"ok": true, "tool": "done", "final": {}}}
+{"step": 2, "event": "done", "reason": "agent_done"}

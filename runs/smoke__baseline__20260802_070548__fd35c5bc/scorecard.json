@@ -1,0 +1,450 @@
+{
+  "schema_version": "amb_scorecard_v1",
+  "normalization_id": "norm_v1",
+  "check_set_id": "smoke_scorecard_v1",
+  "suite": {
+    "id": "smoke",
+    "version": "1.0.0"
+  },
+  "run_id": "smoke__baseline__20260802_070548__fd35c5bc",
+  "graded_at": "2026-08-02T07:16:16.680576+00:00",
+  "results": [
+    {
+      "passed": true,
+      "status": "evaluated",
+      "detail": {
+        "matched_form": "coffee",
+        "path_hint": "people/morgan.md"
+      },
+      "check_id": "mgmt.fact_present.morgan_drink_current",
+      "family": "fact_present",
+      "gate": "scorecard"
+    },
+    {
+      "check_id": "mgmt.update_precedence.morgan_drink",
+      "family": "update_precedence",
+      "gate": "scorecard",
+      "passed": true,
+      "status": "evaluated",
+      "detail": {
+        "current_ok": true,
+        "historical_absent": true,
+        "historical_hit": null
+      }
+    },
+    {
+      "passed": true,
+      "status": "evaluated",
+      "detail": {
+        "matched_form": "ava morgan",
+        "path_hint": "notes/emergency_contact.md"
+      },
+      "check_id": "mgmt.protected_survives.emergency_contact",
+      "family": "protected_survives",
+      "gate": "scorecard"
+    },
+    {
+      "passed": true,
+      "status": "evaluated",
+      "detail": {
+        "matched_form": "march 28",
+        "path_hint": "notes/meetings.md"
+      },
+      "check_id": "mgmt.fact_present.atlas_deadline",
+      "family": "fact_present",
+      "gate": "scorecard"
+    },
+    {
+      "passed": true,
+      "status": "evaluated",
+      "detail": {
+        "matched_form": "api review",
+        "path_hint": "notes/meetings.md"
+      },
+      "check_id": "mgmt.fact_present.priya_api_review",
+      "family": "fact_present",
+      "gate": "scorecard"
+    },
+    {
+      "check_id": "search.answer_match.q_drink_current.organized",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "organized",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "oat latte"
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_drink_current.verbatim",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "verbatim",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "unknown"
+      }
+    },
+    {
+      "check_id": "search.citations_exist.q_drink_current.organized",
+      "family": "citations_exist",
+      "gate": "scorecard",
+      "shape": "organized",
+      "passed": true,
+      "status": "evaluated",
+      "detail": {
+        "citations": [
+          "people/morgan.md"
+        ]
+      }
+    },
+    {
+      "check_id": "search.citations_exist.q_drink_current.verbatim",
+      "family": "citations_exist",
+      "gate": "scorecard",
+      "shape": "verbatim",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "reason": "empty_citations"
+      }
+    },
+    {
+      "check_id": "search.citations_support.q_drink_current.organized",
+      "family": "citations_support",
+      "gate": "scorecard",
+      "shape": "organized",
+      "passed": true,
+      "status": "evaluated",
+      "detail": {
+        "supporting_count": 1,
+        "min_supporting": 1,
+        "citations": [
+          "people/morgan.md"
+        ]
+      }
+    },
+    {
+      "check_id": "search.citations_support.q_drink_current.verbatim",
+      "family": "citations_support",
+      "gate": "scorecard",
+      "shape": "verbatim",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "reason": "deps_failed",
+        "exist": {
+          "reason": "empty_citations"
+        }
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_emergency.organized",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "organized",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "morgan's emergency contact information may not be present in the provided document"
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_emergency.verbatim",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "verbatim",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "unknown"
+      }
+    },
+    {
+      "check_id": "search.citations_exist.q_emergency.organized",
+      "family": "citations_exist",
+      "gate": "scorecard",
+      "shape": "organized",
+      "passed": true,
+      "status": "evaluated",
+      "detail": {
+        "citations": [
+          "people/morgan.md"
+        ]
+      }
+    },
+    {
+      "check_id": "search.citations_exist.q_emergency.verbatim",
+      "family": "citations_exist",
+      "gate": "scorecard",
+      "shape": "verbatim",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "reason": "empty_citations"
+      }
+    },
+    {
+      "check_id": "search.citations_support.q_emergency.organized",
+      "family": "citations_support",
+      "gate": "scorecard",
+      "shape": "organized",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "supporting_count": 0,
+        "min_supporting": 1,
+        "citations": [
+          "people/morgan.md"
+        ]
+      }
+    },
+    {
+      "check_id": "search.citations_support.q_emergency.verbatim",
+      "family": "citations_support",
+      "gate": "scorecard",
+      "shape": "verbatim",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "reason": "deps_failed",
+        "exist": {
+          "reason": "empty_citations"
+        }
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_atlas_deadline.organized",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "organized",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "atlas v0.2's release date is unknown based on current information"
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_atlas_deadline.verbatim",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "verbatim",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "unknown"
+      }
+    },
+    {
+      "check_id": "search.citations_exist.q_atlas_deadline.organized",
+      "family": "citations_exist",
+      "gate": "scorecard",
+      "shape": "organized",
+      "passed": true,
+      "status": "evaluated",
+      "detail": {
+        "citations": [
+          "people/morgan.md"
+        ]
+      }
+    },
+    {
+      "check_id": "search.citations_exist.q_atlas_deadline.verbatim",
+      "family": "citations_exist",
+      "gate": "scorecard",
+      "shape": "verbatim",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "reason": "empty_citations"
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_priya_action.organized",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "organized",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "unknown"
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_priya_action.verbatim",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "verbatim",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": ""
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_multi_hop_priya_city.organized",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "organized",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "unknown"
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_multi_hop_priya_city.verbatim",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "verbatim",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "unknown"
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_roommate.organized",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "organized",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "priya chen"
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_roommate.verbatim",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "verbatim",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "unknown"
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_blackout.organized",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "organized",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "morgan is unavailable during blackout dates from 2023-10-15 to 2023-10-20"
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_blackout.verbatim",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "verbatim",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "reason": "no_answer",
+        "error_code": null
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_recycling.organized",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "organized",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "reason": "no_answer",
+        "error_code": null
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_recycling.verbatim",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "verbatim",
+      "passed": false,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "unknown"
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_unknown_pet.organized",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "organized",
+      "passed": true,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "unknown"
+      }
+    },
+    {
+      "check_id": "search.answer_match.q_unknown_pet.verbatim",
+      "family": "answer_match",
+      "gate": "scorecard",
+      "shape": "verbatim",
+      "passed": true,
+      "status": "evaluated",
+      "detail": {
+        "answer_norm": "unknown"
+      }
+    }
+  ],
+  "summary": {
+    "n_scorecard": 33,
+    "n_passed": 11,
+    "pass_rate": 0.3333333333333333,
+    "by_family": {
+      "fact_present": {
+        "n": 3,
+        "passed": 3
+      },
+      "update_precedence": {
+        "n": 1,
+        "passed": 1
+      },
+      "protected_survives": {
+        "n": 1,
+        "passed": 1
+      },
+      "answer_match": {
+        "n": 18,
+        "passed": 2
+      },
+      "citations_exist": {
+        "n": 6,
+        "passed": 3
+      },
+      "citations_support": {
+        "n": 4,
+        "passed": 1
+      }
+    },
+    "by_role_proxy": {
+      "management": {
+        "n": 5,
+        "passed": 5
+      },
+      "search": {
+        "n": 28,
+        "passed": 6
+      }
+    },
+    "by_shape": {
+      "organized": {
+        "n": 14,
+        "passed": 5
+      },
+      "verbatim": {
+        "n": 14,
+        "passed": 1
+      }
+    }
+  }
+}

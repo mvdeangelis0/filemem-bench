@@ -1,0 +1,4 @@
+{"step": 1, "event": "tool_call", "tool": "create", "arguments": {"path": "people/morgan.md", "file_text": "Morgan unavailable March 20–22 (travel blackout).\nDo not schedule Atlas reviews those days."}, "observation": {"ok": true, "tool": "create", "path": "people/morgan.md", "status": "updated"}}
+{"step": 2, "event": "tool_call", "tool": "str_replace", "arguments": {"path": "people/morgan.md", "old_str": "Morgan unavailable March 20–22 (travel blackout).\nDo not schedule Atlas reviews those days.", "new_str": "Morgan unavailable March 20–22 (travel blackout).\nDo not schedule Atlas reviews those days.\n"}, "observation": {"ok": true, "tool": "str_replace", "path": "people/morgan.md"}}
+{"step": 3, "event": "tool_call", "tool": "done", "arguments": {}, "observation": {"ok": true, "tool": "done", "final": {}}}
+{"step": 3, "event": "done", "reason": "agent_done"}

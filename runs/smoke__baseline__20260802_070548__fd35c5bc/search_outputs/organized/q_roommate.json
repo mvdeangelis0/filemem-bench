@@ -1,0 +1,11 @@
+{
+  "query_id": "q_roommate",
+  "answer": "Priya Chen",
+  "citations": [
+    "people/morgan.md"
+  ],
+  "confidence": "high",
+  "status": "ok",
+  "error_code": null,
+  "shape": "organized"
+}

@@ -1,0 +1,4 @@
+{"step": 1, "event": "tool_call", "tool": "create", "arguments": {"path": "emergency/ava_morgan.md", "file_text": "Emergency contact is Ava Morgan (sister), phone 555-0100. Never delete this contact."}, "observation": {"ok": true, "tool": "create", "path": "emergency/ava_morgan.md"}}
+{"step": 2, "event": "tool_call", "tool": "str_replace", "arguments": {"path": "emergency/ava_morgan.md", "old_str": "Emergency contact is Ava Morgan (sister), phone 555-0100. Never delete this contact.", "new_str": "The emergency contact is Ava Morgan (sister), phone number 555-0100. Never delete this information."}, "observation": {"ok": true, "tool": "str_replace", "path": "emergency/ava_morgan.md"}}
+{"step": 3, "event": "tool_call", "tool": "done", "arguments": {}, "observation": {"ok": true, "tool": "done", "final": {}}}
+{"step": 3, "event": "done", "reason": "agent_done"}

@@ -1,0 +1,11 @@
+{
+  "query_id": "q_emergency",
+  "answer": "Morgan's emergency contact information may not be present in the provided document.",
+  "citations": [
+    "people/morgan.md"
+  ],
+  "confidence": "medium",
+  "status": "ok",
+  "error_code": null,
+  "shape": "organized"
+}

@@ -1,0 +1,5 @@
+{"step": 1, "event": "tool_call", "tool": "create", "arguments": {"path": "projects/atlas.md", "file_text": "# Project Atlas\n\n- Active project: Atlas.\n- Target ship date for Atlas v0.2 is March 28.\n- Collaborator: Priya Chen."}, "observation": {"ok": true, "tool": "create", "path": "projects/atlas.md"}}
+{"step": 2, "event": "tool_call", "tool": "create", "arguments": {"path": "projects/atlas.md", "file_text": "# Project Atlas\n\n- Active project: Atlas.\n- Target ship date for Atlas v0.2 is March 28.\n- Collaborator: Priya Chen."}, "observation": {"ok": false, "error_code": "path_error", "error": "already exists", "path": "projects/atlas.md"}}
+{"step": 3, "event": "tool_call", "tool": "rename", "arguments": {"old_path": "projects/atlas.md", "new_path": "something_else.md"}, "observation": {"ok": true, "tool": "rename", "old_path": "projects/atlas.md", "new_path": "something_else.md"}}
+{"step": 4, "event": "tool_call", "tool": "done", "arguments": {}, "observation": {"ok": true, "tool": "done", "final": {}}}
+{"step": 4, "event": "done", "reason": "agent_done"}

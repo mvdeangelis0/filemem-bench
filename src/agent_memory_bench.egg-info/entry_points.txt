@@ -1,0 +1,2 @@
+[console_scripts]
+amb = amb.cli:main
