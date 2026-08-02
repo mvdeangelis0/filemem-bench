@@ -67,18 +67,12 @@ def run_suite(
             f"chunks={len(suite.chunks)} queries={len(suite.queries)} llm={llm_mode}"
         )
 
-    manage_prompt = (REPO_ROOT / "prompts" / "manage" / "memory_tool.v1.md").read_text(
-        encoding="utf-8"
-    )
-    search_prompt = (REPO_ROOT / "prompts" / "search" / "memory_tool.v1.md").read_text(
-        encoding="utf-8"
-    )
-    manage_digest = writer.copy_prompt(
-        "manage.memory_tool.v1", REPO_ROOT / "prompts" / "manage" / "memory_tool.v1.md"
-    )
-    search_digest = writer.copy_prompt(
-        "search.memory_tool.v1", REPO_ROOT / "prompts" / "search" / "memory_tool.v1.md"
-    )
+    manage_prompt_path = REPO_ROOT / "prompts" / "manage" / "memory_tool.v2.md"
+    search_prompt_path = REPO_ROOT / "prompts" / "search" / "memory_tool.v2.md"
+    manage_prompt = manage_prompt_path.read_text(encoding="utf-8")
+    search_prompt = search_prompt_path.read_text(encoding="utf-8")
+    manage_digest = writer.copy_prompt("manage.memory_tool.v2", manage_prompt_path)
+    search_digest = writer.copy_prompt("search.memory_tool.v2", search_prompt_path)
 
     host = ollama_host or os.environ.get("OLLAMA_HOST") or "http://127.0.0.1:11434"
     if llm_mode == "mock":
@@ -105,7 +99,7 @@ def run_suite(
         "roles": {
             "manage": {
                 "model_id": manage_model_id,
-                "prompt_id": "manage.memory_tool.v1",
+                "prompt_id": "manage.memory_tool.v2",
                 "prompt_digest": manage_digest,
                 "adapter_id": None,
                 "temperature": 0.0,
@@ -113,7 +107,7 @@ def run_suite(
             },
             "search": {
                 "model_id": search_model_id,
-                "prompt_id": "search.memory_tool.v1",
+                "prompt_id": "search.memory_tool.v2",
                 "prompt_digest": search_digest,
                 "adapter_id": None,
                 "temperature": 0.0,

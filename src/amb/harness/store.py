@@ -13,16 +13,43 @@ def ensure_store(root: Path) -> Path:
     return root
 
 
+def canonicalize_rel_path(rel: object) -> tuple[str | None, str | None]:
+    """Return (normalized_relative_path, error_message).
+
+    Rejects absolute Windows/Unix paths. Store paths must be relative with `/`.
+    """
+    if rel is None:
+        return None, "missing path (use a relative path like people/morgan.md)"
+    if not isinstance(rel, str):
+        rel = str(rel)
+    raw = rel.strip()
+    if not raw:
+        return None, "empty path (use a relative path like people/morgan.md)"
+    norm = raw.replace("\\", "/")
+    # Windows drive / UNC
+    if len(norm) >= 2 and norm[1] == ":":
+        return None, "absolute paths forbidden; use relative paths like people/morgan.md"
+    if norm.startswith("//"):
+        return None, "absolute paths forbidden; use relative paths like people/morgan.md"
+    # Unix absolute
+    if norm.startswith("/"):
+        return None, "absolute paths forbidden; use relative paths like people/morgan.md"
+    norm = norm.lstrip("./")
+    if norm in ("", "."):
+        return ".", None
+    if ".." in Path(norm).parts:
+        return None, "path escapes store"
+    return norm, None
+
+
 def resolve_in_store(root: Path, rel: str) -> Path | None:
     """Return resolved path if inside root; None if escape attempt."""
-    if rel is None:
+    canon, err = canonicalize_rel_path(rel)
+    if canon is None or err:
         return None
-    rel = rel.replace("\\", "/").lstrip("/")
-    if rel in ("", "."):
+    if canon == ".":
         return root.resolve()
-    if ".." in Path(rel).parts:
-        return None
-    candidate = (root / rel).resolve()
+    candidate = (root / canon).resolve()
     try:
         candidate.relative_to(root.resolve())
     except ValueError:
@@ -31,5 +58,7 @@ def resolve_in_store(root: Path, rel: str) -> Path | None:
 
 
 def is_write_reserved(rel: str) -> bool:
-    norm = rel.replace("\\", "/").lstrip("/")
-    return any(norm == p.rstrip("/") or norm.startswith(p) for p in RESERVED_WRITE_PREFIXES)
+    canon, err = canonicalize_rel_path(rel)
+    if canon is None or err or canon == ".":
+        return False
+    return any(canon == p.rstrip("/") or canon.startswith(p) for p in RESERVED_WRITE_PREFIXES)

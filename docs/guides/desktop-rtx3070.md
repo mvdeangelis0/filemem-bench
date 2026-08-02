@@ -44,7 +44,7 @@ amb run --suite suites/smoke --llm ollama \
   --out runs -v
 ```
 
-You should see `[amb] probing Ollama…`, then `manage 1/N`, `ollama chat #…` lines. If probe hangs or fails, Ollama isn’t reachable. GPU near-idle with no chat lines usually means the request never started (wrong host/model) or the model is loading on CPU.
+You should see `[amb] probing Ollama…`, then `manage 1/N`, `ollama chat #…` lines. Trust `nvidia-smi` for GPU util. Prompts are `memory_tool.v2` (relative-path few-shots). After a run, check `stores/organized/` is non-empty.
 
 Expect lower pass rates than mock (mock is scripted oracle). Inspect `runs/<id>/REPORT.md` and failed checks.
 
