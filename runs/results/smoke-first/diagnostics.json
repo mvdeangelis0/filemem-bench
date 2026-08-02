@@ -1,0 +1,36 @@
+{
+  "schema_version": "amb_scorecard_v1",
+  "normalization_id": "norm_v1",
+  "check_set_id": "smoke_diagnostics_v1",
+  "suite": {
+    "id": "smoke",
+    "version": "1.0.0"
+  },
+  "run_id": "smoke__baseline__20260802_000313__fd35c5bc",
+  "graded_at": "2026-08-02T00:12:34.160784+00:00",
+  "results": [
+    {
+      "check_id": "diag.file_count.organized",
+      "family": "store_file_count",
+      "gate": "diagnostic",
+      "passed": true,
+      "status": "evaluated",
+      "detail": {
+        "file_count": 0
+      }
+    },
+    {
+      "check_id": "diag.max_depth.organized",
+      "family": "store_max_depth",
+      "gate": "diagnostic",
+      "passed": true,
+      "status": "evaluated",
+      "detail": {
+        "max_depth": 0
+      }
+    }
+  ],
+  "summary": {
+    "n_diagnostic": 2
+  }
+}
