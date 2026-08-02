@@ -52,7 +52,16 @@ class MemoryToolHarness:
                     f"unknown tool {tool!r}; allowed: {', '.join(ALLOWED_TOOLS)}"
                 ),
             }
-        return handlers[tool](arguments)
+        try:
+            return handlers[tool](arguments)
+        except OSError as e:
+            # Windows often raises Errno 22 for illegal names; never crash the run.
+            return {
+                "ok": False,
+                "error_code": "path_error",
+                "error": f"filesystem error: {e}",
+                "tool": tool,
+            }
 
     def _require_path(self, args: dict[str, Any], key: str = "path") -> tuple[str | None, dict[str, Any] | None]:
         canon, err = canonicalize_rel_path(args.get(key))
@@ -117,7 +126,8 @@ class MemoryToolHarness:
         path.parent.mkdir(parents=True, exist_ok=True)
         # Upsert: agents often re-create the same path on later chunks.
         existed = path.exists()
-        path.write_text(text, encoding="utf-8", newline="\n")
+        # Avoid Path.write_text(newline=...) quirks on some Windows builds.
+        path.write_bytes(text.replace("\r\n", "\n").replace("\r", "\n").encode("utf-8"))
         return {
             "ok": True,
             "tool": "create",
@@ -140,7 +150,9 @@ class MemoryToolHarness:
         text = path.read_text(encoding="utf-8")
         if old not in text:
             return {"ok": False, "error_code": "path_error", "error": "old_str not found", "path": rel}
-        path.write_text(text.replace(old, new, 1), encoding="utf-8", newline="\n")
+        path.write_bytes(
+            text.replace(old, new, 1).replace("\r\n", "\n").replace("\r", "\n").encode("utf-8")
+        )
         return {"ok": True, "tool": "str_replace", "path": rel}
 
     def _insert(self, args: dict[str, Any]) -> dict[str, Any]:
@@ -160,7 +172,7 @@ class MemoryToolHarness:
         lines = path.read_text(encoding="utf-8").splitlines(keepends=True)
         idx = max(0, min(len(lines), insert_line - 1))
         lines.insert(idx, new_str if new_str.endswith("\n") else new_str + "\n")
-        path.write_text("".join(lines), encoding="utf-8", newline="\n")
+        path.write_bytes("".join(lines).replace("\r\n", "\n").replace("\r", "\n").encode("utf-8"))
         return {"ok": True, "tool": "insert", "path": rel}
 
     def _delete(self, args: dict[str, Any]) -> dict[str, Any]:

@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from amb.harness.memory_tool import MemoryToolHarness
 
 
@@ -55,3 +57,26 @@ def test_create_upserts_when_exists(tmp_path):
     r2 = h.execute("create", {"path": "people/morgan.md", "file_text": "v2\n"})
     assert r2["ok"] and r2["status"] == "updated"
     assert h.execute("view", {"path": "people/morgan.md"})["content"] == "v2\n"
+
+
+def test_rejects_windows_illegal_filename(tmp_path):
+    h = MemoryToolHarness(tmp_path, role="manage")
+    r = h.execute(
+        "create",
+        {"path": "notes/sync:2025-03-21.md", "file_text": "x\n"},
+    )
+    assert r["ok"] is False
+    assert "illegal path characters" in r["error"]
+
+
+def test_oserror_becomes_path_error(tmp_path, monkeypatch):
+    h = MemoryToolHarness(tmp_path, role="manage")
+
+    def boom(*_a, **_k):
+        raise OSError(22, "Invalid argument")
+
+    monkeypatch.setattr(Path, "write_bytes", boom)
+    r = h.execute("create", {"path": "people/morgan.md", "file_text": "x\n"})
+    assert r["ok"] is False
+    assert r["error_code"] == "path_error"
+    assert "filesystem error" in r["error"]

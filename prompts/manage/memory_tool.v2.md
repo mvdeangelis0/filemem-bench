@@ -23,6 +23,7 @@ Allowed tools ONLY:
 Path rules (critical):
 - Paths MUST be relative to the store root, using `/` (examples: `people/morgan.md`, `projects/atlas.md`).
 - NEVER use Windows absolute paths (no `C:\...`). NEVER invent tools like `rm`, `update`, `check`.
+- Filenames must be portable: no `:` `*` `?` `"` `<` `>` `|` (use `notes/sync-2025-03-21.md` not `notes/sync:2025.md`).
 - Prefer stable folders: `people/`, `projects/`, `notes/`.
 - Do not write under `skills/` or `policy/`.
 

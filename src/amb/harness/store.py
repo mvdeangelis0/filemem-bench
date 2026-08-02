@@ -1,10 +1,22 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 
 AMB_DIR = "_amb"
 RESERVED_WRITE_PREFIXES = ("skills/", "policy/", f"{AMB_DIR}/")
+
+# Windows-illegal filename characters (also bad on purpose for portable stores).
+_WIN_BAD_CHARS = re.compile(r'[<>:"|?*\x00-\x1f]')
+_WIN_RESERVED = {
+    "con",
+    "prn",
+    "aux",
+    "nul",
+    *(f"com{i}" for i in range(1, 10)),
+    *(f"lpt{i}" for i in range(1, 10)),
+}
 
 
 def ensure_store(root: Path) -> Path:
@@ -17,6 +29,7 @@ def canonicalize_rel_path(rel: object) -> tuple[str | None, str | None]:
     """Return (normalized_relative_path, error_message).
 
     Rejects absolute Windows/Unix paths. Store paths must be relative with `/`.
+    Also rejects characters that are illegal on Windows filesystems.
     """
     if rel is None:
         return None, "missing path (use a relative path like people/morgan.md)"
@@ -39,8 +52,23 @@ def canonicalize_rel_path(rel: object) -> tuple[str | None, str | None]:
     norm = norm.lstrip("./")
     if norm in ("", "."):
         return ".", None
-    if ".." in Path(norm).parts:
+    parts = Path(norm).parts
+    if ".." in parts:
         return None, "path escapes store"
+    for part in parts:
+        if part in ("", "."):
+            continue
+        if _WIN_BAD_CHARS.search(part):
+            return (
+                None,
+                "illegal path characters (avoid <>:\"|?* and control chars); "
+                "use names like people/morgan.md or notes/sync-2025-03-21.md",
+            )
+        if part.endswith(" ") or part.endswith("."):
+            return None, "path segment cannot end with space or dot"
+        stem = part.split(".")[0].casefold()
+        if stem in _WIN_RESERVED:
+            return None, f"illegal reserved path segment {part!r}"
     return norm, None
 
 
