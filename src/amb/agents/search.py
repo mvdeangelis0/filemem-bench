@@ -6,11 +6,13 @@ from pathlib import Path
 from typing import Any
 
 from amb.agents.llm import LLM
+from amb.bookkeeper import validate_citations
 from amb.harness.memory_tool import MemoryToolHarness
 
 
 def _log(msg: str) -> None:
     print(msg, file=sys.stderr, flush=True)
+
 
 TOOLS = [
     {"name": "view", "args": ["path"]},
@@ -27,6 +29,7 @@ def run_search(
     max_steps: int = 20,
     progress: bool = False,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    store_root = Path(store_root)
     harness = MemoryToolHarness(store_root, role="search")
     messages = [
         {"role": "system", "content": prompt},
@@ -41,12 +44,48 @@ def run_search(
             tool = out["tool"]
             args = out.get("arguments") or {}
             if tool == "done":
+                check = validate_citations(
+                    store_root,
+                    args.get("citations") or [],
+                    answer=args.get("answer"),
+                )
+                if not check.get("ok"):
+                    obs = {
+                        "ok": False,
+                        "error_code": "citation_error",
+                        "error": check.get("error"),
+                        "bad": check.get("bad"),
+                        "hint": (
+                            "view real files first, then done with citations "
+                            "that exist (or answer unknown with citations:[])"
+                        ),
+                    }
+                    if progress:
+                        _log(
+                            f"[amb] search step {step}/{max_steps} "
+                            f"rejected done: {check.get('error')}"
+                        )
+                    steps.append(
+                        {
+                            "step": step,
+                            "event": "tool_call",
+                            "tool": "done",
+                            "arguments": args,
+                            "observation": obs,
+                            "rejected": True,
+                        }
+                    )
+                    messages.append({"role": "assistant", "content": json.dumps(out)})
+                    messages.append(
+                        {"role": "user", "content": json.dumps({"observation": obs})}
+                    )
+                    continue
                 if progress:
                     _log(f"[amb] search step {step}/{max_steps} final answer")
                 payload = {
                     "query_id": None,
                     "answer": args.get("answer"),
-                    "citations": args.get("citations") or [],
+                    "citations": check.get("citations") or [],
                     "confidence": args.get("confidence", "medium"),
                     "status": "ok",
                     "error_code": None,
@@ -79,14 +118,67 @@ def run_search(
             if progress:
                 _log(f"[amb] search step {step}/{max_steps} final (no tool)")
             if isinstance(content, dict):
+                answer = content.get("answer")
+                citations = content.get("citations") or []
+                check = validate_citations(store_root, citations, answer=answer)
+                if not check.get("ok"):
+                    obs = {
+                        "ok": False,
+                        "error_code": "citation_error",
+                        "error": check.get("error"),
+                        "bad": check.get("bad"),
+                        "hint": (
+                            "use tool done with real citation paths, "
+                            "or answer unknown with citations:[]"
+                        ),
+                    }
+                    steps.append(
+                        {
+                            "step": step,
+                            "event": "tool_call",
+                            "tool": "final_rejected",
+                            "arguments": content,
+                            "observation": obs,
+                            "rejected": True,
+                        }
+                    )
+                    messages.append({"role": "assistant", "content": json.dumps(out)})
+                    messages.append(
+                        {"role": "user", "content": json.dumps({"observation": obs})}
+                    )
+                    continue
                 payload = {
-                    "answer": content.get("answer"),
-                    "citations": content.get("citations") or [],
+                    "answer": answer,
+                    "citations": check.get("citations") or [],
                     "confidence": content.get("confidence", "medium"),
                     "status": "ok",
                     "error_code": None,
                 }
             else:
+                # Bare string final — only accept abstain-like unknowns.
+                check = validate_citations(store_root, [], answer=str(content))
+                if not check.get("ok"):
+                    obs = {
+                        "ok": False,
+                        "error_code": "citation_error",
+                        "error": check.get("error"),
+                        "hint": "call done with answer + real citations",
+                    }
+                    steps.append(
+                        {
+                            "step": step,
+                            "event": "tool_call",
+                            "tool": "final_rejected",
+                            "arguments": {"content": content},
+                            "observation": obs,
+                            "rejected": True,
+                        }
+                    )
+                    messages.append({"role": "assistant", "content": json.dumps(out)})
+                    messages.append(
+                        {"role": "user", "content": json.dumps({"observation": obs})}
+                    )
+                    continue
                 payload = {
                     "answer": str(content),
                     "citations": [],
