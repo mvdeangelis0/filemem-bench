@@ -60,10 +60,10 @@ Without this, Ollama vs Bedrock comparisons stay confounded.
 ### Suggested run order (cheap → dear)
 
 1. **Control:** regrade/label current 31/33 run (A organized + B-without-bookkeeper verbatim already in one suite run).
-2. **Implement B hint** (section 2) → one Haiku smoke (~$0.25).
-3. **Arm C stub:** embed smoke chunks, retrieve top-3 per query, grade same gold (no tools) → one Haiku or even extractive baseline.
-4. Same matrix on Ollama once B/C exist.
-5. Promote to `core` only after smoke matrix is stable.
+2. **Implement B hint** (section 2) → one Haiku smoke (~$0.25). **Done — smoke now 33/33 with later_update_gate.**
+3. **Arm C stub:** `--search-mode rag` (TF-IDF top-k over chunks, no FS tools on verbatim). **Done — Haiku smoke also 33/33; smoke is too easy to separate arms.**
+4. Same matrix on **`core`** (and Ollama) — this is where FS vs RAG should diverge.
+5. Promote claims only after core matrix is stable.
 
 ---
 
