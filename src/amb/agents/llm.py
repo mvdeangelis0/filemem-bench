@@ -4,6 +4,7 @@ import json
 import os
 import re
 import sys
+import threading
 import time
 from dataclasses import dataclass
 from typing import Any, Callable, Protocol
@@ -161,13 +162,23 @@ class OllamaLLM:
         }
         self.n_calls += 1
         n = self.n_calls
-        if self.verbose or self.on_call:
-            msg = f"[amb] ollama chat #{n} model={self.model!r} …"
-            if self.on_call:
-                self.on_call(msg)
-            else:
-                _log(msg)
+        msg = f"[amb] ollama chat #{n} model={self.model!r} waiting (GPU util drops between calls) …"
+        if self.on_call:
+            self.on_call(msg)
+        else:
+            _log(msg)
         t0 = time.perf_counter()
+        stop_hb = threading.Event()
+
+        def _heartbeat() -> None:
+            while not stop_hb.wait(5.0):
+                _log(
+                    f"[amb] … still waiting on ollama chat #{n} "
+                    f"({time.perf_counter() - t0:.0f}s)"
+                )
+
+        hb = threading.Thread(target=_heartbeat, name=f"ollama-hb-{n}", daemon=True)
+        hb.start()
         try:
             with httpx.Client(timeout=self.timeout) as client:
                 r = client.post(f"{self.base_url}/api/chat", json=payload)
@@ -183,10 +194,22 @@ class OllamaLLM:
             raise RuntimeError(
                 f"Ollama chat failed (call #{n}, model={self.model!r}): {e}"
             ) from e
+        finally:
+            stop_hb.set()
+            hb.join(timeout=0.2)
         dt = time.perf_counter() - t0
-        if self.verbose:
-            _log(f"[amb] ollama chat #{n} done in {dt:.1f}s")
         content = data.get("message", {}).get("content", "")
-        return normalize_llm_action(
+        action = normalize_llm_action(
             _parse_json_content(content) if isinstance(content, str) else content
         )
+        if action.get("type") == "tool_call":
+            detail = f"tool={action.get('tool')!r}"
+        else:
+            detail = "final"
+        _log(f"[amb] ollama chat #{n} done in {dt:.1f}s → {detail}")
+        if self.verbose and isinstance(content, str) and content.strip():
+            preview = content.strip().replace("\n", " ")
+            if len(preview) > 160:
+                preview = preview[:160] + "…"
+            _log(f"[amb] ollama chat #{n} preview: {preview}")
+        return action

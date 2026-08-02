@@ -1,11 +1,16 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
 from amb.agents.llm import LLM
 from amb.harness.memory_tool import MemoryToolHarness
+
+
+def _log(msg: str) -> None:
+    print(msg, file=sys.stderr, flush=True)
 
 TOOLS = [
     {"name": "view", "args": ["path"]},
@@ -20,6 +25,7 @@ def run_search(
     prompt: str,
     *,
     max_steps: int = 20,
+    progress: bool = False,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     harness = MemoryToolHarness(store_root, role="search")
     messages = [
@@ -28,11 +34,15 @@ def run_search(
     ]
     steps: list[dict[str, Any]] = []
     for step in range(1, max_steps + 1):
+        if progress:
+            _log(f"[amb] search step {step}/{max_steps} → asking model")
         out = llm.complete(messages, TOOLS)
         if out.get("type") == "tool_call":
             tool = out["tool"]
             args = out.get("arguments") or {}
             if tool == "done":
+                if progress:
+                    _log(f"[amb] search step {step}/{max_steps} final answer")
                 payload = {
                     "query_id": None,
                     "answer": args.get("answer"),
@@ -50,6 +60,8 @@ def run_search(
                     }
                 )
                 return payload, steps
+            if progress:
+                _log(f"[amb] search step {step}/{max_steps} exec tool={tool!r}")
             obs = harness.execute(tool, args)
             steps.append(
                 {
@@ -64,6 +76,8 @@ def run_search(
             messages.append({"role": "user", "content": json.dumps({"observation": obs})})
         else:
             content = out.get("content")
+            if progress:
+                _log(f"[amb] search step {step}/{max_steps} final (no tool)")
             if isinstance(content, dict):
                 payload = {
                     "answer": content.get("answer"),
@@ -82,6 +96,8 @@ def run_search(
                 }
             steps.append({"step": step, "event": "final", "content": content})
             return payload, steps
+    if progress:
+        _log(f"[amb] search hit max_steps={max_steps}")
     return {
         "answer": None,
         "citations": [],

@@ -194,6 +194,7 @@ def run_suite(
                 visible,
                 manage_prompt,
                 max_steps=30,
+                progress=True,
             )
             writer.write_trajectory(f"trajectories/manage/{chunk['id']}.jsonl", steps)
             _log(
@@ -221,6 +222,7 @@ def run_suite(
                 query["q"],
                 search_prompt,
                 max_steps=20,
+                progress=True,
             )
             payload["query_id"] = qid
             payload["shape"] = shape
