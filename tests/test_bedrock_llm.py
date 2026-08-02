@@ -71,7 +71,8 @@ def test_bedrock_complete_mocked():
                             }
                         ]
                     }
-                }
+                },
+                "usage": {"inputTokens": 10, "outputTokens": 5},
             }
 
     llm = BedrockLLM(
@@ -85,6 +86,8 @@ def test_bedrock_complete_mocked():
     )
     assert out["type"] == "tool_call"
     assert out["tool"] == "done"
+    assert llm.input_tokens == 10
+    assert llm.output_tokens == 5
 
 
 def test_search_retries_protocol_error_and_sets_verbatim_shape(tmp_path):

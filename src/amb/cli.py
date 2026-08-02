@@ -106,6 +106,18 @@ def main(argv: list[str] | None = None) -> None:
             f"pass_rate={summary.get('pass_rate')} "
             f"({summary.get('n_passed')}/{summary.get('n_scorecard')})"
         )
+        usage_path = run_dir / "usage.json"
+        if usage_path.exists():
+            usage = json.loads(usage_path.read_text(encoding="utf-8"))
+            total = usage.get("total") or {}
+            est = usage.get("estimate") or {}
+            usd = est.get("usd")
+            usd_s = f"${usd:.4f}" if isinstance(usd, (int, float)) else "n/a"
+            print(
+                f"usage calls={total.get('n_calls')} "
+                f"in={total.get('input_tokens')} out={total.get('output_tokens')} "
+                f"est={usd_s}"
+            )
         return
 
     if args.cmd == "regrade":

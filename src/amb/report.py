@@ -10,6 +10,9 @@ def write_report(run_dir: Path) -> Path:
     scorecard = {}
     if (run_dir / "scorecard.json").exists():
         scorecard = json.loads((run_dir / "scorecard.json").read_text(encoding="utf-8"))
+    usage = {}
+    if (run_dir / "usage.json").exists():
+        usage = json.loads((run_dir / "usage.json").read_text(encoding="utf-8"))
     summary = scorecard.get("summary") or {}
     failed = [
         r
@@ -40,6 +43,25 @@ def write_report(run_dir: Path) -> Path:
         f"- Manage proxy: `{summary.get('by_role_proxy', {}).get('management')}`",
         f"- Search proxy: `{summary.get('by_role_proxy', {}).get('search')}`",
         "",
+    ]
+    if usage:
+        total = usage.get("total") or {}
+        est = usage.get("estimate") or {}
+        by = usage.get("by_role") or {}
+        usd = est.get("usd")
+        usd_s = f"${usd:.4f}" if isinstance(usd, (int, float)) else "n/a"
+        lines += [
+            "## Usage",
+            "",
+            f"- Calls: `{total.get('n_calls')}` "
+            f"(manage `{((by.get('manage') or {}).get('n_calls'))}`, "
+            f"search `{((by.get('search') or {}).get('n_calls'))}`)",
+            f"- Tokens: in=`{total.get('input_tokens')}` out=`{total.get('output_tokens')}`",
+            f"- Estimated cost: **{usd_s}** "
+            f"({est.get('note', 'list-price estimate')})",
+            "",
+        ]
+    lines += [
         "## Failed checks",
         "",
     ]

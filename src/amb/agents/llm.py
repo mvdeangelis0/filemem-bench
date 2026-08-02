@@ -269,6 +269,17 @@ class OllamaLLM:
         self.on_call = on_call
         self.n_calls = 0
 
+    def usage_dict(self) -> dict[str, Any]:
+        return {
+            "n_calls": self.n_calls,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cache_read_tokens": 0,
+            "cache_write_tokens": 0,
+            "model_id": f"ollama/{self.model}",
+            "note": "Ollama path does not expose token counts",
+        }
+
     def complete(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> dict[str, Any]:
         reinforced = reinforce_tool_json(messages, tools)
         payload = {
@@ -374,6 +385,10 @@ class BedrockLLM:
         self.max_tokens = max_tokens
         self.verbose = verbose
         self.n_calls = 0
+        self.input_tokens = 0
+        self.output_tokens = 0
+        self.cache_read_tokens = 0
+        self.cache_write_tokens = 0
         if client is not None:
             self._client = client
         else:
@@ -384,6 +399,16 @@ class BedrockLLM:
                     "bedrock mode requires boto3. Install with: pip install -e '.[bedrock]'"
                 ) from e
             self._client = boto3.client("bedrock-runtime", region_name=self.region)
+
+    def usage_dict(self) -> dict[str, Any]:
+        return {
+            "n_calls": self.n_calls,
+            "input_tokens": self.input_tokens,
+            "output_tokens": self.output_tokens,
+            "cache_read_tokens": self.cache_read_tokens,
+            "cache_write_tokens": self.cache_write_tokens,
+            "model_id": f"bedrock/{self.model}",
+        }
 
     @staticmethod
     def _to_bedrock_messages(
@@ -438,8 +463,26 @@ class BedrockLLM:
                 "(e.g. us.anthropic.claude-haiku-4-5-20251001-v1:0)."
             ) from e
         dt = time.perf_counter() - t0
+        usage = resp.get("usage") or {}
+        self.input_tokens += int(usage.get("inputTokens") or 0)
+        self.output_tokens += int(usage.get("outputTokens") or 0)
+        self.cache_read_tokens += int(
+            usage.get("cacheReadInputTokens")
+            or usage.get("cacheReadInputTokenCount")
+            or 0
+        )
+        self.cache_write_tokens += int(
+            usage.get("cacheWriteInputTokens")
+            or usage.get("cacheWriteInputTokenCount")
+            or 0
+        )
         chunks = (((resp.get("output") or {}).get("message") or {}).get("content")) or []
         content = "".join(c.get("text", "") for c in chunks if isinstance(c, dict))
         action = action_from_model_text(content)
         _log_action("bedrock converse", n, dt, action, content, self.verbose)
+        if self.verbose and usage:
+            _log(
+                f"[amb] bedrock converse #{n} tokens "
+                f"in={usage.get('inputTokens')} out={usage.get('outputTokens')}"
+            )
         return action

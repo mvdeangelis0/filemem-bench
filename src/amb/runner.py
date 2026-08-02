@@ -18,6 +18,7 @@ from amb.ledger.write import RunWriter
 from amb.report import write_report
 from amb.suite.load import load_suite
 from amb.suite.validate import validate_suite
+from amb.usage import build_run_usage, usage_snapshot
 from amb.verbatim import build_verbatim
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -223,6 +224,9 @@ def run_suite(
 
     build_verbatim(writer.verbatim_root(), suite.chunks, whitelist)
 
+    manage_usage: dict[str, Any] | None = None
+    search_usage: dict[str, Any] | None = None
+
     if llm_mode == "mock":
         manage_llm: LLM = manage_llm_for_smoke()
         n_chunks = len(suite.chunks)
@@ -275,17 +279,25 @@ def run_suite(
         probe_ollama(host, manage_model)
         if search_model != manage_model:
             probe_ollama(host, search_model)
+        manage_llm_live: LLM = OllamaLLM(
+            manage_model, base_url=host, verbose=verbose
+        )
+        search_llm_live: LLM = OllamaLLM(
+            search_model, base_url=host, verbose=verbose
+        )
         _run_live_manage_search(
             suite=suite,
             writer=writer,
             whitelist=whitelist,
-            manage_llm=OllamaLLM(manage_model, base_url=host, verbose=verbose),
-            search_llm=OllamaLLM(search_model, base_url=host, verbose=verbose),
+            manage_llm=manage_llm_live,
+            search_llm=search_llm_live,
             manage_prompt=manage_prompt,
             search_prompt=search_prompt,
             search_mode=search_mode,
             rag_top_k=rag_top_k,
         )
+        manage_usage = usage_snapshot(manage_llm_live, role="manage")
+        search_usage = usage_snapshot(search_llm_live, role="search")
     elif llm_mode == "bedrock":
         if manage_model in {"mock", ""} or search_model in {"mock", ""}:
             raise ValueError(
@@ -295,23 +307,42 @@ def run_suite(
         probe_bedrock(manage_model, region=region)
         if search_model != manage_model:
             probe_bedrock(search_model, region=region)
+        manage_llm_live = BedrockLLM(
+            manage_model, region=region, verbose=verbose
+        )
+        search_llm_live = BedrockLLM(
+            search_model, region=region, verbose=verbose
+        )
         _run_live_manage_search(
             suite=suite,
             writer=writer,
             whitelist=whitelist,
-            manage_llm=BedrockLLM(
-                manage_model, region=region, verbose=verbose
-            ),
-            search_llm=BedrockLLM(
-                search_model, region=region, verbose=verbose
-            ),
+            manage_llm=manage_llm_live,
+            search_llm=search_llm_live,
             manage_prompt=manage_prompt,
             search_prompt=search_prompt,
             search_mode=search_mode,
             rag_top_k=rag_top_k,
         )
+        manage_usage = usage_snapshot(manage_llm_live, role="manage")
+        search_usage = usage_snapshot(search_llm_live, role="search")
     else:
         raise ValueError(f"unknown llm_mode {llm_mode}")
+
+    run_usage = build_run_usage(
+        manage=manage_usage, search=search_usage, llm_mode=llm_mode
+    )
+    writer.write_json("usage.json", run_usage)
+    if progress:
+        total = run_usage.get("total") or {}
+        est = run_usage.get("estimate") or {}
+        usd = est.get("usd")
+        usd_s = f"${usd:.4f}" if isinstance(usd, (int, float)) else "n/a"
+        _log(
+            f"[amb] usage calls={total.get('n_calls')} "
+            f"in={total.get('input_tokens')} out={total.get('output_tokens')} "
+            f"est={usd_s}"
+        )
 
     if progress:
         _log("[amb] grading …")
