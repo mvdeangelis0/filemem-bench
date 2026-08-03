@@ -44,6 +44,24 @@ def init_run_dir(
     (root / "STATUS.md").write_text("# Status\n\n(not started)\n", encoding="utf-8")
     (root / "memory" / "observations.jsonl").write_text("", encoding="utf-8")
     (root / "memory" / "deferred.jsonl").write_text("", encoding="utf-8")
+    (root / "memory" / "web_trail.jsonl").write_text("", encoding="utf-8")
+    (root / "memory" / "web_cursor.json").write_text(
+        json.dumps(
+            {
+                "updated_at": None,
+                "last_action": None,
+                "url": None,
+                "query": None,
+                "title": None,
+                "ok": None,
+                "step": None,
+                "left_off": "(no web activity yet)",
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     (root / "memory" / "lessons.md").write_text("# Lessons\n", encoding="utf-8")
     (root / "memory" / "current_plan.json").write_text(
         json.dumps(DEFAULT_PLAN, indent=2) + "\n", encoding="utf-8"

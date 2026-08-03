@@ -15,6 +15,7 @@ from amb.continuous.policy import Policy
 from amb.continuous.report import write_report
 from amb.continuous.status import write_status
 from amb.continuous.tools import ToolRuntime
+from amb.continuous.web_trail import list_trail, read_cursor
 
 _TOOL_SCHEMAS: list[dict[str, Any]] = [
     {"name": "lab_sense", "description": "Read lab instruments"},
@@ -84,6 +85,9 @@ def _build_user_message(run_dir: Path, *, graph_pack: list[dict], inbox_text: st
     deferred_txt = (
         json.dumps(deferred, indent=2) if deferred else "(none — good; stay in-scope)"
     )
+    cursor = read_cursor(run_dir) or {}
+    trail_tail = list_trail(run_dir, limit=5)
+    web_left_off = cursor.get("left_off") or "(no web activity yet)"
     obs_path = run_dir / "memory" / "observations.jsonl"
     tail_lines: list[str] = []
     if obs_path.exists():
@@ -95,6 +99,10 @@ def _build_user_message(run_dir: Path, *, graph_pack: list[dict], inbox_text: st
         "## Status\n" + status.strip(),
         "## Plan\n" + plan.strip(),
         "## Deferred (do not pretend these are done)\n" + deferred_txt,
+        "## Web trail — where you left off\n"
+        + web_left_off
+        + "\n\nRecent trail:\n"
+        + (json.dumps(trail_tail, indent=2) if trail_tail else "(empty)"),
         "## Pathway pack\n" + json.dumps(graph_pack, indent=2),
         "## Recent observations\n" + ("\n".join(tail_lines) if tail_lines else "(none)"),
     ]
@@ -207,6 +215,7 @@ def run_episode(
         if verbose:
             _log(f"[continuous] step {step}/{max_steps} tool={tool} args={arguments}")
 
+        tools.step = step
         result = tools.execute(tool, arguments)
         ok = bool(result.get("ok"))
         _append_jsonl(

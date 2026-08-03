@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import io
 import math
+import re
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FuturesTimeout
 from pathlib import Path
@@ -12,6 +13,7 @@ import httpx
 
 from amb.continuous.deferred import append_deferred, infer_need_from_policy
 from amb.continuous.policy import Policy
+from amb.continuous.web_trail import append_trail, extract_title
 from amb.harness.store import canonicalize_rel_path, resolve_in_store
 
 _PY_TIMEOUT_S = 2.0
@@ -74,10 +76,18 @@ def _run_python_code(code: str) -> dict[str, Any]:
 class ToolRuntime:
     """Policy-gated tools bound to a continuous run directory."""
 
-    def __init__(self, run_dir: Path, *, world: Any, policy: Policy) -> None:
+    def __init__(
+        self,
+        run_dir: Path,
+        *,
+        world: Any,
+        policy: Policy,
+        step: int | None = None,
+    ) -> None:
         self.run_dir = Path(run_dir)
         self.world = world
         self.policy = policy
+        self.step = step
 
     def execute(self, tool: str, arguments: dict[str, Any] | None = None) -> dict[str, Any]:
         arguments = dict(arguments or {})
@@ -192,6 +202,16 @@ class ToolRuntime:
     def _search_web(self, args: dict[str, Any]) -> dict[str, Any]:
         q = str(args.get("query") or "")
         hosts = list(self.policy.web_allowlist)
+        append_trail(
+            self.run_dir,
+            action="search",
+            query=q,
+            ok=True,
+            title="allowlisted hosts",
+            snippet=", ".join(hosts),
+            step=self.step,
+            note="v1 search lists hosts only",
+        )
         return {
             "ok": True,
             "result": {
@@ -205,6 +225,16 @@ class ToolRuntime:
         url = str(args.get("url") or "")
         host = (urlparse(url).hostname or "").lower()
         if host not in self.policy.web_allowlist:
+            append_trail(
+                self.run_dir,
+                action="fetch",
+                url=url,
+                ok=False,
+                title="",
+                snippet="policy_denied",
+                step=self.step,
+                note="host not allowlisted",
+            )
             return {
                 "ok": False,
                 "error_code": "policy_denied",
@@ -214,14 +244,35 @@ class ToolRuntime:
             with httpx.Client(timeout=_WEB_TIMEOUT_S, follow_redirects=True) as client:
                 resp = client.get(url)
             text = resp.text
+            title = extract_title(text)
             if len(text) > _WEB_OUTPUT_CAP:
                 text = text[:_WEB_OUTPUT_CAP] + "\n...[truncated]"
+            append_trail(
+                self.run_dir,
+                action="fetch",
+                url=str(resp.url) if resp.url else url,
+                ok=resp.is_success,
+                status_code=resp.status_code,
+                title=title,
+                snippet=re.sub(r"\s+", " ", text)[:400],
+                step=self.step,
+            )
             return {
                 "ok": resp.is_success,
                 "status_code": resp.status_code,
+                "title": title,
                 "content": text,
             }
         except httpx.HTTPError as e:
+            append_trail(
+                self.run_dir,
+                action="fetch",
+                url=url,
+                ok=False,
+                snippet=str(e)[:400],
+                step=self.step,
+                note="http_error",
+            )
             return {"ok": False, "error_code": "http_error", "error": str(e)}
 
     def _done(self, args: dict[str, Any]) -> dict[str, Any]:

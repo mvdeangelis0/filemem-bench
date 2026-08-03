@@ -100,7 +100,17 @@ Watch with:
 ```bat
 ambc> /use D:\ambc_lab\<run_id>
 ambc> /deferred
+ambc> /trail
 ambc> /status
 ```
 
-STATUS shows a deferred count. Do not treat deferred items as completed until capabilities expand.
+STATUS shows a deferred count and **Web left off** (last browse breadcrumb).
+
+## Web trail
+
+When web tools are used, the agent leaves breadcrumbs:
+
+- `memory/web_trail.jsonl` — append-only history (when, action, url/query, title, snippet, ok)
+- `memory/web_cursor.json` — where it left off (resume pointer)
+
+Each step’s prompt includes the cursor + recent trail so it can continue instead of restarting cold. Use `/trail` to inspect.

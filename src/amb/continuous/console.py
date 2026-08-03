@@ -13,6 +13,7 @@ from amb.continuous.deferred import list_deferred
 from amb.continuous.inbox import inject as continuous_inject
 from amb.continuous.loop import run_episode
 from amb.continuous.score import compare_episodes, score_run
+from amb.continuous.web_trail import list_trail, read_cursor
 
 
 HELP_TEXT = """
@@ -23,6 +24,7 @@ Slash commands (interactive):
   /status                       Print STATUS.md for the active run
   /inbox                        Show pending INBOX.md
   /deferred [n]                 Show last n deferred tasks (default 20)
+  /trail [n]                    Show web trail breadcrumbs (default 15)
   /inject <text>                Queue an operator instruction
   /tail [n]                     Show last n action lines (default 15)
   /graph [k]                    Show top-k weighted pathways (default 8)
@@ -205,6 +207,26 @@ def cmd_deferred(session: Session, args: list[str]) -> None:
             f"[{row.get('need')}] {row.get('task')} "
             f"— {row.get('reason')} ({row.get('source')})"
         )
+
+
+def cmd_trail(session: Session, args: list[str]) -> None:
+    run = session.require_run()
+    cursor = read_cursor(run)
+    if cursor:
+        print(f"left off: {cursor.get('left_off')}")
+        print(f"updated:  {cursor.get('updated_at')}")
+    n = int(args[0]) if args else 15
+    rows = list_trail(run, limit=n)
+    if not rows:
+        print("(no web trail yet)")
+        return
+    for row in rows:
+        when = row.get("ts", "")
+        action = row.get("action")
+        target = row.get("url") or row.get("query") or ""
+        title = row.get("title") or ""
+        ok = "ok" if row.get("ok") else "err"
+        print(f"{when}  {action}/{ok}  {target}  {title}")
 
 
 def cmd_inject(session: Session, args: list[str]) -> None:
@@ -397,6 +419,7 @@ COMMANDS: dict[str, Callable[[Session, list[str]], None]] = {
     "status": cmd_status,
     "inbox": cmd_inbox,
     "deferred": cmd_deferred,
+    "trail": cmd_trail,
     "inject": cmd_inject,
     "tail": cmd_tail,
     "graph": cmd_graph,

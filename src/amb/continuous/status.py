@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from amb.continuous.deferred import count_deferred
+from amb.continuous.web_trail import read_cursor
 
 
 def write_status(
@@ -24,6 +25,8 @@ def write_status(
     ok_s = "ok" if last_ok is True else ("err" if last_ok is False else "n/a")
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
     deferred_n = count_deferred(run_dir)
+    cursor = read_cursor(run_dir) or {}
+    left_off = cursor.get("left_off") or "(no web activity yet)"
     body = (
         f"# Status\n\n"
         f"Task: {task}\n"
@@ -32,6 +35,7 @@ def write_status(
         f"Last action: {last_tool or '(none)'} ({ok_s})\n"
         f"Result: {last_summary}\n"
         f"Deferred tasks: {deferred_n}\n"
+        f"Web left off: {left_off}\n"
         f"Budget: {max_steps - step} steps left\n"
         f"Updated: {now}\n"
     )
