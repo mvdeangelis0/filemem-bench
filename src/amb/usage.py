@@ -89,14 +89,25 @@ def estimate_usd(usage: dict[str, Any], model_id: str | None = None) -> dict[str
     pin, pout = prices
     inp = int(usage.get("input_tokens") or 0)
     out = int(usage.get("output_tokens") or 0)
-    usd = inp / 1e6 * pin + out / 1e6 * pout
+    cache_read = int(usage.get("cache_read_tokens") or 0)
+    cache_write = int(usage.get("cache_write_tokens") or 0)
+    # Anthropic-style cache multipliers relative to base input price.
+    usd = (
+        inp / 1e6 * pin
+        + out / 1e6 * pout
+        + cache_read / 1e6 * (pin * 0.1)
+        + cache_write / 1e6 * (pin * 1.25)
+    )
     return {
         "ok": True,
         "model_id": mid,
         "input_usd_per_mtok": pin,
         "output_usd_per_mtok": pout,
         "usd": round(usd, 6),
-        "note": "list-price estimate; ignores cache discounts and regional premiums",
+        "note": (
+            "list-price estimate; cache read≈0.1× input, write≈1.25× input; "
+            "ignores regional premiums"
+        ),
     }
 
 

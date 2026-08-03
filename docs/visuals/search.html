@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>filemem-bench — Search</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=IBM+Plex+Mono:wght@450;500&family=Source+Sans+3:wght@450;600;650;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="mast">
+      <div class="brand">filemem-bench</div>
+      <h1>Search agent</h1>
+      <p class="sub">Fresh context, tool views, short answer — citations must be paths actually opened.</p>
+    </header>
+    <nav class="nav-mini">
+      <a href="index.html">Gallery</a>
+      <a href="manage.html">Manage</a>
+      <a href="grade.html">Grade</a>
+      <a href="stores-bookkeeper.html">Stores</a>
+      <a href="fs-vs-rag.html">FS vs RAG</a>
+    </nav>
+
+    <div class="callout">
+      <div class="label">Query</div>
+      <div class="text">What does Morgan prefer to drink?</div>
+      <div class="meta">q_drink_current · role: search · protocol: JSON tool calls only</div>
+    </div>
+
+    <div class="story">
+      <div class="narration">
+        <p class="beat-line b0">Search starts with the query plus a store map — not the full chat history of manage.</p>
+        <p class="beat-line b1">First view often hits an early or obvious path (tea still visible).</p>
+        <p class="beat-line b2">On chunk stores, timeline / update flags hint that something later may supersede.</p>
+        <p class="beat-line b3">If done fires too early, the bookkeeper can bounce it with a concrete hint path.</p>
+        <p class="beat-line b4">After viewing the update chunk, done returns coffee with a supporting citation.</p>
+        <p class="beat-line b5">Graders score answer_match and citations_support against gold — not vibes.</p>
+      </div>
+      <div class="mech">
+        <p class="mech-line b0">user: {type:"query", q, store_map, shape, chunk_timeline?}</p>
+        <p class="mech-line b1">{"tool":"view","arguments":{"path":"chunks/chunk_001.md"}}</p>
+        <p class="mech-line b2">chunk_timeline: [{path:chunk_008, update_flag:true, t:8}, …]</p>
+        <p class="mech-line b3"><span class="warn">later_update_unchecked</span> → retry with view hint</p>
+        <p class="mech-line b4">{"tool":"done","arguments":{"answer":"coffee","citations":["chunks/chunk_008.md"]}}</p>
+        <p class="mech-line b5">checks: search.answer_match.q_drink_current · search.citations_support.*</p>
+      </div>
+      <div class="progress">
+        <span class="b0"></span><span class="b1"></span><span class="b2"></span>
+        <span class="b3"></span><span class="b4"></span><span class="b5"></span>
+      </div>
+
+      <div class="stage-board" style="position:relative">
+        <div class="fly-layer"><div class="fly-token">view</div></div>
+        <section class="card">
+          <h3>Read path</h3>
+          <div class="rows">
+            <div class="blob step b0"><div class="id">fresh window</div>query + store_map</div>
+            <div class="blob step b1"><div class="id">view</div>chunk_001 → tea</div>
+            <div class="blob step b2"><div class="id">timeline</div>update_flag on chunk_008</div>
+            <div class="blob step b3"><div class="id">gate</div>reject early done</div>
+            <div class="blob step b4"><div class="id">done</div>answer coffee + cite 008</div>
+            <div class="blob step b5"><div class="id">grade</div>match gold · citation support</div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <footer class="footer-cap">
+      <p class="caption">Cite only what you viewed — the harness can verify path existence and support.</p>
+      <p class="note">Protocol errors nudge JSON retry instead of silent unknown</p>
+    </footer>
+  </div>
+</body>
+</html>

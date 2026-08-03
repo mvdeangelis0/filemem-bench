@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>filemem-bench — Grade</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=IBM+Plex+Mono:wght@450;500&family=Source+Sans+3:wght@450;600;650;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="mast">
+      <div class="brand">filemem-bench</div>
+      <h1>Grade the ledger</h1>
+      <p class="sub">Correctness is a pure function of artifacts — regrade without spending another token.</p>
+    </header>
+    <nav class="nav-mini">
+      <a href="index.html">Gallery</a>
+      <a href="manage.html">Manage</a>
+      <a href="search.html">Search</a>
+      <a href="stores-bookkeeper.html">Stores</a>
+      <a href="fs-vs-rag.html">FS vs RAG</a>
+    </nav>
+
+    <div class="callout">
+      <div class="label">Contract</div>
+      <div class="text">grade(run_dir, suite) → scorecard.json + REPORT.md</div>
+      <div class="meta">gold pinned in suite · checks in scorecard.yaml</div>
+    </div>
+
+    <div class="story">
+      <div class="narration">
+        <p class="beat-line b0">A finished run is a folder: trajectories, stores, search outputs, config.</p>
+        <p class="beat-line b1">Manage checks read the organized store — facts present, updates applied.</p>
+        <p class="beat-line b2">Update precedence fails if April 4 is written but March 28 still lingers.</p>
+        <p class="beat-line b3">Search checks compare answers to gold and verify citations support the claim.</p>
+        <p class="beat-line b4">Diagnostics can tag protocol vs memory failures for bakeoff claims.</p>
+        <p class="beat-line b5">usage.json meters cost beside the scorecard — dollars ≠ correctness.</p>
+      </div>
+      <div class="mech">
+        <p class="mech-line b0">runs/&lt;id&gt;/{trajectories,stores,search_outputs,config.json}</p>
+        <p class="mech-line b1">mgmt.fact_present.* · mgmt.protected_field.*</p>
+        <p class="mech-line b2"><span class="bad">mgmt.update_precedence.atlas_deadline</span> — leftover March 28</p>
+        <p class="mech-line b3">search.answer_match.q_drink_current · search.citations_support.*</p>
+        <p class="mech-line b4">failure tags: protocol | memory | abstain_miss</p>
+        <p class="mech-line b5">usage.json → n_calls, input_tokens, est USD · REPORT.md summary</p>
+      </div>
+      <div class="progress">
+        <span class="b0"></span><span class="b1"></span><span class="b2"></span>
+        <span class="b3"></span><span class="b4"></span><span class="b5"></span>
+      </div>
+
+      <div class="stage-board" style="position:relative">
+        <div class="fly-layer"><div class="fly-token">ledger</div></div>
+        <section class="card">
+          <h3>Eval path</h3>
+          <div class="rows">
+            <div class="blob step b0"><div class="id">run_dir</div>artifacts on disk</div>
+            <div class="blob step b1"><div class="id">manage checks</div>facts / protected</div>
+            <div class="blob step b2"><div class="id">update_precedence</div>stale leftover → fail</div>
+            <div class="blob step b3"><div class="id">search checks</div>answer + citations</div>
+            <div class="blob step b4"><div class="id">taxonomy</div>protocol vs memory</div>
+            <div class="blob step b5"><div class="id">scorecard</div>e.g. 108/109 + usage</div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <footer class="footer-cap">
+      <p class="caption">Paper claims come from the scorecard — not from watching the model stream.</p>
+      <p class="note">amb regrade &lt;run&gt; --suite … recomputes without inference</p>
+    </footer>
+  </div>
+</body>
+</html>

@@ -4,6 +4,12 @@ Open evaluation harness for **filesystem-based agent memory** (management + sear
 
 **Repo:** [mvdeangelis0/filemem-bench](https://github.com/mvdeangelis0/filemem-bench) (public). Local package name remains `agent-memory-bench` / `amb`.
 
+![FS vs RAG bakeoff](docs/visuals/fs-vs-rag.gif)
+
+Same query, same gold — **FS + bookkeeper** reaches the later update (`coffee`); **lexical RAG** can stick on early evidence (`tea`).
+
+[Pipeline visuals gallery](docs/visuals/index.html) · [bakeoff board](docs/visuals/fs-vs-rag.html) · [reproduce `q_drink_current`](docs/guides/repro-drink-query.md) · [visuals README](docs/visuals/README.md)
+
 Desktop (RTX 3070 + Ollama): [`docs/guides/desktop-rtx3070.md`](docs/guides/desktop-rtx3070.md).
 
 ## Quick start

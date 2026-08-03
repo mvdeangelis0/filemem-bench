@@ -190,9 +190,21 @@ def protocol_nudge(tools: list[dict[str, Any]], *, error: str | None = None) -> 
     )
 
 
+def should_reinforce_tool_json(messages: list[dict[str, Any]]) -> bool:
+    """Always reinforce for now — skipping mid-turn increased step count/cost."""
+    return True
+
+
 def reinforce_tool_json(
-    messages: list[dict[str, Any]], tools: list[dict[str, Any]]
+    messages: list[dict[str, Any]],
+    tools: list[dict[str, Any]],
+    *,
+    force: bool | None = None,
 ) -> list[dict[str, Any]]:
+    if force is False:
+        return list(messages)
+    if force is None and not should_reinforce_tool_json(messages):
+        return list(messages)
     tool_names = ", ".join(t["name"] for t in tools)
     reinforced = list(messages)
     reinforced.append(
@@ -433,6 +445,17 @@ class BedrockLLM:
             else:
                 out.append({"role": role, "content": [{"text": content}]})
         system = "\n\n".join(system_parts) if system_parts else None
+        # Prompt-cache the stable prefix (everything except the latest turn).
+        # Haiku 4.5 needs ≥4096 tokens before a checkpoint takes effect.
+        if len(out) >= 2:
+            prev = out[-2]
+            content = list(prev.get("content") or [])
+            if content and not any(
+                isinstance(b, dict) and "cachePoint" in b for b in content
+            ):
+                content = content + [{"cachePoint": {"type": "default"}}]
+                prev = {**prev, "content": content}
+                out[-2] = prev
         return system, out
 
     def complete(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> dict[str, Any]:
@@ -453,7 +476,11 @@ class BedrockLLM:
             },
         }
         if system:
-            kwargs["system"] = [{"text": system}]
+            # Cache stable system text across multi-turn manage/search calls.
+            kwargs["system"] = [
+                {"text": system},
+                {"cachePoint": {"type": "default"}},
+            ]
         try:
             resp = self._client.converse(**kwargs)
         except (BotoCoreError, ClientError) as e:

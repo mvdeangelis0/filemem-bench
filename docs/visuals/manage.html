@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>filemem-bench — Manage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=IBM+Plex+Mono:wght@450;500&family=Source+Sans+3:wght@450;600;650;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="mast">
+      <div class="brand">filemem-bench</div>
+      <h1>Management agent</h1>
+      <p class="sub">Each stream chunk is a write job: tools update the organized store; search never mutates it.</p>
+    </header>
+    <nav class="nav-mini">
+      <a href="index.html">Gallery</a>
+      <a href="search.html">Search</a>
+      <a href="grade.html">Grade</a>
+      <a href="stores-bookkeeper.html">Stores</a>
+      <a href="fs-vs-rag.html">FS vs RAG</a>
+    </nav>
+
+    <div class="callout">
+      <div class="label">Role</div>
+      <div class="text">chunk_008 arrives → manage integrates the preference update</div>
+      <div class="meta">harness: memory_tool_v1 · role: manage</div>
+    </div>
+
+    <div class="story">
+      <div class="narration">
+        <p class="beat-line b0">A new chunk hits the run — manage starts with a clean-ish working context.</p>
+        <p class="beat-line b1">It views the existing person file to see what’s already stored.</p>
+        <p class="beat-line b2">The chunk says the drink preference changed — tea is no longer current.</p>
+        <p class="beat-line b3">str_replace (or create) writes coffee into the organized path.</p>
+        <p class="beat-line b4">Manage calls done for this chunk; the verbatim dump also keeps chunk_008.</p>
+        <p class="beat-line b5">Graders later check update_precedence — leftover tea in the file still fails.</p>
+      </div>
+      <div class="mech">
+        <p class="mech-line b0">ingest chunk_008  title="Preference update"  text includes “now prefers coffee”</p>
+        <p class="mech-line b1">{"tool":"view","arguments":{"path":"people/morgan.md"}}</p>
+        <p class="mech-line b2">chunk body: Update: Morgan now prefers coffee (not tea).</p>
+        <p class="mech-line b3">{"tool":"str_replace","path":"people/morgan.md","old":"tea","new":"coffee"}</p>
+        <p class="mech-line b4">{"tool":"done"}  · verbatim: chunks/chunk_008.md written by harness</p>
+        <p class="mech-line b5">check <span class="ok">mgmt.update_precedence.*</span> — stale tea still present → <span class="bad">fail</span></p>
+      </div>
+      <div class="progress">
+        <span class="b0"></span><span class="b1"></span><span class="b2"></span>
+        <span class="b3"></span><span class="b4"></span><span class="b5"></span>
+      </div>
+
+      <div class="stage-board" style="position:relative">
+        <div class="fly-layer"><div class="fly-token">chunk_008</div></div>
+        <section class="card">
+          <h3>Write path</h3>
+          <div class="rows">
+            <div class="blob step b0"><div class="id">stream</div>chunk_008 preference update</div>
+            <div class="blob step b1"><div class="id">view</div>people/morgan.md</div>
+            <div class="blob step b2"><div class="id">observe</div>tea on disk · coffee in chunk</div>
+            <div class="blob step b3"><div class="id">str_replace</div>Preferred drink: <strong>coffee</strong></div>
+            <div class="blob step b4"><div class="id">done</div>chunk integrated</div>
+            <div class="blob step b5"><div class="id">grader later</div>must not leave tea behind</div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <footer class="footer-cap">
+      <p class="caption">Manage owns writes — search is read-only over whatever manage left behind.</p>
+      <p class="note">Protected fields (e.g. emergency contact) must survive edits</p>
+    </footer>
+  </div>
+</body>
+</html>
