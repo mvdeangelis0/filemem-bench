@@ -7,14 +7,12 @@ Static research figures for the [filemem-bench](https://github.com/mvdeangelis0/
 | [`architecture.svg`](architecture.svg) / [`.png`](architecture.png) | Pipeline: stream → manage → stores → search → grade |
 | [`fs-vs-rag.svg`](fs-vs-rag.svg) / [`.png`](fs-vs-rag.png) | Bakeoff: FS+bookkeeper vs lexical RAG on `q_drink_current` |
 
-Edit the `.svg` sources; refresh PNG with Chrome/Playwright if needed:
+Edit the `.svg` sources; refresh PNGs with `rsvg-convert` (do **not** use macOS Quick Look — it pads to a square and crops wide figures):
 
 ```bash
-# optional — README can embed .svg directly on GitHub
-python - <<'PY'
-# see docs/superpowers/plans if a render helper is added later
-print('open the SVG in a browser and export, or use rsvg-convert / Inkscape')
-PY
+# brew install librsvg
+rsvg-convert -w 1920 docs/visuals/architecture.svg -o docs/visuals/architecture.png
+rsvg-convert -w 1920 docs/visuals/fs-vs-rag.svg -o docs/visuals/fs-vs-rag.png
 ```
 
 Reproduce the drink query: [`../guides/repro-drink-query.md`](../guides/repro-drink-query.md).
