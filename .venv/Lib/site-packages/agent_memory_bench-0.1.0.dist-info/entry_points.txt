@@ -1,0 +1,3 @@
+[console_scripts]
+amb = amb.cli:main
+ambc = amb.continuous.ambc:main
