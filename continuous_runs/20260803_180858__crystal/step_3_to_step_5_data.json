@@ -1,0 +1,1 @@
+[{'timestamp': '2026-08-03T18:10:11+00:00', 'temperature': 25.0, 'humidity': 30.0, 'growth': 0.0, 'trials': 0}, {'timestamp': '2026-08-03T18:10:12+00:00', 'temperature': 25.0, 'humidity': 30.0, 'growth': 0.2870857702340332, 'trials': 1}, {'timestamp': '2026-08-03T18:10:13+00:00', 'temperature': 25.0, 'humidity': 30.0, 'growth': 0.2870857702340332, 'trials': 1}]
