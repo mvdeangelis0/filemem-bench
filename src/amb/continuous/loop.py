@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from amb.continuous.deferred import list_deferred
 from amb.continuous.inbox import consume_inbox
 from amb.continuous.lab import load_world
 from amb.continuous.layout import init_run_dir
@@ -24,6 +25,10 @@ _TOOL_SCHEMAS: list[dict[str, Any]] = [
     {"name": "run_bounded_python", "description": "Run bounded Python"},
     {"name": "search_allowlisted_web", "description": "Search allowlisted web"},
     {"name": "fetch_allowlisted_page", "description": "Fetch allowlisted URL"},
+    {
+        "name": "defer",
+        "description": "Park an out-of-scope task for later (task, reason, need)",
+    },
     {"name": "done", "description": "End the episode"},
 ]
 
@@ -67,8 +72,18 @@ def _labels_for(tool: str, arguments: dict[str, Any], result: dict[str, Any]) ->
 
 def _build_user_message(run_dir: Path, *, graph_pack: list[dict], inbox_text: str) -> str:
     objective = (run_dir / "core" / "objective.md").read_text(encoding="utf-8")
+    caps_path = run_dir / "core" / "capabilities.md"
+    capabilities = (
+        caps_path.read_text(encoding="utf-8")
+        if caps_path.exists()
+        else "(capabilities missing)"
+    )
     status = (run_dir / "STATUS.md").read_text(encoding="utf-8")
     plan = (run_dir / "memory" / "current_plan.json").read_text(encoding="utf-8")
+    deferred = list_deferred(run_dir, limit=8)
+    deferred_txt = (
+        json.dumps(deferred, indent=2) if deferred else "(none — good; stay in-scope)"
+    )
     obs_path = run_dir / "memory" / "observations.jsonl"
     tail_lines: list[str] = []
     if obs_path.exists():
@@ -76,14 +91,18 @@ def _build_user_message(run_dir: Path, *, graph_pack: list[dict], inbox_text: st
         tail_lines = lines[-8:]
     parts = [
         "## Objective\n" + objective.strip(),
+        "## Capabilities\n" + capabilities.strip(),
         "## Status\n" + status.strip(),
         "## Plan\n" + plan.strip(),
+        "## Deferred (do not pretend these are done)\n" + deferred_txt,
         "## Pathway pack\n" + json.dumps(graph_pack, indent=2),
         "## Recent observations\n" + ("\n".join(tail_lines) if tail_lines else "(none)"),
     ]
     if inbox_text:
         parts.insert(0, "## Operator instruction (high priority)\n" + inbox_text)
-    parts.append("Choose the next single tool call.")
+    parts.append(
+        "Choose the next single tool call. Prefer in-scope work; use defer for the rest."
+    )
     return "\n\n".join(parts)
 
 
@@ -102,13 +121,22 @@ def run_episode(
     out_dir = Path(out_dir)
     if run_id is None:
         run_id = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S") + f"__{world}"
-    run_dir = init_run_dir(out_dir, run_id=run_id, world=world, seed=seed, model=model_id)
+    allow = list(web_allowlist or [])
+    run_dir = init_run_dir(
+        out_dir,
+        run_id=run_id,
+        world=world,
+        seed=seed,
+        model=model_id,
+        web_allowlist=allow,
+        max_steps=max_steps,
+    )
     cfg = json.loads((run_dir / "config.json").read_text(encoding="utf-8"))
     cfg["max_steps"] = max_steps
-    cfg["web_allowlist"] = list(web_allowlist or [])
+    cfg["web_allowlist"] = allow
     (run_dir / "config.json").write_text(json.dumps(cfg, indent=2) + "\n", encoding="utf-8")
 
-    policy = Policy(web_allowlist=list(web_allowlist or []))
+    policy = Policy(web_allowlist=allow)
     lab = load_world(world, run_dir / "lab", seed=seed)
     tools = ToolRuntime(run_dir, world=lab, policy=policy)
     graph = MemoryGraph(run_dir / "memory" / "graph.json")

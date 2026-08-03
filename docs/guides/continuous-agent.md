@@ -87,3 +87,20 @@ Or from the shell: `/daemon --max-episodes 5` then `/stop` from another terminal
 ## Safety
 
 No raw shell. Workspace paths are confined to the run directory. Web tools need an explicit `--web-allowlist host1,host2` (default: empty = denied). Bounded Python uses a restricted exec (Windows-safe timeout via threads, not signals).
+
+## Capabilities + deferred tasks
+
+Every run includes `core/capabilities.md` (what is allowed *now*). Out-of-scope work should go to `memory/deferred.jsonl` via:
+
+- tool `defer` `{task, reason, need}`, or
+- automatic enqueue when policy denies a tool
+
+Watch with:
+
+```bat
+ambc> /use D:\ambc_lab\<run_id>
+ambc> /deferred
+ambc> /status
+```
+
+STATUS shows a deferred count. Do not treat deferred items as completed until capabilities expand.

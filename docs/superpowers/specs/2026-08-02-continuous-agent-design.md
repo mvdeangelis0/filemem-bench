@@ -235,3 +235,4 @@ Do **not** pull these into v1 implementation. After mock+Ollama continuous runs 
 - Operator UX: structured STATUS + INBOX inject; observer optional later
 - Runtime: episodic first, daemon designed for phase 2
 - Memory: append-only store + weighted pathway graph (access frequency + light outcome boost; decay optional later)
+- Capability awareness: `core/capabilities.md` + `defer` tool + auto-defer on policy deny → `memory/deferred.jsonl`

@@ -10,6 +10,7 @@ ALLOWED_TOOLS = frozenset({
     "view", "create", "str_replace",
     "run_bounded_python",
     "search_allowlisted_web", "fetch_allowlisted_page",
+    "defer",
     "done",
 })
 

@@ -7,6 +7,7 @@ def test_allows_known_tools():
     assert d.allowed
     d2 = p.check("view", {"path": "memory/lessons.md"})
     assert d2.allowed
+    assert p.check("defer", {"task": "x", "need": "web"}).allowed
 
 
 def test_denies_unknown_and_shellish():

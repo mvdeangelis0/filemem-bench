@@ -10,6 +10,7 @@ from urllib.parse import urlparse
 
 import httpx
 
+from amb.continuous.deferred import append_deferred, infer_need_from_policy
 from amb.continuous.policy import Policy
 from amb.harness.store import canonicalize_rel_path, resolve_in_store
 
@@ -82,10 +83,20 @@ class ToolRuntime:
         arguments = dict(arguments or {})
         decision = self.policy.check(tool, arguments)
         if not decision.allowed:
+            need = infer_need_from_policy(tool, decision.reason)
+            row = append_deferred(
+                self.run_dir,
+                task=f"Attempted {tool}: {arguments!r}"[:400],
+                reason=decision.reason,
+                need=need,
+                source="policy",
+                tool=tool,
+            )
             return {
                 "ok": False,
                 "error_code": "policy_denied",
                 "error": decision.reason,
+                "deferred": row,
             }
         handlers = {
             "view": self._view,
@@ -96,6 +107,7 @@ class ToolRuntime:
             "run_bounded_python": self._run_bounded_python,
             "search_allowlisted_web": self._search_web,
             "fetch_allowlisted_page": self._fetch_page,
+            "defer": self._defer,
             "done": self._done,
         }
         handler = handlers.get(tool)
@@ -218,3 +230,23 @@ class ToolRuntime:
             "done": True,
             "summary": str(args.get("summary") or ""),
         }
+
+    def _defer(self, args: dict[str, Any]) -> dict[str, Any]:
+        task = str(args.get("task") or args.get("description") or "").strip()
+        if not task:
+            return {
+                "ok": False,
+                "error_code": "missing_task",
+                "error": "defer requires task text",
+            }
+        reason = str(args.get("reason") or "out of current capabilities")
+        need = str(args.get("need") or "capability")
+        row = append_deferred(
+            self.run_dir,
+            task=task,
+            reason=reason,
+            need=need,
+            source="agent",
+            tool="defer",
+        )
+        return {"ok": True, "deferred": row, "informative": True}

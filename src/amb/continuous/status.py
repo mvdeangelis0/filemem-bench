@@ -4,6 +4,8 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
+from amb.continuous.deferred import count_deferred
+
 
 def write_status(
     run_dir: Path,
@@ -21,6 +23,7 @@ def write_status(
     plan_total = plan.get("steps_total", "?")
     ok_s = "ok" if last_ok is True else ("err" if last_ok is False else "n/a")
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    deferred_n = count_deferred(run_dir)
     body = (
         f"# Status\n\n"
         f"Task: {task}\n"
@@ -28,6 +31,7 @@ def write_status(
         f"Loop step: {step}/{max_steps}\n"
         f"Last action: {last_tool or '(none)'} ({ok_s})\n"
         f"Result: {last_summary}\n"
+        f"Deferred tasks: {deferred_n}\n"
         f"Budget: {max_steps - step} steps left\n"
         f"Updated: {now}\n"
     )

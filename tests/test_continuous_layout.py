@@ -12,6 +12,8 @@ def test_init_run_dir_creates_skeleton(tmp_path: Path):
     assert (run / "memory" / "current_plan.json").is_file()
     assert (run / "memory" / "graph.json").is_file()
     assert (run / "memory" / "lessons.md").is_file()
+    assert (run / "core" / "capabilities.md").is_file()
+    assert (run / "memory" / "deferred.jsonl").is_file()
     assert (run / "lab").is_dir()
     assert (run / "inbox_archive").is_dir()
     cfg = (run / "config.json").read_text(encoding="utf-8")

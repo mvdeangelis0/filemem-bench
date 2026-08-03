@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from amb.continuous.daemon import run_daemon, should_stop
+from amb.continuous.deferred import list_deferred
 from amb.continuous.inbox import inject as continuous_inject
 from amb.continuous.loop import run_episode
 from amb.continuous.score import compare_episodes, score_run
@@ -21,6 +22,7 @@ Slash commands (interactive):
   /help                         Show this help
   /status                       Print STATUS.md for the active run
   /inbox                        Show pending INBOX.md
+  /deferred [n]                 Show last n deferred tasks (default 20)
   /inject <text>                Queue an operator instruction
   /tail [n]                     Show last n action lines (default 15)
   /graph [k]                    Show top-k weighted pathways (default 8)
@@ -189,6 +191,20 @@ def cmd_inbox(session: Session, _args: list[str]) -> None:
     run = session.require_run()
     text = (run / "INBOX.md").read_text(encoding="utf-8") if (run / "INBOX.md").exists() else ""
     print(text if text.strip() else "(empty inbox)")
+
+
+def cmd_deferred(session: Session, args: list[str]) -> None:
+    run = session.require_run()
+    n = int(args[0]) if args else 20
+    rows = list_deferred(run, limit=n)
+    if not rows:
+        print("(no deferred tasks)")
+        return
+    for row in rows:
+        print(
+            f"[{row.get('need')}] {row.get('task')} "
+            f"— {row.get('reason')} ({row.get('source')})"
+        )
 
 
 def cmd_inject(session: Session, args: list[str]) -> None:
@@ -380,6 +396,7 @@ COMMANDS: dict[str, Callable[[Session, list[str]], None]] = {
     "ls": cmd_ls,
     "status": cmd_status,
     "inbox": cmd_inbox,
+    "deferred": cmd_deferred,
     "inject": cmd_inject,
     "tail": cmd_tail,
     "graph": cmd_graph,
