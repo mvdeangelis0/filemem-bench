@@ -1,8 +1,10 @@
-# agent_memory_bench
+# filemem-bench (`agent_memory_bench`)
 
-Open evaluation harness for **filesystem-based agent memory** (management + search), with deterministic scorecards and reproducible run ledgers.
+Open evaluation harness for **filesystem-based agent memory** (management + search), with deterministic scorecards and reproducible run ledgers — plus a sandboxed **continuous-agent loop** (`ambc`) to test whether persistent memory pathways improve long-horizon behavior on local models.
 
-**Repo:** [mvdeangelis0/filemem-bench](https://github.com/mvdeangelis0/filemem-bench) (public). Local package name remains `agent-memory-bench` / `amb`.
+**Not a general desktop assistant.** Continuous mode is an experiment arm (policy-gated lab, STATUS/INBOX, weighted pathways) used to decide whether that direction is worth pursuing.
+
+**Repo:** [mvdeangelis0/filemem-bench](https://github.com/mvdeangelis0/filemem-bench) (public). Package / CLIs: `agent-memory-bench`, `amb`, `ambc`.
 
 ![FS vs RAG bakeoff](docs/visuals/fs-vs-rag.gif)
 
@@ -10,7 +12,7 @@ Same query, same gold — **FS + bookkeeper** reaches the later update (`coffee`
 
 [Pipeline visuals gallery](docs/visuals/index.html) · [bakeoff board](docs/visuals/fs-vs-rag.html) · [reproduce `q_drink_current`](docs/guides/repro-drink-query.md) · [visuals README](docs/visuals/README.md)
 
-Desktop (RTX 3070 + Ollama): [`docs/guides/desktop-rtx3070.md`](docs/guides/desktop-rtx3070.md).
+Desktop (RTX 3070 + Ollama): [`docs/guides/desktop-rtx3070.md`](docs/guides/desktop-rtx3070.md) · Continuous agent: [`docs/guides/continuous-agent.md`](docs/guides/continuous-agent.md)
 
 ## Quick start
 
@@ -18,7 +20,7 @@ Desktop (RTX 3070 + Ollama): [`docs/guides/desktop-rtx3070.md`](docs/guides/desk
 git clone https://github.com/mvdeangelis0/filemem-bench.git
 cd filemem-bench
 python3.12 -m venv .venv   # needs Python >=3.11
-source .venv/bin/activate
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
 pytest
 amb validate-suite suites/smoke
@@ -46,3 +48,15 @@ amb run --suite suites/smoke --llm bedrock \
   --search-model us.anthropic.claude-haiku-4-5-20251001-v1:0 \
   --out runs -v
 ```
+
+## Continuous agent (`ambc`)
+
+Operator-facing shell for the sandboxed lab loop (slash commands). Bench suites stay on `amb run`.
+
+```bash
+ambc                  # interactive: /help /status /inject /run …
+ambc help
+ambc run --world crystal --llm ollama --model deepseek-r1:7b --max-steps 50 -v
+```
+
+Prefer ~4k–8k Ollama context on an 8GB RTX 3070. Details: [`docs/guides/continuous-agent.md`](docs/guides/continuous-agent.md).
