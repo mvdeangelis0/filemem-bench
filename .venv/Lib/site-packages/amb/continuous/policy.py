@@ -15,6 +15,16 @@ ALLOWED_TOOLS = frozenset({
 })
 
 _FORBIDDEN_PY = ("import os", "import subprocess", "from os", "__import__", "socket", "subprocess")
+_PATH_EXAMPLE = "memory/notes.md"
+
+
+def continuous_path_error(err: str | None) -> str:
+    """Rewrite AMB store examples so the lab agent is not steered to people/morgan.md."""
+    text = err or "bad path"
+    return (
+        text.replace("people/morgan.md", _PATH_EXAMPLE)
+        .replace("notes/sync-2025-03-21.md", "lab/state.json")
+    )
 
 
 @dataclass
@@ -34,11 +44,17 @@ class Policy:
             path = arguments.get("path") or arguments.get("file_path") or ""
             canon, err = canonicalize_rel_path(path)
             if err or canon is None:
-                return PolicyDecision(False, err or "bad path")
+                return PolicyDecision(False, continuous_path_error(err or "bad path"))
             if canon.startswith("inbox_archive/") is False and ".." in str(path):
                 return PolicyDecision(False, "path escape")
         if tool == "run_bounded_python":
-            code = str(arguments.get("code") or "")
+            raw = arguments.get("code")
+            if raw is None:
+                raw = arguments.get("script")
+            if isinstance(raw, dict):
+                code = str(raw.get("code") or raw.get("script") or "")
+            else:
+                code = str(raw or "")
             low = code.lower()
             for bad in _FORBIDDEN_PY:
                 if bad in low:

@@ -1,0 +1,1 @@
+Hypothesis: Initial observations indicate growth rates are positively correlated with temperature and moderately affected by humidity.

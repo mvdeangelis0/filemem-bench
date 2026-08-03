@@ -1,0 +1,1 @@
+{"ts": "2026-08-03T22:16:24.707103+00:00", "task": "Attempted view: {}", "reason": "empty path (use a relative path like memory/notes.md)", "need": "host_fs", "source": "policy", "tool": "view", "status": "deferred"}

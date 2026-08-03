@@ -18,12 +18,31 @@ from amb.continuous.tools import ToolRuntime
 from amb.continuous.web_trail import list_trail, read_cursor
 
 _TOOL_SCHEMAS: list[dict[str, Any]] = [
-    {"name": "lab_sense", "description": "Read lab instruments"},
-    {"name": "lab_act", "description": "Set temperature/humidity and run a trial"},
-    {"name": "view", "description": "Read a workspace file"},
-    {"name": "create", "description": "Create a workspace file"},
-    {"name": "str_replace", "description": "Replace text in a workspace file"},
-    {"name": "run_bounded_python", "description": "Run bounded Python"},
+    {"name": "lab_sense", "description": "Read lab instruments (no arguments)"},
+    {
+        "name": "lab_act",
+        "description": (
+            "Set temperature and/or humidity then run one growth trial. "
+            "Arguments: temperature (number), humidity (number). "
+            "Example: {\"temperature\": 30, \"humidity\": 50}"
+        ),
+    },
+    {
+        "name": "view",
+        "description": "Read a relative workspace file (e.g. memory/notes.md)",
+    },
+    {
+        "name": "create",
+        "description": "Create a relative workspace file (path + content/file_text)",
+    },
+    {
+        "name": "str_replace",
+        "description": "Replace text in a relative workspace file (path, old_str, new_str)",
+    },
+    {
+        "name": "run_bounded_python",
+        "description": "Run bounded Python; pass code as string argument {\"code\": \"...\"}",
+    },
     {"name": "search_allowlisted_web", "description": "Search allowlisted web"},
     {"name": "fetch_allowlisted_page", "description": "Fetch allowlisted URL"},
     {
@@ -165,117 +184,127 @@ def run_episode(
         last_summary="starting",
     )
 
-    for step in range(1, max_steps + 1):
-        steps_done = step
-        inbox_text = consume_inbox(run_dir)
-        plan = json.loads((run_dir / "memory" / "current_plan.json").read_text(encoding="utf-8"))
-        query_tokens = [str(plan.get("task", "")), world]
-        graph_pack = graph.retrieve(query_tokens=query_tokens, top_k=5)
-        messages = [
-            {"role": "system", "content": system},
-            {
-                "role": "user",
-                "content": _build_user_message(
-                    run_dir, graph_pack=graph_pack, inbox_text=inbox_text
-                ),
-            },
-        ]
-        response = llm.complete(messages, _TOOL_SCHEMAS)
-        _append_jsonl(
-            run_dir / "trajectory.jsonl",
-            {"step": step, "response": response, "inbox": inbox_text},
-        )
+    try:
+        for step in range(1, max_steps + 1):
+            steps_done = step
+            inbox_text = consume_inbox(run_dir)
+            plan = json.loads((run_dir / "memory" / "current_plan.json").read_text(encoding="utf-8"))
+            query_tokens = [str(plan.get("task", "")), world]
+            graph_pack = graph.retrieve(query_tokens=query_tokens, top_k=5)
+            messages = [
+                {"role": "system", "content": system},
+                {
+                    "role": "user",
+                    "content": _build_user_message(
+                        run_dir, graph_pack=graph_pack, inbox_text=inbox_text
+                    ),
+                },
+            ]
+            response = llm.complete(messages, _TOOL_SCHEMAS)
+            _append_jsonl(
+                run_dir / "trajectory.jsonl",
+                {"step": step, "response": response, "inbox": inbox_text},
+            )
 
-        if not isinstance(response, dict) or response.get("type") != "tool_call":
-            consecutive_failures += 1
+            if not isinstance(response, dict) or response.get("type") != "tool_call":
+                consecutive_failures += 1
+                write_status(
+                    run_dir,
+                    step=step,
+                    max_steps=max_steps,
+                    last_tool=None,
+                    last_ok=False,
+                    last_summary="protocol_error: expected tool_call",
+                )
+                if verbose:
+                    _log(f"[continuous] step {step}/{max_steps} protocol_error")
+                if consecutive_failures >= 3:
+                    stop_reason = "protocol_failures"
+                    break
+                continue
+
+            tool = str(response.get("tool") or "")
+            arguments = dict(response.get("arguments") or {})
+            key = _action_key(tool, arguments)
+            if key == last_key:
+                repeat_count += 1
+            else:
+                last_key = key
+                repeat_count = 1
+
+            if verbose:
+                _log(f"[continuous] step {step}/{max_steps} tool={tool} args={arguments}")
+
+            tools.step = step
+            result = tools.execute(tool, arguments)
+            ok = bool(result.get("ok"))
+            _append_jsonl(
+                run_dir / "actions.jsonl",
+                {"step": step, "tool": tool, "arguments": arguments, "result": result},
+            )
+
+            obs_id = f"step_{step}"
+            obs = {
+                "id": obs_id,
+                "step": step,
+                "tool": tool,
+                "arguments": arguments,
+                "ok": ok,
+                "result": result,
+            }
+            _append_jsonl(run_dir / "memory" / "observations.jsonl", obs)
+            graph.observe(
+                _labels_for(tool, arguments, result),
+                observation_id=obs_id,
+                success=ok and bool(result.get("informative", ok)),
+            )
+
+            summary = (
+                result.get("error")
+                or result.get("summary")
+                or str(result.get("result", ""))[:200]
+            )
             write_status(
                 run_dir,
                 step=step,
                 max_steps=max_steps,
-                last_tool=None,
-                last_ok=False,
-                last_summary="protocol_error: expected tool_call",
+                last_tool=tool,
+                last_ok=ok,
+                last_summary=str(summary),
             )
-            if verbose:
-                _log(f"[continuous] step {step}/{max_steps} protocol_error")
-            if consecutive_failures >= 3:
-                stop_reason = "protocol_failures"
+
+            if not ok:
+                consecutive_failures += 1
+            else:
+                consecutive_failures = 0
+
+            if result.get("done"):
+                stop_reason = "done"
                 break
-            continue
-
-        tool = str(response.get("tool") or "")
-        arguments = dict(response.get("arguments") or {})
-        key = _action_key(tool, arguments)
-        if key == last_key:
-            repeat_count += 1
-        else:
-            last_key = key
-            repeat_count = 1
-
+            if consecutive_failures >= 3:
+                stop_reason = "consecutive_failures"
+                break
+            if repeat_count >= 3:
+                # Give one structured observation then stop if still looping.
+                _append_jsonl(
+                    run_dir / "memory" / "observations.jsonl",
+                    {
+                        "id": f"loop_warn_{step}",
+                        "step": step,
+                        "warning": "repeated identical action; break the loop",
+                    },
+                )
+                stop_reason = "loop_detected"
+                if verbose:
+                    _log(f"[continuous] loop detected at step {step}")
+                break
+    except Exception as e:  # noqa: BLE001 — always leave a REPORT.md
+        stop_reason = f"crash:{type(e).__name__}"
         if verbose:
-            _log(f"[continuous] step {step}/{max_steps} tool={tool} args={arguments}")
-
-        tools.step = step
-        result = tools.execute(tool, arguments)
-        ok = bool(result.get("ok"))
-        _append_jsonl(
-            run_dir / "actions.jsonl",
-            {"step": step, "tool": tool, "arguments": arguments, "result": result},
-        )
-
-        obs_id = f"step_{step}"
-        obs = {
-            "id": obs_id,
-            "step": step,
-            "tool": tool,
-            "arguments": arguments,
-            "ok": ok,
-            "result": result,
-        }
-        _append_jsonl(run_dir / "memory" / "observations.jsonl", obs)
-        graph.observe(
-            _labels_for(tool, arguments, result),
-            observation_id=obs_id,
-            success=ok and bool(result.get("informative", ok)),
-        )
-
-        summary = result.get("error") or result.get("summary") or str(result.get("result", ""))[:200]
-        write_status(
-            run_dir,
-            step=step,
-            max_steps=max_steps,
-            last_tool=tool,
-            last_ok=ok,
-            last_summary=str(summary),
-        )
-
-        if not ok:
-            consecutive_failures += 1
-        else:
-            consecutive_failures = 0
-
-        if result.get("done"):
-            stop_reason = "done"
-            break
-        if consecutive_failures >= 3:
-            stop_reason = "consecutive_failures"
-            break
-        if repeat_count >= 3:
-            # Give one structured observation then stop if still looping.
-            _append_jsonl(
-                run_dir / "memory" / "observations.jsonl",
-                {
-                    "id": f"loop_warn_{step}",
-                    "step": step,
-                    "warning": "repeated identical action; break the loop",
-                },
-            )
-            stop_reason = "loop_detected"
-            if verbose:
-                _log(f"[continuous] loop detected at step {step}")
-            break
-
-    write_report(run_dir, stop_reason=stop_reason, steps=steps_done)
-    if verbose:
-        _log(f"[continuous] stop_reason={stop_reason} steps={steps_done} dir={run_dir}")
+            _log(f"[continuous] crash: {type(e).__name__}: {e}")
+        raise
+    finally:
+        write_report(run_dir, stop_reason=stop_reason, steps=steps_done)
+        if verbose:
+            _log(f"[continuous] stop_reason={stop_reason} steps={steps_done} dir={run_dir}")
     return run_dir
