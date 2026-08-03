@@ -12,6 +12,7 @@ from amb.continuous.daemon import run_daemon, should_stop
 from amb.continuous.deferred import list_deferred
 from amb.continuous.inbox import inject as continuous_inject
 from amb.continuous.loop import run_episode
+from amb.continuous.memory_browser import ask_over_run, build_map, inventory_tree
 from amb.continuous.score import compare_episodes, score_run
 from amb.continuous.web_trail import list_trail, read_cursor
 
@@ -25,6 +26,9 @@ Slash commands (interactive):
   /inbox                        Show pending INBOX.md
   /deferred [n]                 Show last n deferred tasks (default 20)
   /trail [n]                    Show web trail breadcrumbs (default 15)
+  /tree                         List files stored in the active run
+  /map                          Write/print OPERATOR_MAP.md (roles + graph + trail)
+  /ask <question>               LLM Q&A over the run files (uses /settings llm)
   /inject <text>                Queue an operator instruction
   /tail [n]                     Show last n action lines (default 15)
   /graph [k]                    Show top-k weighted pathways (default 8)
@@ -229,6 +233,43 @@ def cmd_trail(session: Session, args: list[str]) -> None:
         print(f"{when}  {action}/{ok}  {target}  {title}")
 
 
+def cmd_tree(session: Session, _args: list[str]) -> None:
+    run = session.require_run()
+    lines = inventory_tree(run)
+    if not lines:
+        print("(empty run)")
+        return
+    print(f"run: {run}")
+    for ln in lines:
+        print(ln)
+
+
+def cmd_map(session: Session, _args: list[str]) -> None:
+    run = session.require_run()
+    text = build_map(run)
+    print(text)
+    print(f"(also wrote {run / 'OPERATOR_MAP.md'})")
+
+
+def cmd_ask(session: Session, args: list[str]) -> None:
+    if not args:
+        raise ValueError("usage: /ask <question>")
+    run = session.require_run()
+    question = " ".join(args)
+    result = ask_over_run(
+        run,
+        question,
+        llm_mode=session.llm,
+        model=session.model,
+        ollama_host=session.ollama_host,
+    )
+    print(result["answer"])
+    if result.get("sources"):
+        print("\nSources:")
+        for s in result["sources"]:
+            print(f"- {s['path']} (score={s['score']})")
+
+
 def cmd_inject(session: Session, args: list[str]) -> None:
     if not args:
         raise ValueError('usage: /inject <text>')
@@ -420,6 +461,9 @@ COMMANDS: dict[str, Callable[[Session, list[str]], None]] = {
     "inbox": cmd_inbox,
     "deferred": cmd_deferred,
     "trail": cmd_trail,
+    "tree": cmd_tree,
+    "map": cmd_map,
+    "ask": cmd_ask,
     "inject": cmd_inject,
     "tail": cmd_tail,
     "graph": cmd_graph,

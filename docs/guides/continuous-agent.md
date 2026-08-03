@@ -114,3 +114,17 @@ When web tools are used, the agent leaves breadcrumbs:
 - `memory/web_cursor.json` — where it left off (resume pointer)
 
 Each step’s prompt includes the cursor + recent trail so it can continue instead of restarting cold. Use `/trail` to inspect.
+
+## Track, map, and ask (operator)
+
+All durable state for a run lives under one folder. Manage it with:
+
+```bat
+ambc> /use D:\ambc_lab\<run_id>
+ambc> /tree          rem inventory of stored files
+ambc> /map           rem writes OPERATOR_MAP.md (roles, pathways, deferred, trail)
+ambc> /ask What did we learn about humidity?
+ambc> /open memory/notes.md
+```
+
+`/ask` does lexical retrieval over the run’s text files, then answers with your configured LLM (`/set llm ollama` + `/set model …`). Sources are listed after the answer. This is **read-only Q&A for you** — it does not grant the agent new tools.
