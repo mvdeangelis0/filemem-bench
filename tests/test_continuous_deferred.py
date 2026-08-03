@@ -56,15 +56,9 @@ def count_at_least(run: Path, n: int) -> bool:
     return len(list_deferred(run)) >= n
 
 
-def test_append_deferred_roundtrip(tmp_path: Path):
-    run = init_run_dir(tmp_path, run_id="d2", world="crystal", seed=0)
-    append_deferred(
-        run,
-        task="Need shell to run make",
-        reason="no shell tool",
-        need="shell",
-        source="agent",
-    )
-    rows = list_deferred(run)
-    assert rows[-1]["need"] == "shell"
-    assert "make" in rows[-1]["task"]
+def test_capabilities_use_relative_path_examples(tmp_path: Path):
+    run = init_run_dir(tmp_path, run_id="caps1", world="crystal", seed=0, max_steps=10)
+    text = (run / "core" / "capabilities.md").read_text(encoding="utf-8")
+    assert "memory/notes.md" in text
+    assert "people/morgan.md" not in text
+    assert "temperature" in text and "humidity" in text

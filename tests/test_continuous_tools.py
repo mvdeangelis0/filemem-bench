@@ -41,12 +41,54 @@ def test_lab_roundtrip(tmp_path: Path):
     assert sense["ok"] and "growth" in sense["result"]
 
 
+def test_lab_act_rejects_fake_action_keys(tmp_path: Path):
+    run = init_run_dir(tmp_path, run_id="w4", world="crystal", seed=0)
+    world = load_world("crystal", run / "lab", seed=0)
+    rt = ToolRuntime(run, world=world, policy=Policy(web_allowlist=[]))
+    r = rt.execute("lab_act", {"action": "test_action_optimized_growth"})
+    assert not r["ok"]
+    assert r["error_code"] == "bad_args"
+    assert "temperature" in r["error"]
+
+
+def test_lab_act_sets_temp_humidity_ignores_extra(tmp_path: Path):
+    run = init_run_dir(tmp_path, run_id="w5", world="crystal", seed=0)
+    world = load_world("crystal", run / "lab", seed=0)
+    rt = ToolRuntime(run, world=world, policy=Policy(web_allowlist=[]))
+    r = rt.execute(
+        "lab_act",
+        {"temperature": 37, "humidity": 50, "action": "ignored"},
+    )
+    assert r["ok"]
+    assert r["result"]["temperature"] == 37.0
+    assert r["result"]["humidity"] == 50.0
+    assert "action" in r.get("ignored_keys", [])
+
+
+def test_python_accepts_script_alias(tmp_path: Path):
+    run = init_run_dir(tmp_path, run_id="w6", world="crystal", seed=0)
+    world = load_world("crystal", run / "lab", seed=0)
+    rt = ToolRuntime(run, world=world, policy=Policy(web_allowlist=[]))
+    r = rt.execute("run_bounded_python", {"script": "result = 2 + 2"})
+    assert r["ok"] and r["result"] == 4
+
+
 def test_python_math_via_tools(tmp_path: Path):
     run = init_run_dir(tmp_path, run_id="w3", world="crystal", seed=0)
     world = load_world("crystal", run / "lab", seed=0)
     rt = ToolRuntime(run, world=world, policy=Policy(web_allowlist=[]))
     r = rt.execute("run_bounded_python", {"code": "result = 1 + 1"})
     assert r["ok"] and r["result"] == 2
+
+
+def test_absolute_path_error_uses_continuous_example(tmp_path: Path):
+    run = init_run_dir(tmp_path, run_id="w7", world="crystal", seed=0)
+    world = load_world("crystal", run / "lab", seed=0)
+    rt = ToolRuntime(run, world=world, policy=Policy(web_allowlist=[]))
+    r = rt.execute("view", {"path": "/path/to/data.json"})
+    assert not r["ok"]
+    assert "people/morgan.md" not in r["error"]
+    assert "memory/notes.md" in r["error"]
 
 
 def test_mock_llm_unused_import_ok():

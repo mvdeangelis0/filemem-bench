@@ -130,6 +130,41 @@ def _parse_json_content(content: str) -> Any:
     return None
 
 
+def _coerce_tool_arguments(raw: Any) -> tuple[dict[str, Any] | None, str | None]:
+    """Normalize tool arguments to a dict. Accept a single-element list of dict."""
+    if raw is None:
+        return {}, None
+    if isinstance(raw, dict):
+        return dict(raw), None
+    if isinstance(raw, list):
+        if not raw:
+            return {}, None
+        if isinstance(raw[0], dict):
+            return dict(raw[0]), None
+        return None, "arguments_not_object"
+    return None, "arguments_not_object"
+
+
+def _tool_call_action(tool: Any, arguments: Any, *, raw: str | None) -> dict[str, Any]:
+    name = str(tool or "").strip()
+    if not name:
+        return {
+            "type": "protocol_error",
+            "error": "missing_tool_or_answer",
+            "raw": (raw or "")[:500],
+        }
+    args, err = _coerce_tool_arguments(arguments)
+    if err or args is None:
+        return {
+            "type": "protocol_error",
+            "error": err or "arguments_not_object",
+            "raw": (raw or json.dumps({"tool": name, "arguments": arguments}, ensure_ascii=False))[
+                :500
+            ],
+        }
+    return {"type": "tool_call", "tool": name, "arguments": args}
+
+
 def normalize_llm_action(obj: Any, *, raw: str | None = None) -> dict[str, Any]:
     """Map model JSON into tool_call, final, or protocol_error."""
     if obj is None:
@@ -151,18 +186,35 @@ def normalize_llm_action(obj: Any, *, raw: str | None = None) -> dict[str, Any]:
             "raw": str(obj)[:500],
         }
 
+    # Nested wrapper seen from small models: {"tool_call": {...}} or {"tool_call": "name"}
+    if "tool_call" in obj and "tool" not in obj:
+        tc = obj["tool_call"]
+        if isinstance(tc, str):
+            return _tool_call_action(tc, {}, raw=raw)
+        if isinstance(tc, dict):
+            return _tool_call_action(
+                tc.get("tool"),
+                tc.get("arguments") if "arguments" in tc else tc.get("args"),
+                raw=raw,
+            )
+        return {
+            "type": "protocol_error",
+            "error": "missing_tool_or_answer",
+            "raw": json.dumps(obj, ensure_ascii=False)[:500],
+        }
+
     if obj.get("type") == "tool_call" and "tool" in obj:
-        return {
-            "type": "tool_call",
-            "tool": obj["tool"],
-            "arguments": obj.get("arguments") or {},
-        }
+        return _tool_call_action(
+            obj["tool"],
+            obj.get("arguments") if "arguments" in obj else obj.get("args"),
+            raw=raw,
+        )
     if "tool" in obj:
-        return {
-            "type": "tool_call",
-            "tool": obj["tool"],
-            "arguments": obj.get("arguments") or obj.get("args") or {},
-        }
+        return _tool_call_action(
+            obj["tool"],
+            obj.get("arguments") if "arguments" in obj else obj.get("args"),
+            raw=raw,
+        )
     if "final" in obj:
         return {"type": "final", "content": obj["final"]}
     if "answer" in obj:

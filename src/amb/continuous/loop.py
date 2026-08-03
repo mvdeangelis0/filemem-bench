@@ -18,12 +18,31 @@ from amb.continuous.tools import ToolRuntime
 from amb.continuous.web_trail import list_trail, read_cursor
 
 _TOOL_SCHEMAS: list[dict[str, Any]] = [
-    {"name": "lab_sense", "description": "Read lab instruments"},
-    {"name": "lab_act", "description": "Set temperature/humidity and run a trial"},
-    {"name": "view", "description": "Read a workspace file"},
-    {"name": "create", "description": "Create a workspace file"},
-    {"name": "str_replace", "description": "Replace text in a workspace file"},
-    {"name": "run_bounded_python", "description": "Run bounded Python"},
+    {"name": "lab_sense", "description": "Read lab instruments (no arguments)"},
+    {
+        "name": "lab_act",
+        "description": (
+            "Set temperature and/or humidity then run one growth trial. "
+            "Arguments: temperature (number), humidity (number). "
+            "Example: {\"temperature\": 30, \"humidity\": 50}"
+        ),
+    },
+    {
+        "name": "view",
+        "description": "Read a relative workspace file (e.g. memory/notes.md)",
+    },
+    {
+        "name": "create",
+        "description": "Create a relative workspace file (path + content/file_text)",
+    },
+    {
+        "name": "str_replace",
+        "description": "Replace text in a relative workspace file (path, old_str, new_str)",
+    },
+    {
+        "name": "run_bounded_python",
+        "description": "Run bounded Python; pass code as string argument {\"code\": \"...\"}",
+    },
     {"name": "search_allowlisted_web", "description": "Search allowlisted web"},
     {"name": "fetch_allowlisted_page", "description": "Fetch allowlisted URL"},
     {

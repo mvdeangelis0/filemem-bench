@@ -2,6 +2,8 @@
 
 Windows-first notes for the RTX 3070 desktop. Spec: `docs/superpowers/specs/2026-08-02-continuous-agent-design.md`.
 
+First live-run writeup (what the 7B actually did, crash fix, score caveats): `docs/guides/continuous-agent-findings-2026-08-03.md`.
+
 ## Setup (Windows)
 
 ```bat

@@ -13,7 +13,7 @@ from urllib.parse import urlparse
 import httpx
 
 from amb.continuous.deferred import append_deferred, infer_need_from_policy
-from amb.continuous.policy import Policy
+from amb.continuous.policy import Policy, continuous_path_error
 from amb.continuous.web_trail import append_trail, extract_title
 from amb.harness.store import canonicalize_rel_path, resolve_in_store
 
@@ -139,7 +139,7 @@ class ToolRuntime:
     def _resolve(self, rel: object) -> tuple[Path | None, str | None]:
         canon, err = canonicalize_rel_path(rel)
         if err or canon is None:
-            return None, err or "bad path"
+            return None, continuous_path_error(err or "bad path")
         path = resolve_in_store(self.run_dir, canon)
         if path is None:
             return None, "path escape"
@@ -196,17 +196,59 @@ class ToolRuntime:
         return {"ok": True, "result": self.world.sense(), "informative": True}
 
     def _lab_act(self, args: dict[str, Any]) -> dict[str, Any]:
-        out = self.world.act(args)
-        return {
+        allowed = {"temperature", "humidity"}
+        ignored = sorted(k for k in args if k not in allowed)
+        filtered: dict[str, Any] = {}
+        for key in allowed:
+            if key not in args:
+                continue
+            try:
+                filtered[key] = float(args[key])
+            except (TypeError, ValueError):
+                return {
+                    "ok": False,
+                    "error_code": "bad_args",
+                    "error": (
+                        f"{key} must be a number; "
+                        'example: {"temperature": 30, "humidity": 50}'
+                    ),
+                    "ignored_keys": ignored,
+                }
+        if not filtered:
+            return {
+                "ok": False,
+                "error_code": "bad_args",
+                "error": (
+                    "lab_act requires temperature and/or humidity numbers; "
+                    'example: {"temperature": 30, "humidity": 50}. '
+                    "Do not invent keys like action or command."
+                ),
+                "ignored_keys": ignored,
+            }
+        out = self.world.act(filtered)
+        result: dict[str, Any] = {
             "ok": bool(out.get("ok", True)),
             "result": out.get("state") or out,
             "informative": bool(out.get("informative", True)),
         }
+        if ignored:
+            result["ignored_keys"] = ignored
+        return result
 
     def _run_bounded_python(self, args: dict[str, Any]) -> dict[str, Any]:
-        code = str(args.get("code") or "")
+        raw = args.get("code")
+        if raw is None:
+            raw = args.get("script")
+        if isinstance(raw, dict):
+            # Nested shapes like {"type":"python","script":"..."} from small models.
+            raw = raw.get("code") or raw.get("script") or ""
+        code = str(raw or "")
         if not code.strip():
-            return {"ok": False, "error_code": "empty_code", "error": "missing code"}
+            return {
+                "ok": False,
+                "error_code": "empty_code",
+                "error": 'missing code; pass {"code": "result = 1 + 1"}',
+            }
         return _run_python_code(code)
 
     def _search_web(self, args: dict[str, Any]) -> dict[str, Any]:
