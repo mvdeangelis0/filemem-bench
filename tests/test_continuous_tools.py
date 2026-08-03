@@ -1,0 +1,39 @@
+from pathlib import Path
+
+from amb.agents.llm import MockLLM, ScriptedTurn
+from amb.continuous.lab import load_world
+from amb.continuous.layout import init_run_dir
+from amb.continuous.policy import Policy
+from amb.continuous.tools import ToolRuntime
+
+
+def test_workspace_create_view(tmp_path: Path):
+    run = init_run_dir(tmp_path, run_id="w1", world="crystal", seed=0)
+    world = load_world("crystal", run / "lab", seed=0)
+    rt = ToolRuntime(run, world=world, policy=Policy(web_allowlist=[]))
+    r = rt.execute("create", {"path": "memory/notes.md", "file_text": "hello"})
+    assert r["ok"]
+    r2 = rt.execute("view", {"path": "memory/notes.md"})
+    assert r2["ok"] and "hello" in r2["content"]
+
+
+def test_lab_roundtrip(tmp_path: Path):
+    run = init_run_dir(tmp_path, run_id="w2", world="crystal", seed=0)
+    world = load_world("crystal", run / "lab", seed=0)
+    rt = ToolRuntime(run, world=world, policy=Policy(web_allowlist=[]))
+    assert rt.execute("lab_act", {"temperature": 37, "humidity": 50})["ok"]
+    sense = rt.execute("lab_sense", {})
+    assert sense["ok"] and "growth" in sense["result"]
+
+
+def test_python_math_via_tools(tmp_path: Path):
+    run = init_run_dir(tmp_path, run_id="w3", world="crystal", seed=0)
+    world = load_world("crystal", run / "lab", seed=0)
+    rt = ToolRuntime(run, world=world, policy=Policy(web_allowlist=[]))
+    r = rt.execute("run_bounded_python", {"code": "result = 1 + 1"})
+    assert r["ok"] and r["result"] == 2
+
+
+def test_mock_llm_unused_import_ok():
+    # Keep MockLLM import wired for loop tests package discovery.
+    assert MockLLM is not None and ScriptedTurn is not None

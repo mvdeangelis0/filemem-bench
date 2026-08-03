@@ -64,6 +64,10 @@ amb run --suite suites/smoke --llm bedrock \
 
 This is a cloud comparison arm (costs money). Local Ollama remains the primary 24/7 target.
 
-## 6. Security note
+## 6. Continuous sandboxed agent
+
+See [continuous-agent.md](continuous-agent.md). Preferred operator UI: **`ambc`** (interactive `/help`, `/status`, `/inject`, `/run`, …). Prefer 4k–8k Ollama context on 8GB VRAM.
+
+## 7. Security note
 
 Do **not** bind raw Ollama (`0.0.0.0:11434`) to the public internet. Keep it local; tunnel later behind an authenticated API if needed.

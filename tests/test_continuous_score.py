@@ -1,0 +1,33 @@
+from pathlib import Path
+
+from amb.continuous.layout import init_run_dir
+from amb.continuous.score import compare_episodes, score_run
+
+
+def test_score_run_discovers_laws(tmp_path: Path):
+    run = init_run_dir(tmp_path, run_id="sc1", world="crystal", seed=0)
+    (run / "memory" / "notes.md").write_text(
+        "Growth peaks near temperature 37 with humidity 50.\n",
+        encoding="utf-8",
+    )
+    sc = score_run(run)
+    assert sc["summary"]["n_passed"] == 2
+    assert sc["summary"]["pass_rate"] == 1.0
+    assert (run / "scorecard.json").is_file()
+
+
+def test_score_run_fails_without_hints(tmp_path: Path):
+    run = init_run_dir(tmp_path, run_id="sc2", world="crystal", seed=0)
+    sc = score_run(run)
+    assert sc["summary"]["n_passed"] == 0
+
+
+def test_compare_episodes(tmp_path: Path):
+    early = init_run_dir(tmp_path, run_id="e1", world="crystal", seed=0)
+    late = init_run_dir(tmp_path, run_id="e2", world="crystal", seed=0)
+    (late / "memory" / "notes.md").write_text(
+        "Prefer temp 37 and humidity around 45.\n", encoding="utf-8"
+    )
+    cmp = compare_episodes(early, late)
+    assert cmp["improved"] is True
+    assert cmp["delta"] > 0
