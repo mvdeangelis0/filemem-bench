@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+import json
 import math
 import re
 from concurrent.futures import ThreadPoolExecutor
@@ -84,7 +85,8 @@ class ToolRuntime:
         policy: Policy,
         step: int | None = None,
     ) -> None:
-        self.run_dir = Path(run_dir)
+        # Always absolute so relative_to() works after resolve_in_store().
+        self.run_dir = Path(run_dir).resolve()
         self.world = world
         self.policy = policy
         self.step = step
@@ -131,6 +133,8 @@ class ToolRuntime:
             return handler(arguments)
         except OSError as e:
             return {"ok": False, "error_code": "os_error", "error": str(e)}
+        except Exception as e:  # noqa: BLE001 — keep episode alive on tool bugs
+            return {"ok": False, "error_code": "tool_error", "error": f"{type(e).__name__}: {e}"}
 
     def _resolve(self, rel: object) -> tuple[Path | None, str | None]:
         canon, err = canonicalize_rel_path(rel)
@@ -160,11 +164,17 @@ class ToolRuntime:
         if path.exists():
             return {"ok": False, "error_code": "exists", "error": "file already exists"}
         path.parent.mkdir(parents=True, exist_ok=True)
-        text = str(
+        raw = (
             args.get("file_text")
             if args.get("file_text") is not None
-            else args.get("content") or ""
+            else args.get("content")
         )
+        if raw is None:
+            text = ""
+        elif isinstance(raw, str):
+            text = raw
+        else:
+            text = json.dumps(raw, ensure_ascii=False, indent=2)
         path.write_text(text, encoding="utf-8")
         return {"ok": True, "path": str(path.relative_to(self.run_dir)).replace("\\", "/")}
 

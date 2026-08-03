@@ -17,6 +17,21 @@ def test_workspace_create_view(tmp_path: Path):
     assert r2["ok"] and "hello" in r2["content"]
 
 
+def test_create_survives_relative_run_dir(tmp_path: Path, monkeypatch):
+    """Regression: create used to ValueError after write when run_dir was relative."""
+    monkeypatch.chdir(tmp_path)
+    run = Path("rel_run")
+    run.mkdir()
+    (run / "lab").mkdir()
+    world = load_world("crystal", run / "lab", seed=0)
+    rt = ToolRuntime(run, world=world, policy=Policy(web_allowlist=[]))
+    r = rt.execute("create", {"path": "note.json", "content": [{"k": 1}]})
+    assert r["ok"], r
+    assert r["path"] == "note.json"
+    text = (run / "note.json").read_text(encoding="utf-8")
+    assert '"k"' in text and "1" in text
+
+
 def test_lab_roundtrip(tmp_path: Path):
     run = init_run_dir(tmp_path, run_id="w2", world="crystal", seed=0)
     world = load_world("crystal", run / "lab", seed=0)
