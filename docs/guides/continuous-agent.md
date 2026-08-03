@@ -22,6 +22,8 @@ Interactive slash-command shell (recommended on the desktop):
 
 ```bat
 ambc
+ambc> /menu
+ambc>          rem bare Enter also opens the arrow-key picker
 ambc> /help
 ambc> /set llm ollama
 ambc> /set model deepseek-r1:7b
@@ -32,8 +34,18 @@ ambc> /inject Focus on humidity next
 ambc> /tail 20
 ambc> /graph
 ambc> /score
+ambc> /pull
+ambc> /reinstall
 ambc> /quit
 ```
+
+### Command picker
+
+`/menu` (or press **Enter** on an empty `ambc>` line) opens an ↑/↓ list of commands. Pick with Enter; Esc/Ctrl+C cancels. Commands that need text (`inject`, `ask`, …) get a follow-up prompt. `/run` and `/daemon` from the menu use your current `/settings` (no flag wizard). Typed slash commands still work.
+
+Requires `questionary` (installed with the package). Prefer **Windows Terminal**.
+
+After `/pull` + `/reinstall`, always `/quit` and start `ambc` again so Python loads the new package.
 
 One-shot:
 
