@@ -66,7 +66,9 @@ This is a cloud comparison arm (costs money). Local Ollama remains the primary 2
 
 ## 6. Continuous sandboxed agent
 
-See [continuous-agent.md](continuous-agent.md). Preferred operator UI: **`ambc`** (interactive `/help`, `/status`, `/inject`, `/run`, …). Prefer 4k–8k Ollama context on 8GB VRAM.
+See [continuous-agent.md](continuous-agent.md). Preferred operator UI: **`ambc`** (interactive `/help`, `/status`, `/inject`, `/run`, …). Prefer 4k–8k Ollama context on 8GB VRAM (`/set num_ctx 4096`, `/set num_predict 512`, `/set keep_alive 30m`).
+
+Model bakeoff checklist: [continuous-model-bakeoff.md](continuous-model-bakeoff.md).
 
 ## 7. Security note
 

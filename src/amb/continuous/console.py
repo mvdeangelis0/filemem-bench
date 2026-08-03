@@ -59,7 +59,8 @@ One-shot (non-interactive):
   ambc status --run <dir>
 
 /run flags: --world --llm --model --max-steps --seed --out --run-id
-            --ollama-host --web-allowlist -v --observer
+            --ollama-host --web-allowlist --num-ctx --num-predict --keep-alive
+            -v --observer
 """.strip()
 
 
@@ -69,6 +70,9 @@ def build_llm(
     model: str,
     ollama_host: str | None,
     verbose: bool,
+    num_ctx: int | None = None,
+    num_predict: int | None = None,
+    keep_alive: str | int | None = None,
 ) -> tuple[Any, str]:
     model_id = model
     if llm_mode == "mock":
@@ -81,7 +85,17 @@ def build_llm(
         host = ollama_host or os.environ.get("OLLAMA_HOST") or "http://127.0.0.1:11434"
         if model_id == "mock":
             raise ValueError("--model required for --llm ollama (e.g. deepseek-r1:7b)")
-        return OllamaLLM(model_id, base_url=host, verbose=verbose), model_id
+        return (
+            OllamaLLM(
+                model_id,
+                base_url=host,
+                verbose=verbose,
+                num_ctx=num_ctx,
+                num_predict=num_predict,
+                keep_alive=keep_alive,
+            ),
+            model_id,
+        )
     raise ValueError(f"unsupported llm {llm_mode}")
 
 
@@ -104,6 +118,10 @@ class Session:
     observer: bool = False
     idle_seconds: float = 1.0
     max_episodes: int = 1
+    # Ollama speed knobs (RTX 3070 defaults — override with /set)
+    num_ctx: int | None = 4096
+    num_predict: int | None = 512
+    keep_alive: str | None = "30m"
 
     def require_run(self) -> Path:
         if self.run_dir is None or not self.run_dir.exists():
@@ -140,10 +158,27 @@ def cmd_settings(session: Session, _args: list[str]) -> None:
                 "observer": session.observer,
                 "idle_seconds": session.idle_seconds,
                 "max_episodes": session.max_episodes,
+                "num_ctx": session.num_ctx,
+                "num_predict": session.num_predict,
+                "keep_alive": session.keep_alive,
             },
             indent=2,
         )
     )
+
+
+def _parse_optional_int(v: str) -> int | None:
+    s = v.strip().lower()
+    if s in {"", "none", "null", "default", "-"}:
+        return None
+    return int(v)
+
+
+def _parse_keep_alive(v: str) -> str | None:
+    s = v.strip()
+    if s.lower() in {"", "none", "null", "default", "-"}:
+        return None
+    return s
 
 
 def cmd_set(session: Session, args: list[str]) -> None:
@@ -163,6 +198,9 @@ def cmd_set(session: Session, args: list[str]) -> None:
         "observer": lambda v: setattr(session, "observer", v.lower() in {"1", "true", "yes", "on"}),
         "idle_seconds": lambda v: setattr(session, "idle_seconds", float(v)),
         "max_episodes": lambda v: setattr(session, "max_episodes", int(v)),
+        "num_ctx": lambda v: setattr(session, "num_ctx", _parse_optional_int(v)),
+        "num_predict": lambda v: setattr(session, "num_predict", _parse_optional_int(v)),
+        "keep_alive": lambda v: setattr(session, "keep_alive", _parse_keep_alive(v)),
     }
     if key not in mapping:
         raise ValueError(f"unknown key {key!r}; see /settings")
@@ -376,10 +414,15 @@ def _apply_run_flags(session: Session, args: list[str]) -> None:
             "web_allowlist",
         }:
             setattr(session, key if key != "ollama_host" else "ollama_host", val)
-        elif key in {"max_steps", "seed", "max_episodes"}:
-            setattr(session, key, int(val))
+        elif key in {"max_steps", "seed", "max_episodes", "num_ctx", "num_predict"}:
+            if key in {"num_ctx", "num_predict"}:
+                setattr(session, key, _parse_optional_int(val))
+            else:
+                setattr(session, key, int(val))
         elif key == "idle_seconds":
             session.idle_seconds = float(val)
+        elif key == "keep_alive":
+            session.keep_alive = _parse_keep_alive(val)
         else:
             raise ValueError(f"unknown flag {tok}")
         i += 2
@@ -396,6 +439,9 @@ def cmd_run(session: Session, args: list[str]) -> None:
         model=session.model,
         ollama_host=session.ollama_host,
         verbose=verbose,
+        num_ctx=session.num_ctx,
+        num_predict=session.num_predict,
+        keep_alive=session.keep_alive,
     )
     run_id = getattr(session, "_run_id", None)
     run_dir = run_episode(
@@ -426,6 +472,9 @@ def cmd_daemon(session: Session, args: list[str]) -> None:
         model=session.model,
         ollama_host=session.ollama_host,
         verbose=verbose,
+        num_ctx=session.num_ctx,
+        num_predict=session.num_predict,
+        keep_alive=session.keep_alive,
     )
     runs = run_daemon(
         run_episode_fn=run_episode,
