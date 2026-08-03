@@ -32,7 +32,7 @@
 
     <div class="story">
       <div class="narration">
-        <p class="beat-line b0">A new chunk hits the run — manage starts with a clean-ish working context.</p>
+        <p class="beat-line b0 is-on">A new chunk hits the run — manage starts with a clean-ish working context.</p>
         <p class="beat-line b1">It views the existing person file to see what’s already stored.</p>
         <p class="beat-line b2">The chunk says the drink preference changed — tea is no longer current.</p>
         <p class="beat-line b3">str_replace (or create) writes coffee into the organized path.</p>
@@ -40,7 +40,7 @@
         <p class="beat-line b5">Graders later check update_precedence — leftover tea in the file still fails.</p>
       </div>
       <div class="mech">
-        <p class="mech-line b0">ingest chunk_008  title="Preference update"  text includes “now prefers coffee”</p>
+        <p class="mech-line b0 is-on">ingest chunk_008  title="Preference update"  text includes “now prefers coffee”</p>
         <p class="mech-line b1">{"tool":"view","arguments":{"path":"people/morgan.md"}}</p>
         <p class="mech-line b2">chunk body: Update: Morgan now prefers coffee (not tea).</p>
         <p class="mech-line b3">{"tool":"str_replace","path":"people/morgan.md","old":"tea","new":"coffee"}</p>
@@ -48,7 +48,7 @@
         <p class="mech-line b5">check <span class="ok">mgmt.update_precedence.*</span> — stale tea still present → <span class="bad">fail</span></p>
       </div>
       <div class="progress">
-        <span class="b0"></span><span class="b1"></span><span class="b2"></span>
+        <span class="b0 is-on"></span><span class="b1"></span><span class="b2"></span>
         <span class="b3"></span><span class="b4"></span><span class="b5"></span>
       </div>
 
@@ -73,5 +73,6 @@
       <p class="note">Protected fields (e.g. emergency contact) must survive edits</p>
     </footer>
   </div>
+  <script src="beats.js" defer></script>
 </body>
 </html>

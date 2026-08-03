@@ -1,36 +1,22 @@
 # Visuals
 
-Animated explainers for [filemem-bench](https://github.com/mvdeangelis0/filemem-bench).
+Static research figures for the [filemem-bench](https://github.com/mvdeangelis0/filemem-bench) README (figure-first hybrid).
 
-## Gallery
-
-Open [`index.html`](index.html) for the full set:
-
-| Board | File |
+| Asset | Role |
 |-------|------|
-| Management agent | [`manage.html`](manage.html) |
-| Search agent | [`search.html`](search.html) |
-| Grade the ledger | [`grade.html`](grade.html) |
-| Stores + bookkeeper | [`stores-bookkeeper.html`](stores-bookkeeper.html) |
-| FS vs RAG bakeoff | [`fs-vs-rag.html`](fs-vs-rag.html) |
+| [`architecture.svg`](architecture.svg) / [`.png`](architecture.png) | Pipeline: stream → manage → stores → search → grade |
+| [`fs-vs-rag.svg`](fs-vs-rag.svg) / [`.png`](fs-vs-rag.png) | Bakeoff: FS+bookkeeper vs lexical RAG on `q_drink_current` |
 
-Shared look: [`shared.css`](shared.css) (professional chrome + sketch accents on flows).
-
-## README hero GIF
-
-[`fs-vs-rag.gif`](fs-vs-rag.gif) — ~22s six-beat loop for the bakeoff board.
-
-### Re-export
+Edit the `.svg` sources; refresh PNG with Chrome/Playwright if needed:
 
 ```bash
-pip install playwright Pillow
-python docs/visuals/render_gif.py            # fs-vs-rag (default)
-python docs/visuals/render_gif.py manage     # optional other boards
+# optional — README can embed .svg directly on GitHub
+python - <<'PY'
+# see docs/superpowers/plans if a render helper is added later
+print('open the SVG in a browser and export, or use rsvg-convert / Inkscape')
+PY
 ```
 
-Uses system Chrome (`channel=chrome`).
+Reproduce the drink query: [`../guides/repro-drink-query.md`](../guides/repro-drink-query.md).
 
-### GitHub Pages
-
-Settings → Pages → Deploy from branch → `/docs`.  
-Gallery: `https://<user>.github.io/filemem-bench/visuals/index.html`
+Animated HTML boards from earlier experiments live under [`archive/`](archive/) and are **not** linked from the root README.

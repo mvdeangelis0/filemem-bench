@@ -47,7 +47,7 @@
 
     <div class="story">
       <div class="narration" aria-live="off">
-        <p class="beat-line b0">Both arms get the same question — only the memory interface differs.</p>
+        <p class="beat-line b0 is-on">Both arms get the same question — only the memory interface differs.</p>
         <p class="beat-line b1">FS search opens an early chunk and sees tea (the original preference).</p>
         <p class="beat-line b2">Bookkeeper rejects done: a later update-like chunk overlaps this query.</p>
         <p class="beat-line b3">FS is forced to view chunk_008 — coffee — and cites the update.</p>
@@ -56,7 +56,7 @@
       </div>
 
       <div class="mech" aria-hidden="true">
-        <p class="mech-line b0">query_id = <span class="ok">q_drink_current</span> · shapes = organized|verbatim · search-mode = tools | rag</p>
+        <p class="mech-line b0 is-on">query_id = <span class="ok">q_drink_current</span> · shapes = organized|verbatim · search-mode = tools | rag</p>
         <p class="mech-line b1">{"tool":"view","arguments":{"path":"chunks/chunk_001.md"}}  →  body contains “tea”</p>
         <p class="mech-line b2"><span class="warn">error_code: later_update_unchecked</span>  hint_paths: ["chunks/chunk_008.md"]</p>
         <p class="mech-line b3">{"tool":"view","path":"chunks/chunk_008.md"} → coffee · done citations=["chunks/chunk_008.md"] <span class="ok">✓</span></p>
@@ -65,7 +65,7 @@
       </div>
 
       <div class="progress" aria-hidden="true">
-        <span class="b0"></span><span class="b1"></span><span class="b2"></span>
+        <span class="b0 is-on"></span><span class="b1"></span><span class="b2"></span>
         <span class="b3"></span><span class="b4"></span><span class="b5"></span>
       </div>
 
@@ -128,5 +128,6 @@
       <p class="note">Illustrative of the Haiku core bakeoff gap on q_drink_current</p>
     </footer>
   </div>
+  <script src="beats.js" defer></script>
 </body>
 </html>

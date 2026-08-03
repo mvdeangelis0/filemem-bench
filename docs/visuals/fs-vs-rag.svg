@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="420" viewBox="0 0 960 420" role="img" aria-labelledby="title desc">
+  <title id="title">FS tools vs lexical RAG on q_drink_current</title>
+  <desc id="desc">Same query and gold; FS plus bookkeeper reaches coffee; RAG may answer tea.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#44403c"/>
+    </marker>
+    <style type="text/css"><![CDATA[
+      .bg { fill: #fafaf9; }
+      .panel { fill: #ffffff; stroke: #d6d3d1; stroke-width: 1.25; }
+      .box { fill: #ffffff; stroke: #1c1917; stroke-width: 1.4; }
+      .box-ok { fill: #f7fee7; stroke: #3f6212; stroke-width: 1.6; }
+      .box-bad { fill: #fff1f2; stroke: #9f1239; stroke-width: 1.6; }
+      .box-warn { fill: #fff7ed; stroke: #c2410c; stroke-width: 1.5; stroke-dasharray: 4 3; }
+      .h { font: 700 15px "IBM Plex Sans", "Source Sans 3", system-ui, sans-serif; fill: #1c1917; }
+      .title { font: 700 12.5px "IBM Plex Sans", "Source Sans 3", system-ui, sans-serif; fill: #1c1917; }
+      .sub { font: 500 11px "IBM Plex Sans", "Source Sans 3", system-ui, sans-serif; fill: #57534e; }
+      .mono { font: 500 10.5px "IBM Plex Mono", ui-monospace, monospace; fill: #44403c; }
+      .ok { font: 700 13px "IBM Plex Sans", system-ui, sans-serif; fill: #3f6212; }
+      .bad { font: 700 13px "IBM Plex Sans", system-ui, sans-serif; fill: #9f1239; }
+      .flow { stroke: #57534e; stroke-width: 1.4; fill: none; marker-end: url(#arrow); }
+      .query { fill: #ffffff; stroke: #1c1917; stroke-width: 1.5; }
+      .foot { font: 600 12px "IBM Plex Sans", system-ui, sans-serif; fill: #44403c; }
+    ]]></style>
+  </defs>
+  <rect class="bg" width="960" height="420" rx="8"/>
+
+  <rect class="query" x="180" y="18" width="600" height="56" rx="10"/>
+  <text class="title" x="480" y="40" text-anchor="middle">Shared query / q_drink_current</text>
+  <text class="sub" x="480" y="58" text-anchor="middle">What does Morgan prefer to drink?  |  gold: coffee</text>
+
+  <rect class="panel" x="28" y="92" width="440" height="280" rx="12"/>
+  <text class="h" x="48" y="118">Arm A - FS + bookkeeper</text>
+  <text class="mono" x="48" y="136">addressable paths / later_update_gate</text>
+
+  <rect class="box" x="56" y="152" width="160" height="44" rx="7"/>
+  <text class="mono" x="136" y="170" text-anchor="middle">view chunk_001</text>
+  <text class="sub" x="136" y="186" text-anchor="middle">tea (stale)</text>
+
+  <path class="flow" d="M 224 174 H 268"/>
+
+  <rect class="box-warn" x="276" y="152" width="160" height="44" rx="7"/>
+  <text class="mono" x="356" y="170" text-anchor="middle">later_update_unchecked</text>
+  <text class="sub" x="356" y="186" text-anchor="middle">hint -&gt; chunk_008</text>
+
+  <path class="flow" d="M 356 204 V 228"/>
+
+  <rect class="box" x="276" y="232" width="160" height="44" rx="7"/>
+  <text class="mono" x="356" y="250" text-anchor="middle">view chunk_008</text>
+  <text class="sub" x="356" y="266" text-anchor="middle">coffee (current)</text>
+
+  <rect class="box-ok" x="56" y="308" width="380" height="40" rx="7"/>
+  <text class="ok" x="246" y="334" text-anchor="middle">answer: coffee  [pass]  cite chunk_008</text>
+
+  <rect class="panel" x="492" y="92" width="440" height="280" rx="12"/>
+  <text class="h" x="512" y="118">Arm C - RAG lexical</text>
+  <text class="mono" x="512" y="136">TF-IDF top-k / no forced later read</text>
+
+  <rect class="box" x="520" y="152" width="380" height="70" rx="7"/>
+  <text class="mono" x="536" y="174">top-k</text>
+  <text class="sub" x="536" y="192">1. chunk_001 tea...   2. chunk_010 ...   3. chunk_003 ...</text>
+  <text class="sub" x="536" y="208">chunk_008 update ranked low / buried</text>
+
+  <path class="flow" d="M 710 230 V 254"/>
+
+  <rect class="box" x="520" y="258" width="380" height="44" rx="7"/>
+  <text class="mono" x="710" y="276" text-anchor="middle">model context = retrieved passages only</text>
+  <text class="sub" x="710" y="292" text-anchor="middle">no bookkeeper gate</text>
+
+  <rect class="box-bad" x="520" y="308" width="380" height="40" rx="7"/>
+  <text class="bad" x="710" y="334" text-anchor="middle">answer: tea  [fail]  stale evidence</text>
+
+  <text class="foot" x="480" y="400" text-anchor="middle">Same gold. Memory representation differs.  |  illustrative Haiku core bakeoff gap</text>
+</svg>

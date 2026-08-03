@@ -32,7 +32,7 @@
 
     <div class="story">
       <div class="narration">
-        <p class="beat-line b0">Search starts with the query plus a store map — not the full chat history of manage.</p>
+        <p class="beat-line b0 is-on">Search starts with the query plus a store map — not the full chat history of manage.</p>
         <p class="beat-line b1">First view often hits an early or obvious path (tea still visible).</p>
         <p class="beat-line b2">On chunk stores, timeline / update flags hint that something later may supersede.</p>
         <p class="beat-line b3">If done fires too early, the bookkeeper can bounce it with a concrete hint path.</p>
@@ -40,7 +40,7 @@
         <p class="beat-line b5">Graders score answer_match and citations_support against gold — not vibes.</p>
       </div>
       <div class="mech">
-        <p class="mech-line b0">user: {type:"query", q, store_map, shape, chunk_timeline?}</p>
+        <p class="mech-line b0 is-on">user: {type:"query", q, store_map, shape, chunk_timeline?}</p>
         <p class="mech-line b1">{"tool":"view","arguments":{"path":"chunks/chunk_001.md"}}</p>
         <p class="mech-line b2">chunk_timeline: [{path:chunk_008, update_flag:true, t:8}, …]</p>
         <p class="mech-line b3"><span class="warn">later_update_unchecked</span> → retry with view hint</p>
@@ -48,7 +48,7 @@
         <p class="mech-line b5">checks: search.answer_match.q_drink_current · search.citations_support.*</p>
       </div>
       <div class="progress">
-        <span class="b0"></span><span class="b1"></span><span class="b2"></span>
+        <span class="b0 is-on"></span><span class="b1"></span><span class="b2"></span>
         <span class="b3"></span><span class="b4"></span><span class="b5"></span>
       </div>
 
@@ -73,5 +73,6 @@
       <p class="note">Protocol errors nudge JSON retry instead of silent unknown</p>
     </footer>
   </div>
+  <script src="beats.js" defer></script>
 </body>
 </html>

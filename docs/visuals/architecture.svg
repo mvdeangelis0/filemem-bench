@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="280" viewBox="0 0 960 280" role="img" aria-labelledby="title desc">
+  <title id="title">filemem-bench architecture</title>
+  <desc id="desc">Stream chunks flow through manage into dual stores, then search, then grade.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#44403c"/>
+    </marker>
+    <style type="text/css"><![CDATA[
+      .bg { fill: #fafaf9; }
+      .box { fill: #ffffff; stroke: #1c1917; stroke-width: 1.5; }
+      .box-muted { fill: #f5f5f4; stroke: #78716c; stroke-width: 1.25; }
+      .title { font: 700 13px "IBM Plex Sans", "Source Sans 3", system-ui, sans-serif; fill: #1c1917; }
+      .sub { font: 500 11px "IBM Plex Sans", "Source Sans 3", system-ui, sans-serif; fill: #57534e; }
+      .cap { font: 600 12px "IBM Plex Sans", "Source Sans 3", system-ui, sans-serif; fill: #44403c; }
+      .flow { stroke: #44403c; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
+      .label { font: 500 10px "IBM Plex Mono", ui-monospace, monospace; fill: #78716c; }
+    ]]></style>
+  </defs>
+  <rect class="bg" width="960" height="280" rx="8"/>
+
+  <rect class="box" x="28" y="100" width="120" height="64" rx="8"/>
+  <text class="title" x="88" y="128" text-anchor="middle">stream</text>
+  <text class="sub" x="88" y="146" text-anchor="middle">chunks.yaml</text>
+
+  <path class="flow" d="M 156 132 H 196"/>
+
+  <rect class="box" x="200" y="92" width="130" height="80" rx="8"/>
+  <text class="title" x="265" y="122" text-anchor="middle">manage</text>
+  <text class="sub" x="265" y="140" text-anchor="middle">memory tools</text>
+  <text class="label" x="265" y="156" text-anchor="middle">write path</text>
+
+  <path class="flow" d="M 338 120 H 378"/>
+  <path class="flow" d="M 338 150 H 378"/>
+
+  <rect class="box" x="386" y="48" width="160" height="70" rx="8"/>
+  <text class="title" x="466" y="76" text-anchor="middle">organized/</text>
+  <text class="sub" x="466" y="94" text-anchor="middle">curated markdown</text>
+
+  <rect class="box-muted" x="386" y="148" width="160" height="70" rx="8"/>
+  <text class="title" x="466" y="176" text-anchor="middle">verbatim/chunks/</text>
+  <text class="sub" x="466" y="194" text-anchor="middle">+ bookkeeper gate</text>
+
+  <path class="flow" d="M 554 83 H 594"/>
+  <path class="flow" d="M 554 183 H 594"/>
+  <path class="flow" d="M 594 83 V 183"/>
+  <path class="flow" d="M 594 132 H 634"/>
+
+  <rect class="box" x="642" y="92" width="130" height="80" rx="8"/>
+  <text class="title" x="707" y="122" text-anchor="middle">search</text>
+  <text class="sub" x="707" y="140" text-anchor="middle">view / done</text>
+  <text class="label" x="707" y="156" text-anchor="middle">read-only</text>
+
+  <path class="flow" d="M 780 132 H 820"/>
+
+  <rect class="box" x="828" y="100" width="110" height="64" rx="8"/>
+  <text class="title" x="883" y="128" text-anchor="middle">grade</text>
+  <text class="sub" x="883" y="146" text-anchor="middle">scorecard</text>
+
+  <text class="cap" x="480" y="250" text-anchor="middle">Harness: stream -&gt; manage -&gt; dual stores -&gt; search -&gt; grade(ledger)</text>
+</svg>

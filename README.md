@@ -6,11 +6,20 @@ Open evaluation harness for **filesystem-based agent memory** (management + sear
 
 **Repo:** [mvdeangelis0/filemem-bench](https://github.com/mvdeangelis0/filemem-bench) (public). Package / CLIs: `agent-memory-bench`, `amb`, `ambc`.
 
-![FS vs RAG bakeoff](docs/visuals/fs-vs-rag.gif)
+![Architecture](docs/visuals/architecture.png)
 
-Same query, same gold — **FS + bookkeeper** reaches the later update (`coffee`); **lexical RAG** can stick on early evidence (`tea`).
+*Stream → manage (write) → organized/ + verbatim/chunks/ → search (read-only) → grade(ledger).*
 
-[Pipeline visuals gallery](docs/visuals/index.html) · [bakeoff board](docs/visuals/fs-vs-rag.html) · [reproduce `q_drink_current`](docs/guides/repro-drink-query.md) · [visuals README](docs/visuals/README.md)
+![FS vs RAG bakeoff](docs/visuals/fs-vs-rag.png)
+
+Same query and gold (`q_drink_current`) — **FS + bookkeeper** reaches the later update (**coffee**); **lexical RAG** can stick on early evidence (**tea**).
+
+| Arm (Haiku / `suites/core`) | Scorecard | `q_drink_current` verbatim |
+|-----------------------------|-----------|------------------------------|
+| FS tools + bookkeeper | **108/109** | coffee ✓ |
+| RAG lexical (TF-IDF top-k) | **106/109** | tea ✗ (stale) |
+
+Runs: `core__bedrock_haiku__20260802_164950__57bafb64`, `core__rag_lexical__20260802_165347__57bafb64`. Reproduce: [`docs/guides/repro-drink-query.md`](docs/guides/repro-drink-query.md) · figures: [`docs/visuals/`](docs/visuals/README.md)
 
 Desktop (RTX 3070 + Ollama): [`docs/guides/desktop-rtx3070.md`](docs/guides/desktop-rtx3070.md) · Continuous agent: [`docs/guides/continuous-agent.md`](docs/guides/continuous-agent.md)
 

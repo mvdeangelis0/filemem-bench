@@ -32,7 +32,7 @@
 
     <div class="story">
       <div class="narration">
-        <p class="beat-line b0">One stream feeds two stores: curated files and a raw chunk log.</p>
+        <p class="beat-line b0 is-on">One stream feeds two stores: curated files and a raw chunk log.</p>
         <p class="beat-line b1">Organized memory aims for current facts at stable paths.</p>
         <p class="beat-line b2">Verbatim keeps history — chunk_001 tea and chunk_008 coffee both exist.</p>
         <p class="beat-line b3">Search tries to finish after citing only the early chunk.</p>
@@ -40,7 +40,7 @@
         <p class="beat-line b5">After viewing chunk_008, done is allowed — citations can support coffee.</p>
       </div>
       <div class="mech">
-        <p class="mech-line b0">build_verbatim(chunks) ∥ manage → stores/organized/</p>
+        <p class="mech-line b0 is-on">build_verbatim(chunks) ∥ manage → stores/organized/</p>
         <p class="mech-line b1">people/morgan.md · projects/atlas.md  <span class="ok">(addressable)</span></p>
         <p class="mech-line b2">chunks/chunk_001.md (t=1) … chunks/chunk_008.md (t=8, update_flag)</p>
         <p class="mech-line b3">done answer=tea citations=[chunk_001]  <span class="bad">← premature</span></p>
@@ -48,7 +48,7 @@
         <p class="mech-line b5">view chunk_008 → done answer=coffee citations=[chunk_008] <span class="ok">✓</span></p>
       </div>
       <div class="progress">
-        <span class="b0"></span><span class="b1"></span><span class="b2"></span>
+        <span class="b0 is-on"></span><span class="b1"></span><span class="b2"></span>
         <span class="b3"></span><span class="b4"></span><span class="b5"></span>
       </div>
 
@@ -100,5 +100,6 @@
       <p class="note">Search-only · chunk stores only · suite-agnostic query-token overlap</p>
     </footer>
   </div>
+  <script src="beats.js" defer></script>
 </body>
 </html>
