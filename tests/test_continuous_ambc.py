@@ -88,5 +88,22 @@ def test_build_slash_line():
     assert build_slash_line("inject", "Focus humidity") == "/inject Focus humidity"
 
 
-def test_help_lists_menu():
-    assert "/menu" in HELP_TEXT
+def test_settings_persist_across_load(tmp_path: Path, monkeypatch):
+    from amb.continuous.console import load_session, save_session, settings_path
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("AMBC_SETTINGS", raising=False)
+    s = Session(out_dir=tmp_path / "continuous_runs")
+    assert s.llm == "ollama"
+    assert "qwen2.5" in s.model
+    assert dispatch_line(s, "/set max_steps 42") is True
+    assert settings_path().is_file()
+    s2 = load_session(Session())
+    assert s2.max_steps == 42
+    assert s2.model == s.model
+    # explicit path
+    other = tmp_path / "alt.json"
+    s.model = "llama3.1:8b-instruct-q4_K_M"
+    save_session(s, path=other)
+    s3 = load_session(Session(), path=other)
+    assert s3.model == "llama3.1:8b-instruct-q4_K_M"

@@ -53,7 +53,7 @@ Slash commands (interactive):
 One-shot (non-interactive):
   ambc                         Enter interactive shell
   ambc help
-  ambc run --llm ollama --model deepseek-r1:7b --max-steps 50
+  ambc run --llm ollama --model qwen2.5:7b-instruct-q4_K_M --max-steps 30
   ambc inject --run <dir> "Focus on humidity"
   ambc score --run <dir>
   ambc status --run <dir>
@@ -61,7 +61,31 @@ One-shot (non-interactive):
 /run flags: --world --llm --model --max-steps --seed --out --run-id
             --ollama-host --web-allowlist --num-ctx --num-predict --keep-alive
             -v --observer
+
+Settings persist to .ambc_settings.json in the current directory (override with AMBC_SETTINGS).
+/set and /use auto-save; /settings shows the file path.
 """.strip()
+
+
+DEFAULT_MODEL = "qwen2.5:7b-instruct-q4_K_M"
+SETTINGS_FILENAME = ".ambc_settings.json"
+
+_PERSIST_KEYS = (
+    "world",
+    "llm",
+    "model",
+    "max_steps",
+    "seed",
+    "ollama_host",
+    "web_allowlist",
+    "verbose",
+    "observer",
+    "idle_seconds",
+    "max_episodes",
+    "num_ctx",
+    "num_predict",
+    "keep_alive",
+)
 
 
 def build_llm(
@@ -103,14 +127,21 @@ def parse_allowlist(raw: str) -> list[str]:
     return [h.strip() for h in raw.split(",") if h.strip()]
 
 
+def settings_path() -> Path:
+    env = os.environ.get("AMBC_SETTINGS")
+    if env:
+        return Path(env).expanduser()
+    return Path.cwd() / SETTINGS_FILENAME
+
+
 @dataclass
 class Session:
     out_dir: Path = field(default_factory=lambda: Path("continuous_runs"))
     run_dir: Path | None = None
     world: str = "crystal"
-    llm: str = "mock"
-    model: str = "mock"
-    max_steps: int = 20
+    llm: str = "ollama"
+    model: str = DEFAULT_MODEL
+    max_steps: int = 30
     seed: int = 0
     ollama_host: str | None = None
     web_allowlist: str = ""
@@ -129,6 +160,55 @@ class Session:
         return self.run_dir
 
 
+def session_snapshot(session: Session) -> dict[str, Any]:
+    data: dict[str, Any] = {
+        "out": str(session.out_dir),
+        "run": str(session.run_dir) if session.run_dir else None,
+    }
+    for key in _PERSIST_KEYS:
+        data[key] = getattr(session, key)
+    return data
+
+
+def apply_snapshot(session: Session, data: dict[str, Any]) -> None:
+    if "out" in data and data["out"]:
+        session.out_dir = Path(str(data["out"]))
+    run = data.get("run")
+    if run:
+        path = Path(str(run))
+        session.run_dir = path if path.exists() else None
+    elif "run" in data and data["run"] is None:
+        session.run_dir = None
+    for key in _PERSIST_KEYS:
+        if key not in data:
+            continue
+        setattr(session, key, data[key])
+
+
+def save_session(session: Session, *, path: Path | None = None) -> Path:
+    dest = path or settings_path()
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text(json.dumps(session_snapshot(session), indent=2) + "\n", encoding="utf-8")
+    return dest
+
+
+def load_session(session: Session | None = None, *, path: Path | None = None) -> Session:
+    """Load persisted settings over defaults (Qwen + Ollama)."""
+    sess = session or Session()
+    src = path or settings_path()
+    if not src.is_file():
+        return sess
+    try:
+        data = json.loads(src.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as e:
+        print(f"warning: could not load {src}: {e}", file=sys.stderr)
+        return sess
+    if not isinstance(data, dict):
+        return sess
+    apply_snapshot(sess, data)
+    return sess
+
+
 def _print_file(path: Path) -> None:
     if not path.exists():
         print(f"(missing) {path}")
@@ -142,29 +222,9 @@ def cmd_help(_session: Session, _args: list[str]) -> None:
 
 
 def cmd_settings(session: Session, _args: list[str]) -> None:
-    print(
-        json.dumps(
-            {
-                "out": str(session.out_dir),
-                "run": str(session.run_dir) if session.run_dir else None,
-                "world": session.world,
-                "llm": session.llm,
-                "model": session.model,
-                "max_steps": session.max_steps,
-                "seed": session.seed,
-                "ollama_host": session.ollama_host,
-                "web_allowlist": session.web_allowlist,
-                "verbose": session.verbose,
-                "observer": session.observer,
-                "idle_seconds": session.idle_seconds,
-                "max_episodes": session.max_episodes,
-                "num_ctx": session.num_ctx,
-                "num_predict": session.num_predict,
-                "keep_alive": session.keep_alive,
-            },
-            indent=2,
-        )
-    )
+    snap = session_snapshot(session)
+    snap["settings_file"] = str(settings_path())
+    print(json.dumps(snap, indent=2))
 
 
 def _parse_optional_int(v: str) -> int | None:
@@ -205,7 +265,8 @@ def cmd_set(session: Session, args: list[str]) -> None:
     if key not in mapping:
         raise ValueError(f"unknown key {key!r}; see /settings")
     mapping[key](value)
-    print(f"set {key}={value}")
+    dest = save_session(session)
+    print(f"set {key}={value}  (saved {dest})")
 
 
 def cmd_use(session: Session, args: list[str]) -> None:
@@ -215,7 +276,8 @@ def cmd_use(session: Session, args: list[str]) -> None:
     if not path.exists():
         raise ValueError(f"not found: {path}")
     session.run_dir = path
-    print(f"active run: {path}")
+    dest = save_session(session)
+    print(f"active run: {path}  (saved {dest})")
 
 
 def cmd_ls(session: Session, _args: list[str]) -> None:
@@ -458,6 +520,7 @@ def cmd_run(session: Session, args: list[str]) -> None:
     session.run_dir = run_dir
     if hasattr(session, "_run_id"):
         delattr(session, "_run_id")
+    save_session(session)
     print(run_dir)
 
 
@@ -491,6 +554,7 @@ def cmd_daemon(session: Session, args: list[str]) -> None:
     )
     if runs:
         session.run_dir = runs[-1]
+        save_session(session)
     for r in runs:
         print(r)
 
@@ -640,11 +704,12 @@ def dispatch_line(session: Session, line: str) -> bool:
 
 
 def run_repl(session: Session | None = None) -> int:
-    session = session or Session()
+    session = load_session(session)
     print(
         f"ambc interactive shell — type /menu or press Enter for picker  "
         f"(out={session.out_dir})"
     )
+    print(f"settings: llm={session.llm} model={session.model}  file={settings_path()}")
     while True:
         try:
             line = input("ambc> ")

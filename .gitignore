@@ -9,5 +9,6 @@ dist/
 build/
 runs/
 continuous_runs/
+.ambc_settings.json
 .superpowers/
 .DS_Store

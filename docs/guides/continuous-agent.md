@@ -24,22 +24,18 @@ Interactive slash-command shell (recommended on the desktop):
 
 ```bat
 ambc
+ambc> /settings
 ambc> /menu
 ambc>          rem bare Enter also opens the arrow-key picker
-ambc> /help
-ambc> /set llm ollama
-ambc> /set model deepseek-r1:7b
-ambc> /set max_steps 50
+ambc> /set model qwen2.5:7b-instruct-q4_K_M
 ambc> /run -v
 ambc> /status
 ambc> /inject Focus on humidity next
-ambc> /tail 20
-ambc> /graph
 ambc> /score
-ambc> /pull
-ambc> /reinstall
 ambc> /quit
 ```
+
+Defaults: `llm=ollama`, model=`qwen2.5:7b-instruct-q4_K_M`, `num_ctx=4096`, `num_predict=512`, `keep_alive=30m`, `max_steps=30`. `/set` and `/use` write `.ambc_settings.json` in the cwd (gitignored) so restarts keep your choices.
 
 ### Command picker
 

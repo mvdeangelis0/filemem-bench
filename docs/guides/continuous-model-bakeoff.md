@@ -7,8 +7,12 @@ Related: [continuous-agent.md](continuous-agent.md) · findings: [continuous-age
 
 ## Fixed settings (all arms)
 
+Defaults in a fresh `ambc` session (also saved to `.ambc_settings.json` when you `/set`):
+
 | Knob | Value | Why |
 |------|-------|-----|
+| `llm` | `ollama` | Local GPU |
+| `model` | `qwen2.5:7b-instruct-q4_K_M` | Primary bakeoff arm |
 | `world` | `crystal` | Only continuous world shipped |
 | `seed` | `0` | Comparable lab noise |
 | `max_steps` | `30` | Enough signal without all-night runs |
@@ -16,6 +20,8 @@ Related: [continuous-agent.md](continuous-agent.md) · findings: [continuous-age
 | `num_predict` | `512` | Cap tool-call / thinking tokens |
 | `keep_alive` | `30m` | Avoid cold reload between steps |
 | inject (optional) | same text every arm | See below |
+
+Settings persist across restarts (cwd `.ambc_settings.json`, or `AMBC_SETTINGS`). Change model with `/set model …` — it auto-saves.
 
 ## Models to pull
 
@@ -42,19 +48,15 @@ ollama pull deepseek-r1:7b-qwen-distill-q4_K_M
 
 ```bat
 ambc
-ambc> /set llm ollama
-ambc> /set model qwen2.5:7b-instruct-q4_K_M
-ambc> /set max_steps 30
-ambc> /set seed 0
-ambc> /set num_ctx 4096
-ambc> /set num_predict 512
-ambc> /set keep_alive 30m
 ambc> /settings
+ambc> /set model qwen2.5:7b-instruct-q4_K_M
 ambc> /inject Run a temperature sweep 20 to 45 at humidity 50; log results; update memory/lessons.md with any T/H hypothesis.
 ambc> /run -v
 ambc> /score
 ambc> /report
 ```
+
+Fresh installs already default to Qwen + the fixed knobs above; `/set model …` for later arms auto-saves.
 
 One-shot equivalent:
 
