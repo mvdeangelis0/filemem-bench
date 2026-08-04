@@ -1,0 +1,1 @@
+Temperature and humidity seem to have a positive effect on growth. Next, I will try increasing the temperature slightly while keeping humidity constant.

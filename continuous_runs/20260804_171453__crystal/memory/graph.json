@@ -1,0 +1,307 @@
+{
+  "nodes": {
+    "lab_sense": {
+      "visits": 8,
+      "observations": [
+        "step_1",
+        "step_3",
+        "step_4",
+        "step_6",
+        "step_8",
+        "step_10",
+        "step_11",
+        "step_12"
+      ]
+    },
+    "temperature": {
+      "visits": 12,
+      "observations": [
+        "step_1",
+        "step_2",
+        "step_3",
+        "step_4",
+        "step_5",
+        "step_6",
+        "step_7",
+        "step_8",
+        "step_9",
+        "step_10",
+        "step_11",
+        "step_12"
+      ]
+    },
+    "humidity": {
+      "visits": 12,
+      "observations": [
+        "step_1",
+        "step_2",
+        "step_3",
+        "step_4",
+        "step_5",
+        "step_6",
+        "step_7",
+        "step_8",
+        "step_9",
+        "step_10",
+        "step_11",
+        "step_12"
+      ]
+    },
+    "growth": {
+      "visits": 12,
+      "observations": [
+        "step_1",
+        "step_2",
+        "step_3",
+        "step_4",
+        "step_5",
+        "step_6",
+        "step_7",
+        "step_8",
+        "step_9",
+        "step_10",
+        "step_11",
+        "step_12"
+      ]
+    },
+    "lab_act": {
+      "visits": 4,
+      "observations": [
+        "step_2",
+        "step_5",
+        "step_7",
+        "step_9"
+      ]
+    },
+    "temperature:30": {
+      "visits": 1,
+      "observations": [
+        "step_2"
+      ]
+    },
+    "humidity:40": {
+      "visits": 1,
+      "observations": [
+        "step_2"
+      ]
+    },
+    "temperature:25": {
+      "visits": 1,
+      "observations": [
+        "step_5"
+      ]
+    },
+    "humidity:30": {
+      "visits": 1,
+      "observations": [
+        "step_5"
+      ]
+    },
+    "temperature:28": {
+      "visits": 1,
+      "observations": [
+        "step_7"
+      ]
+    },
+    "humidity:35": {
+      "visits": 1,
+      "observations": [
+        "step_7"
+      ]
+    },
+    "temperature:27": {
+      "visits": 1,
+      "observations": [
+        "step_9"
+      ]
+    },
+    "humidity:32": {
+      "visits": 1,
+      "observations": [
+        "step_9"
+      ]
+    }
+  },
+  "edges": {
+    "lab_sense|temperature": {
+      "weight": 12.0,
+      "count": 8
+    },
+    "humidity|lab_sense": {
+      "weight": 12.0,
+      "count": 8
+    },
+    "growth|lab_sense": {
+      "weight": 12.0,
+      "count": 8
+    },
+    "humidity|temperature": {
+      "weight": 18.0,
+      "count": 12
+    },
+    "growth|temperature": {
+      "weight": 18.0,
+      "count": 12
+    },
+    "growth|humidity": {
+      "weight": 18.0,
+      "count": 12
+    },
+    "lab_act|temperature:30": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "humidity:40|lab_act": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "lab_act|temperature": {
+      "weight": 6.0,
+      "count": 4
+    },
+    "humidity|lab_act": {
+      "weight": 6.0,
+      "count": 4
+    },
+    "growth|lab_act": {
+      "weight": 6.0,
+      "count": 4
+    },
+    "humidity:40|temperature:30": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "temperature|temperature:30": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "humidity|temperature:30": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "growth|temperature:30": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "humidity:40|temperature": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "humidity|humidity:40": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "growth|humidity:40": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "lab_act|temperature:25": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "humidity:30|lab_act": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "humidity:30|temperature:25": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "temperature|temperature:25": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "humidity|temperature:25": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "growth|temperature:25": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "humidity:30|temperature": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "humidity|humidity:30": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "growth|humidity:30": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "lab_act|temperature:28": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "humidity:35|lab_act": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "humidity:35|temperature:28": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "temperature|temperature:28": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "humidity|temperature:28": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "growth|temperature:28": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "humidity:35|temperature": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "humidity|humidity:35": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "growth|humidity:35": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "lab_act|temperature:27": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "humidity:32|lab_act": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "humidity:32|temperature:27": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "temperature|temperature:27": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "humidity|temperature:27": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "growth|temperature:27": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "humidity:32|temperature": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "humidity|humidity:32": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "growth|humidity:32": {
+      "weight": 1.5,
+      "count": 1
+    }
+  }
+}

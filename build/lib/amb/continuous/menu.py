@@ -16,7 +16,8 @@ MENU_ITEMS: list[tuple[str, str]] = [
     ("Inspect › score", "score"),
     ("Inspect › report", "report"),
     ("Inspect › ls", "ls"),
-    ("Operator › inject …", "inject"),
+    ("Operator › inject … (queue next /run)", "inject"),
+    ("Operator › curriculum (temp sweep)", "curriculum"),
     ("Operator › ask …", "ask"),
     ("Operator › open …", "open"),
     ("Operator › use …", "use"),
@@ -34,7 +35,7 @@ MENU_ITEMS: list[tuple[str, str]] = [
 
 # Commands that need a follow-up text prompt after pick.
 ARG_PROMPTS: dict[str, str] = {
-    "inject": "Instruction text",
+    "inject": "Instruction text (queued for next /run)",
     "ask": "Question",
     "open": "Relative path under active run",
     "use": "Run directory path",

@@ -32,7 +32,8 @@ Slash commands (interactive):
   /tree                         List files stored in the active run
   /map                          Write/print OPERATOR_MAP.md (roles + graph + trail)
   /ask <question>               LLM Q&A over the run files (uses /settings llm)
-  /inject <text>                Queue an operator instruction
+  /inject <text>                Queue for next /run (or write to active run)
+  /curriculum                   Queue the standard crystal temp-sweep inject
   /tail [n]                     Show last n action lines (default 15)
   /graph [k]                    Show top-k weighted pathways (default 8)
   /score [--compare <dir>]      Score active run (optionally vs earlier)
@@ -69,6 +70,11 @@ Settings persist to .ambc_settings.json in the current directory (override with 
 
 DEFAULT_MODEL = "qwen2.5:7b-instruct-q4_K_M"
 SETTINGS_FILENAME = ".ambc_settings.json"
+DEFAULT_CURRICULUM = (
+    "Run a temperature sweep from 20 to 45 at humidity 50. "
+    "After each lab_act, note growth. Do not repeat lab_sense without a new experiment. "
+    "Write your best T/H hypothesis to memory/lessons.md when you have evidence."
+)
 
 _PERSIST_KEYS = (
     "world",
@@ -85,6 +91,7 @@ _PERSIST_KEYS = (
     "num_ctx",
     "num_predict",
     "keep_alive",
+    "next_inbox",
 )
 
 
@@ -153,6 +160,8 @@ class Session:
     num_ctx: int | None = 4096
     num_predict: int | None = 512
     keep_alive: str | None = "30m"
+    # Queued for the next /run → written into that episode's INBOX.md at start
+    next_inbox: str = ""
 
     def require_run(self) -> Path:
         if self.run_dir is None or not self.run_dir.exists():
@@ -224,6 +233,8 @@ def cmd_help(_session: Session, _args: list[str]) -> None:
 def cmd_settings(session: Session, _args: list[str]) -> None:
     snap = session_snapshot(session)
     snap["settings_file"] = str(settings_path())
+    pending = (session.next_inbox or "").strip()
+    snap["next_inbox_preview"] = (pending[:120] + "…") if len(pending) > 120 else pending
     print(json.dumps(snap, indent=2))
 
 
@@ -378,10 +389,36 @@ def cmd_ask(session: Session, args: list[str]) -> None:
 
 def cmd_inject(session: Session, args: list[str]) -> None:
     if not args:
-        raise ValueError('usage: /inject <text>')
-    run = session.require_run()
-    continuous_inject(run, " ".join(args))
-    print(f"injected → {run / 'INBOX.md'}")
+        raise ValueError(
+            "usage: /inject <text>  (queues for next /run; "
+            "add --now to write into the active run only)"
+        )
+    now = False
+    parts = list(args)
+    if parts and parts[0] in {"--now", "-n"}:
+        now = True
+        parts = parts[1:]
+    if not parts:
+        raise ValueError("usage: /inject [--now] <text>")
+    text = " ".join(parts).strip()
+    if now:
+        run = session.require_run()
+        continuous_inject(run, text)
+        print(f"injected → {run / 'INBOX.md'}")
+        return
+    session.next_inbox = text
+    dest = save_session(session)
+    print(f"queued for next /run ({len(text)} chars)  (saved {dest})")
+    if session.run_dir:
+        print("(tip: /inject --now … writes into the active run instead)")
+
+
+def cmd_curriculum(session: Session, _args: list[str]) -> None:
+    """Queue the standard crystal bakeoff inject for the next /run."""
+    session.next_inbox = DEFAULT_CURRICULUM
+    dest = save_session(session)
+    print(f"queued curriculum for next /run  (saved {dest})")
+    print(DEFAULT_CURRICULUM)
 
 
 def cmd_tail(session: Session, args: list[str]) -> None:
@@ -459,6 +496,16 @@ def _apply_run_flags(session: Session, args: list[str]) -> None:
             session.observer = True
             i += 1
             continue
+        if tok == "--curriculum":
+            session.next_inbox = DEFAULT_CURRICULUM
+            i += 1
+            continue
+        if tok == "--inject":
+            if i + 1 >= len(args):
+                raise ValueError("--inject needs text")
+            session.next_inbox = args[i + 1]
+            i += 2
+            continue
         if not tok.startswith("--") or i + 1 >= len(args):
             raise ValueError(f"bad flag near {tok!r}")
         key = tok[2:].replace("-", "_")
@@ -506,6 +553,7 @@ def cmd_run(session: Session, args: list[str]) -> None:
         keep_alive=session.keep_alive,
     )
     run_id = getattr(session, "_run_id", None)
+    inbox = (session.next_inbox or "").strip()
     run_dir = run_episode(
         session.out_dir,
         world=session.world,
@@ -516,10 +564,13 @@ def cmd_run(session: Session, args: list[str]) -> None:
         run_id=run_id,
         verbose=verbose,
         web_allowlist=parse_allowlist(session.web_allowlist),
+        initial_inbox=inbox or None,
     )
     session.run_dir = run_dir
     if hasattr(session, "_run_id"):
         delattr(session, "_run_id")
+    if inbox:
+        session.next_inbox = ""
     save_session(session)
     print(run_dir)
 
@@ -623,6 +674,7 @@ def cmd_menu(session: Session, _args: list[str]) -> None:
     if name in {"inject", "ask", "open", "use", "set"} and not args_text.strip():
         print(f"error: /{name} needs an argument", file=sys.stderr)
         return
+    # curriculum has no args
     line = build_slash_line(name, args_text)
     if not dispatch_line(session, line):
         raise _ExitRepl()
@@ -654,6 +706,7 @@ COMMANDS: dict[str, Callable[[Session, list[str]], None]] = {
     "map": cmd_map,
     "ask": cmd_ask,
     "inject": cmd_inject,
+    "curriculum": cmd_curriculum,
     "tail": cmd_tail,
     "graph": cmd_graph,
     "score": cmd_score,

@@ -1,0 +1,19 @@
+{
+  "out": "continuous_runs",
+  "run": "continuous_runs\\20260804_171453__crystal",
+  "world": "crystal",
+  "llm": "ollama",
+  "model": "qwen2.5:7b-instruct-q4_K_M",
+  "max_steps": 30,
+  "seed": 0,
+  "ollama_host": null,
+  "web_allowlist": "",
+  "verbose": true,
+  "observer": false,
+  "idle_seconds": 1.0,
+  "max_episodes": 1,
+  "num_ctx": 4096,
+  "num_predict": 512,
+  "keep_alive": "30m",
+  "next_inbox": ""
+}

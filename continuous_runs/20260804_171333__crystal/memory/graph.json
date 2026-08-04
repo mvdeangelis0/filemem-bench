@@ -1,0 +1,217 @@
+{
+  "nodes": {
+    "lab_act": {
+      "visits": 3,
+      "observations": [
+        "step_1",
+        "step_3",
+        "step_6"
+      ]
+    },
+    "temperature:20": {
+      "visits": 1,
+      "observations": [
+        "step_1"
+      ]
+    },
+    "humidity:50": {
+      "visits": 3,
+      "observations": [
+        "step_1",
+        "step_3",
+        "step_6"
+      ]
+    },
+    "temperature": {
+      "visits": 8,
+      "observations": [
+        "step_1",
+        "step_2",
+        "step_3",
+        "step_4",
+        "step_6",
+        "step_7",
+        "step_8",
+        "step_9"
+      ]
+    },
+    "humidity": {
+      "visits": 8,
+      "observations": [
+        "step_1",
+        "step_2",
+        "step_3",
+        "step_4",
+        "step_6",
+        "step_7",
+        "step_8",
+        "step_9"
+      ]
+    },
+    "growth": {
+      "visits": 8,
+      "observations": [
+        "step_1",
+        "step_2",
+        "step_3",
+        "step_4",
+        "step_6",
+        "step_7",
+        "step_8",
+        "step_9"
+      ]
+    },
+    "lab_sense": {
+      "visits": 5,
+      "observations": [
+        "step_2",
+        "step_4",
+        "step_7",
+        "step_8",
+        "step_9"
+      ]
+    },
+    "temperature:25": {
+      "visits": 1,
+      "observations": [
+        "step_3"
+      ]
+    },
+    "create": {
+      "visits": 1,
+      "observations": [
+        "step_5"
+      ]
+    },
+    "path:memory/notes.md": {
+      "visits": 1,
+      "observations": [
+        "step_5"
+      ]
+    },
+    "temperature:30": {
+      "visits": 1,
+      "observations": [
+        "step_6"
+      ]
+    }
+  },
+  "edges": {
+    "lab_act|temperature:20": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "humidity:50|lab_act": {
+      "weight": 4.5,
+      "count": 3
+    },
+    "lab_act|temperature": {
+      "weight": 4.5,
+      "count": 3
+    },
+    "humidity|lab_act": {
+      "weight": 4.5,
+      "count": 3
+    },
+    "growth|lab_act": {
+      "weight": 4.5,
+      "count": 3
+    },
+    "humidity:50|temperature:20": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "temperature|temperature:20": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "humidity|temperature:20": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "growth|temperature:20": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "humidity:50|temperature": {
+      "weight": 4.5,
+      "count": 3
+    },
+    "humidity|humidity:50": {
+      "weight": 4.5,
+      "count": 3
+    },
+    "growth|humidity:50": {
+      "weight": 4.5,
+      "count": 3
+    },
+    "humidity|temperature": {
+      "weight": 12.0,
+      "count": 8
+    },
+    "growth|temperature": {
+      "weight": 12.0,
+      "count": 8
+    },
+    "growth|humidity": {
+      "weight": 12.0,
+      "count": 8
+    },
+    "lab_sense|temperature": {
+      "weight": 7.5,
+      "count": 5
+    },
+    "humidity|lab_sense": {
+      "weight": 7.5,
+      "count": 5
+    },
+    "growth|lab_sense": {
+      "weight": 7.5,
+      "count": 5
+    },
+    "lab_act|temperature:25": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "humidity:50|temperature:25": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "temperature|temperature:25": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "humidity|temperature:25": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "growth|temperature:25": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "create|path:memory/notes.md": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "lab_act|temperature:30": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "humidity:50|temperature:30": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "temperature|temperature:30": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "humidity|temperature:30": {
+      "weight": 1.5,
+      "count": 1
+    },
+    "growth|temperature:30": {
+      "weight": 1.5,
+      "count": 1
+    }
+  }
+}

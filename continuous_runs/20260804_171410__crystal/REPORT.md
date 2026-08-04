@@ -1,0 +1,23 @@
+# Continuous run report
+
+- run_id: 20260804_171410__crystal
+- world: crystal
+- model: qwen2.5:7b-instruct-q4_K_M
+- steps: 26
+- stop_reason: loop_detected
+
+## Final status
+
+```
+# Status
+
+Task: Explore instruments
+Plan step: 1/5
+Loop step: 26/30
+Last action: lab_sense (ok)
+Result: {'temperature': 31.0, 'humidity': 35.0, 'growth': 0.4296943870624552, 'trials': 10}
+Deferred tasks: 0
+Web left off: (no web activity yet)
+Budget: 4 steps left
+Updated: 2026-08-04 17:14:41 UTC
+```

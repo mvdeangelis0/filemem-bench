@@ -7,6 +7,7 @@ from pathlib import Path
 
 from amb import __version__
 from amb.continuous.console import (
+    DEFAULT_CURRICULUM,
     HELP_TEXT,
     Session,
     build_llm,
@@ -34,6 +35,16 @@ def _add_run_flags(p: argparse.ArgumentParser) -> None:
     p.add_argument("--num-ctx", type=int, default=4096)
     p.add_argument("--num-predict", type=int, default=512)
     p.add_argument("--keep-alive", default="30m")
+    p.add_argument(
+        "--inject",
+        default=None,
+        help="Seed INBOX.md for this episode (operator curriculum)",
+    )
+    p.add_argument(
+        "--curriculum",
+        action="store_true",
+        help="Seed the standard crystal temp-sweep inject",
+    )
     p.add_argument("-v", "--verbose", action="store_true")
     p.add_argument("--observer", action="store_true")
 
@@ -116,6 +127,10 @@ def main(argv: list[str] | None = None) -> None:
             num_predict=args.num_predict,
             keep_alive=args.keep_alive,
         )
+        if getattr(args, "curriculum", False):
+            session.next_inbox = DEFAULT_CURRICULUM
+        elif getattr(args, "inject", None):
+            session.next_inbox = str(args.inject)
         if args.cmd == "run":
             if args.run_id:
                 setattr(session, "_run_id", args.run_id)

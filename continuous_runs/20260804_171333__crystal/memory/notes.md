@@ -1,0 +1,1 @@
+Initial growth at 25°C and 50% humidity: 33.02% increase. Next, explore the effect of varying temperature.

@@ -1,0 +1,12 @@
+{"step": 1, "tool": "lab_sense", "arguments": {}, "result": {"ok": true, "result": {"temperature": 25.0, "humidity": 30.0, "growth": 0.0, "trials": 0}, "informative": true}}
+{"step": 2, "tool": "lab_act", "arguments": {"temperature": 30, "humidity": 40}, "result": {"ok": true, "result": {"temperature": 30.0, "humidity": 40.0, "growth": 0.6970857702340333, "trials": 1}, "informative": true}}
+{"step": 3, "tool": "lab_sense", "arguments": {}, "result": {"ok": true, "result": {"temperature": 30.0, "humidity": 40.0, "growth": 0.6970857702340333, "trials": 1}, "informative": true}}
+{"step": 4, "tool": "lab_sense", "arguments": {}, "result": {"ok": true, "result": {"temperature": 30.0, "humidity": 40.0, "growth": 0.6970857702340333, "trials": 1}, "informative": true}}
+{"step": 5, "tool": "lab_act", "arguments": {"temperature": 25, "humidity": 30}, "result": {"ok": true, "result": {"temperature": 25.0, "humidity": 30.0, "growth": 0.1701710947649425, "trials": 2}, "informative": true}}
+{"step": 6, "tool": "lab_sense", "arguments": {}, "result": {"ok": true, "result": {"temperature": 25.0, "humidity": 30.0, "growth": 0.1701710947649425, "trials": 2}, "informative": true}}
+{"step": 7, "tool": "lab_act", "arguments": {"temperature": 28, "humidity": 35}, "result": {"ok": true, "result": {"temperature": 28.0, "humidity": 35.0, "growth": 0.29601427759607896, "trials": 3}, "informative": true}}
+{"step": 8, "tool": "lab_sense", "arguments": {}, "result": {"ok": true, "result": {"temperature": 28.0, "humidity": 35.0, "growth": 0.29601427759607896, "trials": 3}, "informative": true}}
+{"step": 9, "tool": "lab_act", "arguments": {"temperature": 27, "humidity": 32}, "result": {"ok": true, "result": {"temperature": 27.0, "humidity": 32.0, "growth": 0.31852517837303296, "trials": 4}, "informative": true}}
+{"step": 10, "tool": "lab_sense", "arguments": {}, "result": {"ok": true, "result": {"temperature": 27.0, "humidity": 32.0, "growth": 0.31852517837303296, "trials": 4}, "informative": true}}
+{"step": 11, "tool": "lab_sense", "arguments": {}, "result": {"ok": true, "result": {"temperature": 27.0, "humidity": 32.0, "growth": 0.31852517837303296, "trials": 4}, "informative": true}}
+{"step": 12, "tool": "lab_sense", "arguments": {}, "result": {"ok": true, "result": {"temperature": 27.0, "humidity": 32.0, "growth": 0.31852517837303296, "trials": 4}, "informative": true}}

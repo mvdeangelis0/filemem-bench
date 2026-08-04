@@ -1,0 +1,12 @@
+{"step": 1, "response": {"type": "tool_call", "tool": "lab_sense", "arguments": {}}, "inbox": ""}
+{"step": 2, "response": {"type": "tool_call", "tool": "lab_act", "arguments": {"temperature": 30, "humidity": 40}}, "inbox": ""}
+{"step": 3, "response": {"type": "tool_call", "tool": "lab_sense", "arguments": {}}, "inbox": ""}
+{"step": 4, "response": {"type": "tool_call", "tool": "lab_sense", "arguments": {}}, "inbox": ""}
+{"step": 5, "response": {"type": "tool_call", "tool": "lab_act", "arguments": {"temperature": 25, "humidity": 30}}, "inbox": ""}
+{"step": 6, "response": {"type": "tool_call", "tool": "lab_sense", "arguments": {}}, "inbox": ""}
+{"step": 7, "response": {"type": "tool_call", "tool": "lab_act", "arguments": {"temperature": 28, "humidity": 35}}, "inbox": ""}
+{"step": 8, "response": {"type": "tool_call", "tool": "lab_sense", "arguments": {}}, "inbox": ""}
+{"step": 9, "response": {"type": "tool_call", "tool": "lab_act", "arguments": {"temperature": 27, "humidity": 32}}, "inbox": ""}
+{"step": 10, "response": {"type": "tool_call", "tool": "lab_sense", "arguments": {}}, "inbox": ""}
+{"step": 11, "response": {"type": "tool_call", "tool": "lab_sense", "arguments": {}}, "inbox": ""}
+{"step": 12, "response": {"type": "tool_call", "tool": "lab_sense", "arguments": {}}, "inbox": ""}
