@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from amb.continuous.deferred import list_deferred
-from amb.continuous.inbox import consume_inbox
+from amb.continuous.inbox import consume_inbox, inject as write_inbox
 from amb.continuous.lab import load_world
 from amb.continuous.layout import init_run_dir
 from amb.continuous.memory_graph import MemoryGraph
@@ -144,6 +144,7 @@ def run_episode(
     run_id: str | None = None,
     verbose: bool = True,
     web_allowlist: list[str] | None = None,
+    initial_inbox: str | None = None,
 ) -> Path:
     out_dir = Path(out_dir)
     if run_id is None:
@@ -158,6 +159,10 @@ def run_episode(
         web_allowlist=allow,
         max_steps=max_steps,
     )
+    if initial_inbox and initial_inbox.strip():
+        write_inbox(run_dir, initial_inbox.strip())
+        if verbose:
+            _log(f"[continuous] seeded INBOX ({len(initial_inbox.strip())} chars)")
     cfg = json.loads((run_dir / "config.json").read_text(encoding="utf-8"))
     cfg["max_steps"] = max_steps
     cfg["web_allowlist"] = allow

@@ -48,15 +48,13 @@ ollama pull deepseek-r1:7b-qwen-distill-q4_K_M
 
 ```bat
 ambc
-ambc> /settings
-ambc> /set model qwen2.5:7b-instruct-q4_K_M
-ambc> /inject Run a temperature sweep 20 to 45 at humidity 50; log results; update memory/lessons.md with any T/H hypothesis.
+ambc> /curriculum
 ambc> /run -v
 ambc> /score
 ambc> /report
 ```
 
-Fresh installs already default to Qwen + the fixed knobs above; `/set model …` for later arms auto-saves.
+`/curriculum` queues the standard temp-sweep inject for the **next** `/run` (written into that episode’s `INBOX.md` at start). `/inject <text>` does the same with custom text. Use `/inject --now …` only to write into the already-active run.
 
 One-shot equivalent:
 

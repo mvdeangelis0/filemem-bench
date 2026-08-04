@@ -19,8 +19,18 @@ def test_help_and_status(tmp_path: Path, capsys):
 def test_inject_via_slash(tmp_path: Path):
     run = init_run_dir(tmp_path, run_id="c2", world="crystal", seed=0)
     session = Session(out_dir=tmp_path, run_dir=run)
-    assert dispatch_line(session, "/inject Focus on humidity") is True
+    assert dispatch_line(session, "/inject --now Focus on humidity") is True
     assert "humidity" in (run / "INBOX.md").read_text(encoding="utf-8")
+
+
+def test_curriculum_queues_for_next_run(tmp_path: Path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("AMBC_SETTINGS", raising=False)
+    session = Session(out_dir=tmp_path)
+    assert dispatch_line(session, "/curriculum") is True
+    assert "temperature sweep" in session.next_inbox.lower()
+    assert dispatch_line(session, "/inject Do a humidity sweep at T=37") is True
+    assert session.next_inbox.startswith("Do a humidity")
 
 
 def test_quit(tmp_path: Path):
