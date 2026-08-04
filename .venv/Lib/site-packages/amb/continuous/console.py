@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import shlex
+import subprocess
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -13,6 +14,7 @@ from amb.continuous.deferred import list_deferred
 from amb.continuous.inbox import inject as continuous_inject
 from amb.continuous.loop import run_episode
 from amb.continuous.memory_browser import ask_over_run, build_map, inventory_tree
+from amb.continuous.menu import build_slash_line, pick_command, prompt_args
 from amb.continuous.score import compare_episodes, score_run
 from amb.continuous.web_trail import list_trail, read_cursor
 
@@ -21,6 +23,7 @@ HELP_TEXT = """
 ambc — continuous sandboxed lab agent
 
 Slash commands (interactive):
+  /menu                         Arrow-key command picker (also: bare Enter)
   /help                         Show this help
   /status                       Print STATUS.md for the active run
   /inbox                        Show pending INBOX.md
@@ -42,6 +45,9 @@ Slash commands (interactive):
   /run [flags]                  Start an episode (uses /settings)
   /daemon [flags]               Run episodes until STOP / max-episodes
   /stop                         Write STOP in out dir (halts daemon)
+  /pull                         git pull (repo root)
+  /reinstall                    pip install -e ".[dev]" (then /quit + restart ambc)
+  /update                       /pull then /reinstall
   /quit  |  /exit               Leave the shell
 
 One-shot (non-interactive):
@@ -440,6 +446,75 @@ def cmd_daemon(session: Session, args: list[str]) -> None:
         print(r)
 
 
+def _repo_root() -> Path:
+    """Walk up from cwd for a checkout that has pyproject.toml."""
+    cur = Path.cwd().resolve()
+    for candidate in [cur, *cur.parents]:
+        if (candidate / "pyproject.toml").is_file():
+            return candidate
+    return cur
+
+
+def _run_shell(argv: list[str], *, cwd: Path) -> int:
+    print(f"$ {' '.join(argv)}  (cwd={cwd})")
+    proc = subprocess.run(argv, cwd=str(cwd), check=False)
+    return int(proc.returncode)
+
+
+def cmd_pull(_session: Session, _args: list[str]) -> None:
+    root = _repo_root()
+    code = _run_shell(["git", "pull"], cwd=root)
+    if code != 0:
+        raise RuntimeError(f"git pull failed with exit {code}")
+    print("pulled ok — run /reinstall if Python/package files changed, then /quit and restart ambc")
+
+
+def cmd_reinstall(_session: Session, _args: list[str]) -> None:
+    root = _repo_root()
+    code = _run_shell(
+        [sys.executable, "-m", "pip", "install", "-e", ".[dev]"],
+        cwd=root,
+    )
+    if code != 0:
+        raise RuntimeError(f"pip install failed with exit {code}")
+    print(
+        "reinstall ok — this ambc process still has old code in memory; "
+        "/quit and run ambc again to load the new package"
+    )
+
+
+def cmd_update(session: Session, args: list[str]) -> None:
+    cmd_pull(session, args)
+    cmd_reinstall(session, args)
+
+
+class _ExitRepl(Exception):
+    """Raised when the menu (or a nested dispatch) requests leaving the shell."""
+
+
+def cmd_menu(session: Session, _args: list[str]) -> None:
+    """Arrow-key picker; builds a slash line and dispatches it."""
+    name = pick_command()
+    if name is None:
+        print("(menu cancelled — try /help)")
+        return
+    if name in {"run", "daemon"}:
+        print(
+            f"using /settings: llm={session.llm} model={session.model} "
+            f"max_steps={session.max_steps} world={session.world}"
+        )
+    args_text = prompt_args(name)
+    if args_text is None:
+        print("(cancelled)")
+        return
+    if name in {"inject", "ask", "open", "use", "set"} and not args_text.strip():
+        print(f"error: /{name} needs an argument", file=sys.stderr)
+        return
+    line = build_slash_line(name, args_text)
+    if not dispatch_line(session, line):
+        raise _ExitRepl()
+
+
 def cmd_stop(session: Session, _args: list[str]) -> None:
     session.out_dir.mkdir(parents=True, exist_ok=True)
     path = session.out_dir / "STOP"
@@ -453,6 +528,7 @@ COMMANDS: dict[str, Callable[[Session, list[str]], None]] = {
     "help": cmd_help,
     "h": cmd_help,
     "?": cmd_help,
+    "menu": cmd_menu,
     "settings": cmd_settings,
     "set": cmd_set,
     "use": cmd_use,
@@ -473,6 +549,9 @@ COMMANDS: dict[str, Callable[[Session, list[str]], None]] = {
     "run": cmd_run,
     "daemon": cmd_daemon,
     "stop": cmd_stop,
+    "pull": cmd_pull,
+    "reinstall": cmd_reinstall,
+    "update": cmd_update,
 }
 
 
@@ -484,7 +563,7 @@ def dispatch_line(session: Session, line: str) -> bool:
     if raw in {"/quit", "/exit", "quit", "exit"}:
         return False
     if not raw.startswith("/"):
-        print("commands start with / — try /help")
+        print("commands start with / — try /help or /menu")
         return True
     # Windows-friendly: allow /help and \help style already covered by /
     body = raw[1:].strip()
@@ -502,7 +581,7 @@ def dispatch_line(session: Session, line: str) -> bool:
     args = parts[1:]
     fn = COMMANDS.get(name)
     if fn is None:
-        print(f"unknown command /{name} — try /help")
+        print(f"unknown command /{name} — try /help or /menu")
         return True
     try:
         fn(session, args)
@@ -513,7 +592,10 @@ def dispatch_line(session: Session, line: str) -> bool:
 
 def run_repl(session: Session | None = None) -> int:
     session = session or Session()
-    print(f"ambc interactive shell — type /help  (out={session.out_dir})")
+    print(
+        f"ambc interactive shell — type /menu or press Enter for picker  "
+        f"(out={session.out_dir})"
+    )
     while True:
         try:
             line = input("ambc> ")
@@ -523,6 +605,12 @@ def run_repl(session: Session | None = None) -> int:
         except KeyboardInterrupt:
             print("\n(interrupted — /quit to exit)")
             continue
-        if not dispatch_line(session, line):
+        try:
+            if not line.strip():
+                cmd_menu(session, [])
+                continue
+            if not dispatch_line(session, line):
+                break
+        except _ExitRepl:
             break
     return 0

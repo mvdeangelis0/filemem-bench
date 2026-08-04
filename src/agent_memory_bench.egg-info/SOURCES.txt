@@ -32,6 +32,7 @@ src/amb/continuous/layout.py
 src/amb/continuous/loop.py
 src/amb/continuous/memory_browser.py
 src/amb/continuous/memory_graph.py
+src/amb/continuous/menu.py
 src/amb/continuous/policy.py
 src/amb/continuous/report.py
 src/amb/continuous/score.py
