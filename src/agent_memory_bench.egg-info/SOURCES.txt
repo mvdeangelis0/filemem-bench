@@ -75,6 +75,7 @@ tests/test_core_suite.py
 tests/test_graders.py
 tests/test_harness.py
 tests/test_norm.py
+tests/test_ollama_options.py
 tests/test_ollama_parse.py
 tests/test_rag.py
 tests/test_run_mock.py

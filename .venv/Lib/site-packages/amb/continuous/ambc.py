@@ -11,6 +11,7 @@ from amb.continuous.console import (
     Session,
     build_llm,
     cmd_run,
+    load_session,
     parse_allowlist,
     run_repl,
 )
@@ -22,14 +23,17 @@ from amb.continuous.score import compare_episodes, score_run
 
 def _add_run_flags(p: argparse.ArgumentParser) -> None:
     p.add_argument("--world", default="crystal")
-    p.add_argument("--llm", default="mock", choices=["mock", "ollama"])
-    p.add_argument("--model", default="mock")
-    p.add_argument("--max-steps", type=int, default=20)
+    p.add_argument("--llm", default="ollama", choices=["mock", "ollama"])
+    p.add_argument("--model", default="qwen2.5:7b-instruct-q4_K_M")
+    p.add_argument("--max-steps", type=int, default=30)
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--out", default="continuous_runs")
     p.add_argument("--run-id", default=None)
     p.add_argument("--ollama-host", default=None)
     p.add_argument("--web-allowlist", default="")
+    p.add_argument("--num-ctx", type=int, default=4096)
+    p.add_argument("--num-predict", type=int, default=512)
+    p.add_argument("--keep-alive", default="30m")
     p.add_argument("-v", "--verbose", action="store_true")
     p.add_argument("--observer", action="store_true")
 
@@ -39,7 +43,7 @@ def main(argv: list[str] | None = None) -> None:
 
     # Bare `ambc` or `ambc shell` → interactive
     if not argv or argv[0] in {"shell", "repl", "i"}:
-        raise SystemExit(run_repl(Session()))
+        raise SystemExit(run_repl(load_session()))
 
     if argv[0] in {"help", "-h", "--help", "/help"}:
         print(HELP_TEXT)
@@ -108,6 +112,9 @@ def main(argv: list[str] | None = None) -> None:
             web_allowlist=args.web_allowlist,
             verbose=args.verbose or args.llm == "ollama",
             observer=args.observer,
+            num_ctx=args.num_ctx,
+            num_predict=args.num_predict,
+            keep_alive=args.keep_alive,
         )
         if args.cmd == "run":
             if args.run_id:
@@ -125,6 +132,9 @@ def main(argv: list[str] | None = None) -> None:
                 model=session.model,
                 ollama_host=session.ollama_host,
                 verbose=verbose,
+                num_ctx=session.num_ctx,
+                num_predict=session.num_predict,
+                keep_alive=session.keep_alive,
             )
             runs = run_daemon(
                 run_episode_fn=run_episode,

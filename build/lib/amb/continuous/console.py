@@ -53,14 +53,39 @@ Slash commands (interactive):
 One-shot (non-interactive):
   ambc                         Enter interactive shell
   ambc help
-  ambc run --llm ollama --model deepseek-r1:7b --max-steps 50
+  ambc run --llm ollama --model qwen2.5:7b-instruct-q4_K_M --max-steps 30
   ambc inject --run <dir> "Focus on humidity"
   ambc score --run <dir>
   ambc status --run <dir>
 
 /run flags: --world --llm --model --max-steps --seed --out --run-id
-            --ollama-host --web-allowlist -v --observer
+            --ollama-host --web-allowlist --num-ctx --num-predict --keep-alive
+            -v --observer
+
+Settings persist to .ambc_settings.json in the current directory (override with AMBC_SETTINGS).
+/set and /use auto-save; /settings shows the file path.
 """.strip()
+
+
+DEFAULT_MODEL = "qwen2.5:7b-instruct-q4_K_M"
+SETTINGS_FILENAME = ".ambc_settings.json"
+
+_PERSIST_KEYS = (
+    "world",
+    "llm",
+    "model",
+    "max_steps",
+    "seed",
+    "ollama_host",
+    "web_allowlist",
+    "verbose",
+    "observer",
+    "idle_seconds",
+    "max_episodes",
+    "num_ctx",
+    "num_predict",
+    "keep_alive",
+)
 
 
 def build_llm(
@@ -69,6 +94,9 @@ def build_llm(
     model: str,
     ollama_host: str | None,
     verbose: bool,
+    num_ctx: int | None = None,
+    num_predict: int | None = None,
+    keep_alive: str | int | None = None,
 ) -> tuple[Any, str]:
     model_id = model
     if llm_mode == "mock":
@@ -81,7 +109,17 @@ def build_llm(
         host = ollama_host or os.environ.get("OLLAMA_HOST") or "http://127.0.0.1:11434"
         if model_id == "mock":
             raise ValueError("--model required for --llm ollama (e.g. deepseek-r1:7b)")
-        return OllamaLLM(model_id, base_url=host, verbose=verbose), model_id
+        return (
+            OllamaLLM(
+                model_id,
+                base_url=host,
+                verbose=verbose,
+                num_ctx=num_ctx,
+                num_predict=num_predict,
+                keep_alive=keep_alive,
+            ),
+            model_id,
+        )
     raise ValueError(f"unsupported llm {llm_mode}")
 
 
@@ -89,14 +127,21 @@ def parse_allowlist(raw: str) -> list[str]:
     return [h.strip() for h in raw.split(",") if h.strip()]
 
 
+def settings_path() -> Path:
+    env = os.environ.get("AMBC_SETTINGS")
+    if env:
+        return Path(env).expanduser()
+    return Path.cwd() / SETTINGS_FILENAME
+
+
 @dataclass
 class Session:
     out_dir: Path = field(default_factory=lambda: Path("continuous_runs"))
     run_dir: Path | None = None
     world: str = "crystal"
-    llm: str = "mock"
-    model: str = "mock"
-    max_steps: int = 20
+    llm: str = "ollama"
+    model: str = DEFAULT_MODEL
+    max_steps: int = 30
     seed: int = 0
     ollama_host: str | None = None
     web_allowlist: str = ""
@@ -104,11 +149,64 @@ class Session:
     observer: bool = False
     idle_seconds: float = 1.0
     max_episodes: int = 1
+    # Ollama speed knobs (RTX 3070 defaults — override with /set)
+    num_ctx: int | None = 4096
+    num_predict: int | None = 512
+    keep_alive: str | None = "30m"
 
     def require_run(self) -> Path:
         if self.run_dir is None or not self.run_dir.exists():
             raise ValueError("no active run — use /run or /use <run_dir>")
         return self.run_dir
+
+
+def session_snapshot(session: Session) -> dict[str, Any]:
+    data: dict[str, Any] = {
+        "out": str(session.out_dir),
+        "run": str(session.run_dir) if session.run_dir else None,
+    }
+    for key in _PERSIST_KEYS:
+        data[key] = getattr(session, key)
+    return data
+
+
+def apply_snapshot(session: Session, data: dict[str, Any]) -> None:
+    if "out" in data and data["out"]:
+        session.out_dir = Path(str(data["out"]))
+    run = data.get("run")
+    if run:
+        path = Path(str(run))
+        session.run_dir = path if path.exists() else None
+    elif "run" in data and data["run"] is None:
+        session.run_dir = None
+    for key in _PERSIST_KEYS:
+        if key not in data:
+            continue
+        setattr(session, key, data[key])
+
+
+def save_session(session: Session, *, path: Path | None = None) -> Path:
+    dest = path or settings_path()
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text(json.dumps(session_snapshot(session), indent=2) + "\n", encoding="utf-8")
+    return dest
+
+
+def load_session(session: Session | None = None, *, path: Path | None = None) -> Session:
+    """Load persisted settings over defaults (Qwen + Ollama)."""
+    sess = session or Session()
+    src = path or settings_path()
+    if not src.is_file():
+        return sess
+    try:
+        data = json.loads(src.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as e:
+        print(f"warning: could not load {src}: {e}", file=sys.stderr)
+        return sess
+    if not isinstance(data, dict):
+        return sess
+    apply_snapshot(sess, data)
+    return sess
 
 
 def _print_file(path: Path) -> None:
@@ -124,26 +222,23 @@ def cmd_help(_session: Session, _args: list[str]) -> None:
 
 
 def cmd_settings(session: Session, _args: list[str]) -> None:
-    print(
-        json.dumps(
-            {
-                "out": str(session.out_dir),
-                "run": str(session.run_dir) if session.run_dir else None,
-                "world": session.world,
-                "llm": session.llm,
-                "model": session.model,
-                "max_steps": session.max_steps,
-                "seed": session.seed,
-                "ollama_host": session.ollama_host,
-                "web_allowlist": session.web_allowlist,
-                "verbose": session.verbose,
-                "observer": session.observer,
-                "idle_seconds": session.idle_seconds,
-                "max_episodes": session.max_episodes,
-            },
-            indent=2,
-        )
-    )
+    snap = session_snapshot(session)
+    snap["settings_file"] = str(settings_path())
+    print(json.dumps(snap, indent=2))
+
+
+def _parse_optional_int(v: str) -> int | None:
+    s = v.strip().lower()
+    if s in {"", "none", "null", "default", "-"}:
+        return None
+    return int(v)
+
+
+def _parse_keep_alive(v: str) -> str | None:
+    s = v.strip()
+    if s.lower() in {"", "none", "null", "default", "-"}:
+        return None
+    return s
 
 
 def cmd_set(session: Session, args: list[str]) -> None:
@@ -163,11 +258,15 @@ def cmd_set(session: Session, args: list[str]) -> None:
         "observer": lambda v: setattr(session, "observer", v.lower() in {"1", "true", "yes", "on"}),
         "idle_seconds": lambda v: setattr(session, "idle_seconds", float(v)),
         "max_episodes": lambda v: setattr(session, "max_episodes", int(v)),
+        "num_ctx": lambda v: setattr(session, "num_ctx", _parse_optional_int(v)),
+        "num_predict": lambda v: setattr(session, "num_predict", _parse_optional_int(v)),
+        "keep_alive": lambda v: setattr(session, "keep_alive", _parse_keep_alive(v)),
     }
     if key not in mapping:
         raise ValueError(f"unknown key {key!r}; see /settings")
     mapping[key](value)
-    print(f"set {key}={value}")
+    dest = save_session(session)
+    print(f"set {key}={value}  (saved {dest})")
 
 
 def cmd_use(session: Session, args: list[str]) -> None:
@@ -177,7 +276,8 @@ def cmd_use(session: Session, args: list[str]) -> None:
     if not path.exists():
         raise ValueError(f"not found: {path}")
     session.run_dir = path
-    print(f"active run: {path}")
+    dest = save_session(session)
+    print(f"active run: {path}  (saved {dest})")
 
 
 def cmd_ls(session: Session, _args: list[str]) -> None:
@@ -376,10 +476,15 @@ def _apply_run_flags(session: Session, args: list[str]) -> None:
             "web_allowlist",
         }:
             setattr(session, key if key != "ollama_host" else "ollama_host", val)
-        elif key in {"max_steps", "seed", "max_episodes"}:
-            setattr(session, key, int(val))
+        elif key in {"max_steps", "seed", "max_episodes", "num_ctx", "num_predict"}:
+            if key in {"num_ctx", "num_predict"}:
+                setattr(session, key, _parse_optional_int(val))
+            else:
+                setattr(session, key, int(val))
         elif key == "idle_seconds":
             session.idle_seconds = float(val)
+        elif key == "keep_alive":
+            session.keep_alive = _parse_keep_alive(val)
         else:
             raise ValueError(f"unknown flag {tok}")
         i += 2
@@ -396,6 +501,9 @@ def cmd_run(session: Session, args: list[str]) -> None:
         model=session.model,
         ollama_host=session.ollama_host,
         verbose=verbose,
+        num_ctx=session.num_ctx,
+        num_predict=session.num_predict,
+        keep_alive=session.keep_alive,
     )
     run_id = getattr(session, "_run_id", None)
     run_dir = run_episode(
@@ -412,6 +520,7 @@ def cmd_run(session: Session, args: list[str]) -> None:
     session.run_dir = run_dir
     if hasattr(session, "_run_id"):
         delattr(session, "_run_id")
+    save_session(session)
     print(run_dir)
 
 
@@ -426,6 +535,9 @@ def cmd_daemon(session: Session, args: list[str]) -> None:
         model=session.model,
         ollama_host=session.ollama_host,
         verbose=verbose,
+        num_ctx=session.num_ctx,
+        num_predict=session.num_predict,
+        keep_alive=session.keep_alive,
     )
     runs = run_daemon(
         run_episode_fn=run_episode,
@@ -442,6 +554,7 @@ def cmd_daemon(session: Session, args: list[str]) -> None:
     )
     if runs:
         session.run_dir = runs[-1]
+        save_session(session)
     for r in runs:
         print(r)
 
@@ -591,11 +704,12 @@ def dispatch_line(session: Session, line: str) -> bool:
 
 
 def run_repl(session: Session | None = None) -> int:
-    session = session or Session()
+    session = load_session(session)
     print(
         f"ambc interactive shell — type /menu or press Enter for picker  "
         f"(out={session.out_dir})"
     )
+    print(f"settings: llm={session.llm} model={session.model}  file={settings_path()}")
     while True:
         try:
             line = input("ambc> ")

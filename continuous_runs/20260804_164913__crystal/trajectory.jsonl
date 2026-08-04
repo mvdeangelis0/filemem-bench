@@ -1,0 +1,5 @@
+{"step": 1, "response": {"type": "tool_call", "tool": "lab_sense", "arguments": {}}, "inbox": ""}
+{"step": 2, "response": {"type": "tool_call", "tool": "lab_act", "arguments": {"temperature": 28, "humidity": 35}}, "inbox": ""}
+{"step": 3, "response": {"type": "tool_call", "tool": "lab_sense", "arguments": {}}, "inbox": ""}
+{"step": 4, "response": {"type": "tool_call", "tool": "lab_sense", "arguments": {}}, "inbox": ""}
+{"step": 5, "response": {"type": "tool_call", "tool": "lab_sense", "arguments": {}}, "inbox": ""}
