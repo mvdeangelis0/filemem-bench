@@ -4,6 +4,8 @@ Windows-first notes for the RTX 3070 desktop. Spec: `docs/superpowers/specs/2026
 
 First live-run writeup (what the 7B actually did, crash fix, score caveats): `docs/guides/continuous-agent-findings-2026-08-03.md`.
 
+Model comparison protocol (fixed settings + which Ollama tags to pull): `docs/guides/continuous-model-bakeoff.md`.
+
 ## Setup (Windows)
 
 ```bat

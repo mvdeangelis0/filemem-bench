@@ -322,6 +322,9 @@ class OllamaLLM:
         timeout: float = 300.0,
         verbose: bool = False,
         on_call: Callable[[str], None] | None = None,
+        num_ctx: int | None = None,
+        num_predict: int | None = None,
+        keep_alive: str | int | None = None,
     ) -> None:
         self.model = model
         self.base_url = (base_url or os.environ.get("OLLAMA_HOST") or "http://127.0.0.1:11434").rstrip(
@@ -331,6 +334,9 @@ class OllamaLLM:
         self.timeout = timeout
         self.verbose = verbose
         self.on_call = on_call
+        self.num_ctx = num_ctx
+        self.num_predict = num_predict
+        self.keep_alive = keep_alive
         self.n_calls = 0
 
     def usage_dict(self) -> dict[str, Any]:
@@ -342,20 +348,43 @@ class OllamaLLM:
             "cache_write_tokens": 0,
             "model_id": f"ollama/{self.model}",
             "note": "Ollama path does not expose token counts",
+            "num_ctx": self.num_ctx,
+            "num_predict": self.num_predict,
+            "keep_alive": self.keep_alive,
         }
 
     def complete(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> dict[str, Any]:
         reinforced = reinforce_tool_json(messages, tools)
-        payload = {
+        options: dict[str, Any] = {"temperature": self.temperature}
+        if self.num_ctx is not None:
+            options["num_ctx"] = int(self.num_ctx)
+        if self.num_predict is not None:
+            options["num_predict"] = int(self.num_predict)
+        payload: dict[str, Any] = {
             "model": self.model,
             "messages": reinforced,
             "stream": False,
-            "options": {"temperature": self.temperature},
+            "options": options,
             "format": "json",
         }
+        if self.keep_alive is not None:
+            # Ollama accepts duration strings ("30m", "-1") or seconds as int.
+            ka: str | int = self.keep_alive
+            if isinstance(ka, str) and ka.lstrip("-").isdigit():
+                ka = int(ka)
+            payload["keep_alive"] = ka
         self.n_calls += 1
         n = self.n_calls
-        msg = f"[amb] ollama chat #{n} model={self.model!r} waiting (GPU util drops between calls) …"
+        limits = []
+        if self.num_ctx is not None:
+            limits.append(f"num_ctx={self.num_ctx}")
+        if self.num_predict is not None:
+            limits.append(f"num_predict={self.num_predict}")
+        limit_txt = f" ({', '.join(limits)})" if limits else ""
+        msg = (
+            f"[amb] ollama chat #{n} model={self.model!r}{limit_txt} "
+            "waiting (GPU util drops between calls) …"
+        )
         if self.on_call:
             self.on_call(msg)
         else:

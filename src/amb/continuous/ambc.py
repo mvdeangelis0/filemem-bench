@@ -30,6 +30,9 @@ def _add_run_flags(p: argparse.ArgumentParser) -> None:
     p.add_argument("--run-id", default=None)
     p.add_argument("--ollama-host", default=None)
     p.add_argument("--web-allowlist", default="")
+    p.add_argument("--num-ctx", type=int, default=4096)
+    p.add_argument("--num-predict", type=int, default=512)
+    p.add_argument("--keep-alive", default="30m")
     p.add_argument("-v", "--verbose", action="store_true")
     p.add_argument("--observer", action="store_true")
 
@@ -108,6 +111,9 @@ def main(argv: list[str] | None = None) -> None:
             web_allowlist=args.web_allowlist,
             verbose=args.verbose or args.llm == "ollama",
             observer=args.observer,
+            num_ctx=args.num_ctx,
+            num_predict=args.num_predict,
+            keep_alive=args.keep_alive,
         )
         if args.cmd == "run":
             if args.run_id:
@@ -125,6 +131,9 @@ def main(argv: list[str] | None = None) -> None:
                 model=session.model,
                 ollama_host=session.ollama_host,
                 verbose=verbose,
+                num_ctx=session.num_ctx,
+                num_predict=session.num_predict,
+                keep_alive=session.keep_alive,
             )
             runs = run_daemon(
                 run_episode_fn=run_episode,

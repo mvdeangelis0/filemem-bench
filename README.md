@@ -94,3 +94,5 @@ ambc run --world crystal --llm ollama --model deepseek-r1:7b --max-steps 50 -v
 ```
 
 Prefer ~4k–8k Ollama context on an 8GB RTX 3070. Details: [`docs/guides/continuous-agent.md`](docs/guides/continuous-agent.md).
+
+**Model bakeoff** (compare instruct vs R1 under fixed `num_ctx`/`num_predict`): [`docs/guides/continuous-model-bakeoff.md`](docs/guides/continuous-model-bakeoff.md).
